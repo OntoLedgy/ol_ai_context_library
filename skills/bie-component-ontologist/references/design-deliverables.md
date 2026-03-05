@@ -23,9 +23,30 @@ For each type, note:
 
 ## 2. Component Relation Types
 
-For each relation in the component, list the object types that participate and the relation type that connects them. This makes explicit which object types relate to which other object types and through what relation type.
+Report relation types in two tables. The first provides an overview of all available BIE relation types and whether the component uses them. The second provides detail only for the relation types that are actually used.
 
-Include core relation types used by the component plus any component-specific extensions. Only define component-specific relation types if the 7 core types are insufficient.
+Include core relation types plus any component-specific extensions. Only define component-specific relation types if the 7 core types are insufficient.
+
+### 2a. BIE Relation Types Usage
+
+List every BIE relation type, its source, and how many times it is used in the component (0 if unused).
+
+**Format:**
+
+| Relation Type | Source | Usage Count |
+|---------------|--------|-------------|
+| BIE_TYPES_INSTANCES | Core | 1 |
+| BIE_WHOLES_PARTS | Core | 3 |
+| BIE_SUB_SUPER_SETS | Core | 0 |
+| BIE_SAME_AS | Core | 0 |
+| BIE_SUMMED | Core | 0 |
+| BIE_SUMMING | Core | 0 |
+| BIE_COUPLES | Core | 0 |
+| GOVERNED_BY | Component | 1 |
+
+### 2b. BIE Relation Types Usage Details
+
+For each *used* relation type, list the participating object types. Only relation types with Usage Count > 0 appear here.
 
 **Format:**
 

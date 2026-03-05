@@ -52,7 +52,7 @@ Fetch the latest architecture documentation from Confluence. See `references/con
 See `references/design-deliverables.md` for templates and examples. The deliverables are:
 
 1. **Component Object Types and Hierarchy** — All entity types, whether each is a leaf or composite, what composites contain, and their real-world meaning
-2. **Component Relation Types** — Which object types relate to which other object types and through what relation type (core types + domain-specific extensions only if needed)
+2. **Component Relation Types** — Reported in two sub-tables: (a) BIE Relation Types Usage listing every relation type with its usage count, and (b) BIE Relation Types Usage Details listing only the used relation types with their place_1 and place_2 object types
 3. **Object Type Identity Dependence Relation Types** — For each object type, which other object types its identity depends on and via what relation type. This is the ontology-level view of identity dependence — implementation details (hash modes, BieIdCreationFacade calls) are deferred to the data engineer
 4. **Construction Order** — Leaf-first ordering derived from the identity dependencies in deliverable 3, verifying no circular dependencies exist
 
