@@ -48,7 +48,7 @@ Parse the 4 ontology deliverables:
 
 Then derive the implementation artifacts you need:
 - **Enum definitions** — map object types to enum members, determine if domain-specific relation type enums are needed
-- **BIE Calculation Table** — for each entity type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations
+- **BIE Calculation Table** — for each bie object type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations
 - **Relation registrations** — determine the bie_id_tuples to register from the relation types table
 
 ### Step 2: Read the Excel Domain Reference
