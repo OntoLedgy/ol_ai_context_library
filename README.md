@@ -11,7 +11,7 @@ Installable Claude Code skills for BIE (BORO Identity Ecosystem) development wor
 | Skill | Description |
 |-------|-------------|
 | `bie-data-engineer` | Implements a BIE domain in Python from an approved ontology model. Creates domain enums, bie_id creator functions, BieDomainObjects subclasses, registration helpers, and domain universe setup. |
-| `bie-domain-ontologist` | Designs and reviews BIE domain ontology models. Operates in Design Mode (new domain) or Review Mode (validate/extract from existing code). Produces the 4 ontology deliverables required before implementation. |
+| `bie-component-ontologist` | Designs and reviews BIE component ontology models. Operates in Design Mode (new component) or Review Mode (validate/extract from existing code). Produces the 4 ontology deliverables required before implementation. |
 
 ### Prompts
 
@@ -82,8 +82,8 @@ npx skills add OntoLedgy/ol_ai_context_library
 # Install the BIE data engineer skill
 npx skills add OntoLedgy/ol_ai_context_library --skill bie-data-engineer
 
-# Install the BIE domain ontologist skill
-npx skills add OntoLedgy/ol_ai_context_library --skill bie-domain-ontologist
+# Install the BIE component ontologist skill
+npx skills add OntoLedgy/ol_ai_context_library --skill bie-component-ontologist
 ```
 
 ### Install to a specific agent
@@ -114,7 +114,7 @@ npx skills update
 npx skills remove bie-data-engineer
 ```
 
-Once installed, skills are available in your coding agent sessions and can be triggered by describing a relevant task (e.g. "implement a BIE domain from this ontology model" or "design a BIE domain for spreadsheets").
+Once installed, skills are available in your coding agent sessions and can be triggered by describing a relevant task (e.g. "implement a BIE domain from this ontology model" or "design a BIE component for spreadsheets").
 
 ## Project Structure
 
@@ -124,7 +124,7 @@ ol_ai_context_library/
 │   ├── bie-data-engineer/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   └── bie-domain-ontologist/
+│   └── bie-component-ontologist/
 │       ├── SKILL.md
 │       └── references/
 └── prompts/

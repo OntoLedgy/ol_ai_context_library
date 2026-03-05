@@ -1,15 +1,15 @@
 # Design Deliverables
 
-The domain ontologist produces 4 deliverables. Each must be completed before handoff to the data engineer.
+The component ontologist produces 4 deliverables. Each must be completed before handoff to the data engineer.
 
-## 1. Domain Object Types and Hierarchy
+## 1. Component Object Types and Hierarchy
 
-List all entity types in the domain with their inheritance relationships.
+List all entity types in the component with their inheritance relationships.
 
 **Format:**
 
 ```
-DomainName Object Types:
+ComponentName Object Types:
 ├── EntityTypeA (leaf)
 ├── EntityTypeB (leaf)
 ├── EntityTypeC (composite — contains EntityTypeA)
@@ -21,21 +21,21 @@ For each type, note:
 - What it contains (if composite)
 - Its real-world meaning
 
-## 2. Domain Relation Types
+## 2. Component Relation Types
 
-For each relation in the domain, list the object types that participate and the relation type that connects them. This makes explicit which object types relate to which other object types and through what relation type.
+For each relation in the component, list the object types that participate and the relation type that connects them. This makes explicit which object types relate to which other object types and through what relation type.
 
-Include core relation types used by the domain plus any domain-specific extensions. Only define domain-specific relation types if the 7 core types are insufficient.
+Include core relation types used by the component plus any component-specific extensions. Only define component-specific relation types if the 7 core types are insufficient.
 
 **Format:**
 
-| Relation Type | Source | Usage in Domain | place_1 (object type) | place_2 (object type) |
+| Relation Type | Source | Usage in Component | place_1 (object type) | place_2 (object type) |
 |---------------|--------|-----------------|------------------------|-----------------------|
 | BIE_TYPES_INSTANCES | Core | Every workbook classified by type | Workbook | WorkbookType |
 | BIE_WHOLES_PARTS | Core | Workbook contains worksheets | Workbook | Worksheet |
 | BIE_WHOLES_PARTS | Core | Worksheet contains cells | Worksheet | Cell |
 | BIE_WHOLES_PARTS | Core | Cell contains its source value | Cell | CellSourceValue |
-| GOVERNED_BY | Domain | Document governed by authority | Document | Authority |
+| GOVERNED_BY | Component | Document governed by authority | Document | Authority |
 
 ## 3. Object Type Identity Dependence Relation Types
 
@@ -63,7 +63,7 @@ Notes:
 
 ## 4. Construction Order
 
-Specify the leaf-first ordering for constructing domain entities, derived from the identity dependencies in deliverable 3.
+Specify the leaf-first ordering for constructing component entities, derived from the identity dependencies in deliverable 3.
 
 **Format:**
 

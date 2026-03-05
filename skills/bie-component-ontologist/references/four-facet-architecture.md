@@ -12,11 +12,13 @@ The BIE framework is organized along two axes, producing four facets:
 - **Domain Model** — The ontology for a specific domain: object types, relation types, calculation table, construction order
 - **Domain Implementation** — The Python code for a specific domain: domain enums, bie_id creators, BieDomainObjects subclasses
 
+The ontologist skill can review or design ontologies for **either** foundation or domain components. The four-facet names above are formal architectural terms.
+
 ## Two Fundamental Kinds
 
 A BIE ontology has two fundamental kinds:
 
-1. **Objects** — Entities within a domain. Each object has a `bie_id` (BIE identifier). Stored in the objects register.
+1. **Objects** — Entities within a component. Each object has a `bie_id` (BIE identifier). Stored in the objects register.
 2. **Relations** — Links between things. Each relation is a `bie_id_tuple` — an ordered tuple of bie_ids representing participants and relation type. Stored in the relations register.
 
 ## Core Relation Types (BieCoreRelationTypes)
@@ -36,13 +38,13 @@ Domains may define additional relation types by extending `BieRelationTypes`.
 ## Identity Composition Principles
 
 1. **Deterministic** — Same inputs always produce the same BIE ID via BLAKE2B hashing (order-sensitive) or integer summation (order-insensitive)
-2. **Type-first convention** — When composing a domain identity, the domain type's `item_bie_identity` is typically the first input
+2. **Type-first convention** — When composing identity, the type's `item_bie_identity` is typically the first input
 3. **Parts before wholes** — Leaf entities must be constructed before their containing composites
 4. **Domain typing** — When a `bie_domain_type` is provided, the final identity = `order_sensitive([type.item_bie_identity, vector_bie_id])`
 
-## Domain Construction Pattern
+## Object Construction Pattern
 
-Each domain object follows this pattern during `__init__`:
+Each component object follows this pattern during `__init__`:
 
 ```
 1. Compute bie_id — call BieIdCreationFacade with type + inputs

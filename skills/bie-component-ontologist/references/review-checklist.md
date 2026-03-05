@@ -1,17 +1,17 @@
-# BIE Domain Review Checklist
+# BIE Component Review Checklist
 
-Apply each check to the target domain. Mark as PASS or GAP.
+Apply each check to the target component. Mark as PASS or GAP.
 
 ## Enum Checks
 
-- [ ] Domain type enum exists and extends `BieEnums`
-- [ ] Each domain entity type has a corresponding enum member
-- [ ] Domain relation type enum exists (if domain needs relations beyond core)
+- [ ] Component type enum exists and extends `BieEnums`
+- [ ] Each component entity type has a corresponding enum member
+- [ ] Domain relation type enum exists (if component needs relations beyond core)
 - [ ] Enum members use `auto()` values
 
 ## Object Class Checks
 
-- [ ] Each domain object class subtypes `BieDomainObjects` (or domain-specific base)
+- [ ] Each component object class subtypes `BieObjects` (or appropriate base like `BieDomainObjects`)
 - [ ] Each computes `bie_id` in `__init__` via `BieIdCreationFacade`
 - [ ] Type `item_bie_identity` is the first composition input (type-first convention)
 - [ ] `super().__init__(bie_id=, base_hr_name=, bie_type=)` is called with correct arguments
@@ -34,12 +34,12 @@ Apply each check to the target domain. Mark as PASS or GAP.
 
 - [ ] BIE Calculation Table exists or can be inferred from code
 - [ ] Every entity type has a documented identity composition rule
-- [ ] Every relation in the domain has a corresponding bie_id_tuple registration
+- [ ] Every relation in the component has a corresponding bie_id_tuple registration
 - [ ] Construction order is documented or inferable from the code
 
 ## Output Format
 
 | # | Principle | Expected | Actual | Status |
 |---|-----------|----------|--------|--------|
-| 1 | Domain type enum | BieEnums subclass with members | ... | PASS/GAP |
+| 1 | BIE type enum | BieEnums subclass with members | ... | PASS/GAP |
 | 2 | ... | ... | ... | ... |
