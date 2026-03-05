@@ -2,14 +2,14 @@
 
 The component ontologist produces 4 deliverables. Each must be completed before handoff to the data engineer.
 
-## 1. Component Object Types and Hierarchy
+## 1. BIE Component Object Types and Hierarchy
 
-List all entity types in the component with their inheritance relationships.
+List all BIE entity types in the component with their inheritance relationships.
 
 **Format:**
 
 ```
-ComponentName Object Types:
+ComponentName BIE Object Types:
 ├── EntityTypeA (leaf)
 ├── EntityTypeB (leaf)
 ├── EntityTypeC (composite — contains EntityTypeA)
@@ -21,11 +21,11 @@ For each type, note:
 - What it contains (if composite)
 - Its real-world meaning
 
-## 2. Component Relation Types
+## 2. BIE Component Relation Types
 
-Report relation types in two tables. The first provides an overview of all available BIE relation types and whether the component uses them. The second provides detail only for the relation types that are actually used.
+Report BIE relation types in two tables. The first provides an overview of all available BIE relation types and whether the component uses them. The second provides detail only for the BIE relation types that are actually used.
 
-Include core relation types plus any component-specific extensions. Only define component-specific relation types if the 7 core types are insufficient.
+Include BIE core relation types plus any component-specific extensions. Only define component-specific BIE relation types if the 7 core BIE relation types are insufficient.
 
 ### 2a. BIE Relation Types Usage
 
@@ -58,9 +58,9 @@ For each *used* relation type, list the participating object types. Only relatio
 | BIE_WHOLES_PARTS | Core | Cell contains its source value | Cell | CellSourceValue |
 | GOVERNED_BY | Component | Document governed by authority | Document | Authority |
 
-## 3. Object Type Identity Dependence Relation Types
+## 3. BIE Object Type Identity Dependence Relation Types
 
-For each object type, specify which relation types to other object types its identity depends on. This captures the identity composition dependencies — i.e., what other object types must exist before this type's BIE identity can be computed.
+For each BIE object type, specify which BIE relation types to other BIE object types its identity depends on. This captures the identity composition dependencies — i.e., what other object types must exist before this type's BIE identity can be computed.
 
 This is the ontology-level view of identity composition. Implementation details (hash modes, specific BieIdCreationFacade calls) are deferred to the data engineer.
 

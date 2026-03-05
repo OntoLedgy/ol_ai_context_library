@@ -18,8 +18,8 @@ The ontologist skill can review or design ontologies for **either** foundation o
 
 A BIE ontology has two fundamental kinds:
 
-1. **Objects** — Entities within a component. Each object has a `bie_id` (BIE identifier). Stored in the objects register.
-2. **Relations** — Links between things. Each relation is a `bie_id_tuple` — an ordered tuple of bie_ids representing participants and relation type. Stored in the relations register.
+1. **BIE Objects** — Entities within a component. Each object has a `bie_id` (BIE identifier). Stored in the objects register.
+2. **BIE Relations** — Links between things. Each relation is a `bie_id_tuple` — an ordered tuple of bie_ids representing participants and relation type. Stored in the relations register.
 
 ## Core Relation Types (BieCoreRelationTypes)
 

@@ -6,7 +6,7 @@ Apply each check to the target component. Mark as PASS or GAP.
 
 - [ ] Component type enum exists and extends `BieEnums`
 - [ ] Each component entity type has a corresponding enum member
-- [ ] Domain relation type enum exists (if component needs relations beyond core)
+- [ ] BIE Domain relation type enum exists (if component needs relations beyond core)
 - [ ] Enum members use `auto()` values
 
 ## Object Class Checks
