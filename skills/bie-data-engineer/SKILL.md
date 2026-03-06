@@ -2,9 +2,9 @@
 name: bie-data-engineer
 description: >
   BIE domain implementation from an approved model. Use when: implementing a
-  BIE domain in Python, creating domain enums, bie_id creator functions,
-  BieDomainObjects subclasses, registration helpers, domain universe setup.
-  Requires an approved domain ontology model as input. General/foundation
+  BIE domain in Python, creating domain enums, identity vectors, bie_id creator
+  functions, BieDomainObjects subclasses, registration helpers, domain universe
+  setup. Requires an approved domain ontology model as input. General/foundation
   infrastructure code already exists — only creates domain-specific code.
 ---
 
@@ -30,9 +30,9 @@ Before starting implementation:
    3. Object Type Identity Dependence Relation Types
    4. Construction Order
 
-   These describe *what* the domain is — not *how* to implement it. Deriving implementation artifacts (enums, calculation tables, hash modes, code) from the ontology is your responsibility.
+   These describe *what* the domain is — not *how* to implement it. Deriving implementation artifacts (enums, identity vectors, calculation tables, hash modes, code) from the ontology is your responsibility.
 
-2. **Read the Excel domain as reference** — Before writing any code, read the Excel domain implementation (see `references/code-locations.md`). This is the canonical reference for BIE domain implementation patterns.
+2. **Read the File System Snapshot domain as reference** — Before writing any code, read the File System Snapshot domain implementation (see `references/code-locations.md`). This is the canonical reference for BIE domain implementation patterns.
 
 3. **Read the code style guide** — See `references/code-style.md` for codebase conventions.
 
@@ -41,19 +41,20 @@ Before starting implementation:
 ### Step 1: Read the Approved Domain Ontology
 
 Parse the 4 ontology deliverables:
-1. **Domain Object Types and Hierarchy** — entity types, leaf vs composite, containment
+1. **Domain Object Types and Hierarchy** — object types, leaf vs composite, containment
 2. **Domain Relation Types** — which object types relate to which others and via what relation type
 3. **Object Type Identity Dependence Relation Types** — which object types each type's identity depends on
 4. **Construction Order** — leaf-first ordering derived from identity dependencies
 
 Then derive the implementation artifacts you need:
 - **Enum definitions** — map object types to enum members, determine if domain-specific relation type enums are needed
+- **Identity Vectors** — for each object type, define a NamedTuple of typed places and a `BieIdentityVectorBase` subclass that returns the type's `item_bie_identity` followed by the identity-dependence inputs
 - **BIE Calculation Table** — for each bie object type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations
 - **Relation registrations** — determine the bie_id_tuples to register from the relation types table
 
-### Step 2: Read the Excel Domain Reference
+### Step 2: Read the File System Snapshot Domain Reference
 
-Read all files listed in `references/code-locations.md` under "Excel domain reference". Understand the patterns before writing code.
+Read all files listed in `references/code-locations.md` under "File System Snapshot Domain Reference". Understand the patterns before writing code.
 
 ### Step 3: Create Files in Order
 
@@ -61,25 +62,39 @@ Follow the construction order from the domain model. Create files in this sequen
 
 #### 3.1 Domain Types Enum
 
-Create the domain types enum extending `BieEnums`. See `references/implementation-templates.md` for the template.
+Create the domain types enum extending `BieDomainTypes`. See `references/implementation-templates.md` for the template.
 
 #### 3.2 Domain Relation Types Enum (if needed)
 
 Only create if the domain model specifies relation types beyond the 7 core types.
 
-#### 3.3 BIE ID Creator Functions
+#### 3.3 Identity Vectors
 
-Create one creator function per entity type, following the BIE Calculation Table. Each creator is a standalone module-level function. See `references/implementation-templates.md` for templates.
+For each object type, create:
+- A `NamedTuple` subclass defining the typed places (identity inputs)
+- A `BieIdentityVectorBase` subclass that returns the domain type's `item_bie_identity` as the first input object, followed by the places
 
-#### 3.4 Domain Object Classes
+Group related identity vectors in a single `_identity_vectors.py` file per domain. See `references/implementation-templates.md` for templates.
 
-Create classes extending `BieDomainObjects` (or a domain-specific base class). Each class computes its `bie_id` in `__init__` and registers during construction. See `references/implementation-templates.md` for the template.
+#### 3.4 BIE ID Creator Functions
 
-#### 3.5 Registration Helper Functions
+Create one creator module per object type, following the BIE Calculation Table. Each module provides up to three functions in the three-tier pattern:
 
-Create helper functions that wrap the registration pattern (register object + type-instance + relation). Follow the Excel domain's `bie_ids_registerer.py` pattern.
+- `create_*_bie_id(...)` — Public entry point; delegates to `calculate`
+- `calculate_*_bie_id(...)` — Constructs the identity vector and calls `BieIdCreationFacade.create_bie_id_from_identity_vector()`
+- `issue_*_bie_id(...)` — Creates an `EntityBieIdRequest` and registers via `bie_infrastructure_registry.create_and_register_bie_id()`
 
-#### 3.6 Universe/Orchestration Integration
+See `references/implementation-templates.md` for templates.
+
+#### 3.5 Domain Object Classes
+
+Create classes extending `BieDomainObjects` (or a domain-specific base class). Each class computes its `bie_id` in `__init__` using the appropriate creator function. See `references/implementation-templates.md` for the template.
+
+#### 3.6 Registration Helper Functions
+
+Create helper functions that use `EntityBieIdRequest` and `RelationBieIdRequest` frozen dataclasses to register objects, type-instance relations, and domain relations via `bie_infrastructure_registry.create_and_register_bie_id()`. See `references/implementation-templates.md` for the template.
+
+#### 3.7 Universe/Orchestration Integration
 
 Create universe classes and orchestration functions that wire everything together.
 
@@ -95,10 +110,14 @@ These already exist in the foundation layer. Do NOT recreate them:
 - `BieIdRegistries` / `BieInfrastructureRegistries` — Registration infrastructure
 - `BieIdUniverses` — Universe base class
 - `BieObjects` / `BieDomainObjects` — Base object classes
-- `BieEnums` / `BieCoreRelationTypes` — Core enums
+- `BieEnums` / `BieDomainTypes` / `BieCoreRelationTypes` — Core enums and type hierarchy
 - `BieInfrastructureOrchestrator` — Infrastructure initialization
 - `BieIds` — Identity value type
 - `BSequenceNames` — Naming service
+- `BieIdentityVectorBase` — Identity vector abstract base class
+- `BieVectorStructureTypes` — Vector structure type enum
+- `EntityBieIdRequest` / `RelationBieIdRequest` — Registration request dataclasses
+- `BieIdIssueScopes` / `BieIdIssueResult` — Registration scope and result types
 
 Only create domain-specific extensions of these classes and new domain-specific code.
 
@@ -106,10 +125,13 @@ Only create domain-specific extensions of these classes and new domain-specific 
 
 After implementation, verify:
 
-- [ ] Domain enum extends `BieEnums` with a member for every object type in the ontology
-- [ ] Each creator function correctly implements the identity dependence relations from the ontology
+- [ ] Domain enum extends `BieDomainTypes` with a member for every object type in the ontology
+- [ ] Each object type has an identity vector (NamedTuple places + `BieIdentityVectorBase` subclass)
+- [ ] Each identity vector returns `type.item_bie_identity` as the first input object
+- [ ] Each creator module implements the three-tier pattern (create/calculate/issue)
+- [ ] Creator functions use `BieIdCreationFacade.create_bie_id_from_identity_vector()` (not direct hash methods)
+- [ ] Registration uses `EntityBieIdRequest`/`RelationBieIdRequest` with `create_and_register_bie_id()`
 - [ ] Each object class calls `super().__init__` correctly
-- [ ] Registration happens during construction (no separate phase)
 - [ ] Parts are constructed before wholes (matches construction order from ontology)
 - [ ] All relation types from the ontology are registered as bie_id_tuples
 - [ ] Code style matches `references/code-style.md`

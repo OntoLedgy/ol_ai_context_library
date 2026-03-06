@@ -54,7 +54,7 @@ BIE_SOME_TYPE = \
 Use full package import paths with backslash continuation for long imports:
 
 ```python
-from nf_common_base.b_source.services.identification_services.b_identity_ecosystem.bie_id_creation_module.bie_id_creation_facade import \
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.bie_id_creation_facade import \
     BieIdCreationFacade
 ```
 
@@ -79,4 +79,26 @@ input_objects = \
         item_a,
         item_b
     ]
+```
+
+## NamedTuples
+
+Class definition with parent on separate indented line (same as class inheritance):
+
+```python
+class SomeVectorPlaces(
+        NamedTuple):
+    field_a: BieIds
+    field_b: str
+```
+
+## Frozen Dataclasses
+
+Request/response objects use `@dataclass(frozen=True)`:
+
+```python
+@dataclass(frozen=True)
+class SomeRequest:
+    input_objects: Tuple[object, ...]
+    bie_id_type_id: Optional[BieIds]
 ```
