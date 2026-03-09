@@ -48,7 +48,7 @@ Parse the 4 ontology deliverables:
 
 Then derive the implementation artifacts you need:
 - **Enum definitions** — map object types to enum members, determine if domain-specific relation type enums are needed
-- **Identity Vectors** — for each object type, define a NamedTuple of typed places and a `BieIdentityVectorBase` subclass that returns the type's `item_bie_identity` followed by the identity-dependence inputs
+- **Identity Vectors** — for each object type, define a NamedTuple of typed places and a `BieIdentityVectorBase` subclass where `bie_domain_type` returns the domain type enum member and `input_objects()` returns only the raw identity-dependence inputs
 - **BIE Calculation Table** — for each bie object type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations
 - **Relation registrations** — determine the bie_id_tuples to register from the relation types table
 
@@ -72,7 +72,7 @@ Only create if the domain model specifies relation types beyond the 7 core types
 
 For each object type, create:
 - A `NamedTuple` subclass defining the typed places (identity inputs)
-- A `BieIdentityVectorBase` subclass that returns the domain type's `item_bie_identity` as the first input object, followed by the places
+- A `BieIdentityVectorBase` subclass where `bie_domain_type` returns the domain type enum member and `input_objects()` returns only the raw places
 
 Group related identity vectors in a single `_identity_vectors.py` file per domain. See `references/implementation-templates.md` for templates.
 
@@ -127,7 +127,8 @@ After implementation, verify:
 
 - [ ] Domain enum extends `BieDomainTypes` with a member for every object type in the ontology
 - [ ] Each object type has an identity vector (NamedTuple places + `BieIdentityVectorBase` subclass)
-- [ ] Each identity vector returns `type.item_bie_identity` as the first input object
+- [ ] Each identity vector's `bie_domain_type` returns the domain type enum member (not `None`)
+- [ ] Each identity vector's `input_objects()` contains only raw places (does NOT manually include `type.item_bie_identity`)
 - [ ] Each creator module implements the three-tier pattern (create/calculate/issue)
 - [ ] Creator functions use `BieIdCreationFacade.create_bie_id_from_identity_vector()` (not direct hash methods)
 - [ ] Registration uses `EntityBieIdRequest`/`RelationBieIdRequest` with `create_and_register_bie_id()`

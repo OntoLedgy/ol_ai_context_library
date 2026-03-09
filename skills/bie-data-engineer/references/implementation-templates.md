@@ -70,7 +70,7 @@ class ObjectTypeAIdentityVector(
             self) \
             -> Optional[BieEnums]:
         return \
-            None
+            BieDomainNameTypes.BIE_OBJECT_TYPE_A
 
     @property
     def bie_vector_structure_type(
@@ -84,7 +84,6 @@ class ObjectTypeAIdentityVector(
             -> list[object]:
         return \
             [
-                BieDomainNameTypes.BIE_OBJECT_TYPE_A.item_bie_identity,
                 self._places.object_a_name
             ]
 
@@ -114,7 +113,7 @@ class ObjectTypeBIdentityVector(
             self) \
             -> Optional[BieEnums]:
         return \
-            None
+            BieDomainNameTypes.BIE_OBJECT_TYPE_B
 
     @property
     def bie_vector_structure_type(
@@ -128,7 +127,6 @@ class ObjectTypeBIdentityVector(
             -> list[object]:
         return \
             [
-                BieDomainNameTypes.BIE_OBJECT_TYPE_B.item_bie_identity,
                 self._places.object_a_bie_id,
                 self._places.object_b_value
             ]
@@ -149,9 +147,10 @@ def _validate_places(
 ```
 
 Notes:
-- The first element in `input_objects()` is always the domain type's `item_bie_identity`
+- `bie_domain_type` returns the domain type enum member for this object type — the facade uses this to apply the second composition step automatically
+- `input_objects()` contains ONLY the raw identity places — do NOT manually include `type.item_bie_identity`
+- The facade's two-step process: (1) hash input_objects to get base bie_id, (2) `order_sensitive(bie_domain_type.item_bie_identity, base_bie_id)`
 - The NamedTuple defines the typed identity inputs (places)
-- `bie_domain_type` returns `None` (typing is handled by including `item_bie_identity` in the input objects)
 - Include a shared `_validate_places()` function at the bottom of the file
 
 ## BIE ID Creator Function (Three-Tier Pattern)

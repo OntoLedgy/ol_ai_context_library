@@ -81,6 +81,10 @@ Notes:
 - Leaf types have no identity dependencies on other object types
 - The "Via Relation Type" column shows which relation type connects this object type to the one it depends on
 - This table drives the Construction Order (deliverable 4)
+- The identity composition for each object type follows a two-step process:
+  step 1 hashes the raw inputs (places), step 2 composes with the type enum.
+  The ontologist specifies WHAT inputs determine identity; the data engineer
+  implements HOW via the identity vector's `bie_domain_type` and `input_objects()`.
 
 ## 4. Construction Order
 
