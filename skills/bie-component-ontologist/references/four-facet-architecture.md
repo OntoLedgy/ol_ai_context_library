@@ -38,9 +38,11 @@ Domains may define additional relation types by extending `BieRelationTypes`.
 ## Identity Composition Principles
 
 1. **Deterministic** — Same inputs always produce the same BIE ID via BLAKE2B hashing (order-sensitive) or integer summation (order-insensitive)
-2. **Type-first convention** — When composing identity, the type's `item_bie_identity` is typically the first input
+2. **Two-step domain typing** — Identity composition is a two-step process:
+   - Step 1: Hash the raw identity inputs (places) to produce a base bie_id
+   - Step 2: Compose `order_sensitive(type.item_bie_identity, base_bie_id)` to produce the final typed identity
+   - This is triggered automatically by the facade when the identity vector's `bie_domain_type` is non-None
 3. **Parts before wholes** — Leaf entities must be constructed before their containing composites
-4. **Domain typing** — When a `bie_domain_type` is provided, the final identity = `order_sensitive([type.item_bie_identity, vector_bie_id])`
 
 ## Object Construction Pattern
 
