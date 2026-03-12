@@ -49,10 +49,12 @@ Domains may define additional relation types by extending `BieRelationTypes`.
 Each component object follows this pattern during `__init__`:
 
 ```
-1. Compute bie_id — call BieIdCreationFacade with type + inputs
-2. Init super — super().__init__(bie_id=, base_hr_name=, bie_type=)
-3. Register Level 1 — register object + type-instance relation in infrastructure registry
-4. Create bie_id_tuples — register all relations (wholes-parts, etc.) in infrastructure registry
+1. Set instance attributes needed for identity
+2. Create identity vector — _create_vector() builds a CommonIdentityVector subclass instance
+3. Init super — super().__init__(identity_vector=vector)
+   (BieObjects extracts bie_hr_name, bie_type, and computes bie_id from the vector)
+4. Register Level 1 — register object + type-instance relation in infrastructure registry
+5. Create bie_id_tuples — register all relations (wholes-parts, etc.) in infrastructure registry
 ```
 
 Construction IS registration — there is no separate registration phase.

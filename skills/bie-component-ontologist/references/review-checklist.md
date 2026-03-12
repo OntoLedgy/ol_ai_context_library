@@ -12,12 +12,12 @@ Apply each check to the target component. Mark as PASS or GAP.
 ## Object Class Checks
 
 - [ ] Each component object class subtypes `BieObjects` (or appropriate base like `BieDomainObjects`)
-- [ ] Each computes `bie_id` in `__init__` via `BieIdCreationFacade`
-- [ ] Identity vectors use `CommonIdentityVector` (not custom `BieIdentityVectorBase` subclasses)
-- [ ] `CommonIdentityVector` `bie_domain_type` is set to the object's domain type enum member (not `None`)
-- [ ] `CommonIdentityVector` `bie_hr_name` is set to a human-readable name for the identity
+- [ ] Each implements `_create_vector()` returning a `CommonIdentityVector` subclass instance
+- [ ] Identity vectors subclass `CommonIdentityVector` (not `BieIdentityVectorBase` directly)
+- [ ] Identity vector `bie_domain_type` is set to the object's domain type enum member (not `None`)
+- [ ] Identity vector `bie_hr_name` is set to a human-readable name for the identity
 - [ ] NamedTuple places contain only the raw identity inputs (does NOT manually include `type.item_bie_identity`)
-- [ ] `super().__init__(bie_id=, base_hr_name=, bie_type=)` is called with correct arguments
+- [ ] `super().__init__(identity_vector=vector)` is called — does NOT pass `bie_id`, `base_hr_name`, `bie_type` separately
 - [ ] No mutable state participates in identity computation
 
 ## Registration Checks
