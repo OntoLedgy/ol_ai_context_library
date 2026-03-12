@@ -48,7 +48,7 @@ Parse the 4 ontology deliverables:
 
 Then derive the implementation artifacts you need:
 - **Enum definitions** — map object types to enum members, determine if domain-specific relation type enums are needed
-- **Identity Vectors** — for each object type, define a NamedTuple of typed places and a `BieIdentityVectorBase` subclass where `bie_domain_type` returns the domain type enum member and `input_objects()` returns only the raw identity-dependence inputs
+- **Identity Vectors** — for each object type, define a NamedTuple of typed places; identity vectors are created by instantiating `CommonIdentityVector` with the domain type enum member, human-readable name, places, and vector structure type (do NOT create custom `BieIdentityVectorBase` subclasses)
 - **BIE Calculation Table** *(required deliverable)* — for each bie object type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations. This table must be produced and shown to the user before any code is written — it is a first-class output artifact alongside the identity vectors file
 - **Relation registrations** — determine the bie_id_tuples to register from the relation types table
 
@@ -70,11 +70,9 @@ Only create if the domain model specifies relation types beyond the 7 core types
 
 #### 3.3 Identity Vectors
 
-For each object type, create:
-- A `NamedTuple` subclass defining the typed places (identity inputs)
-- A `BieIdentityVectorBase` subclass where `bie_domain_type` returns the domain type enum member and `input_objects()` returns only the raw places
+For each object type, create a `NamedTuple` subclass defining the typed places (identity inputs). Identity vectors are created by instantiating `CommonIdentityVector` in the creator functions — do NOT create custom `BieIdentityVectorBase` subclasses.
 
-Group related identity vectors in a single `_identity_vectors.py` file per domain. See `references/implementation-templates.md` for templates.
+Group related NamedTuple definitions in a single `_identity_vectors.py` file per domain. See `references/implementation-templates.md` for templates.
 
 #### 3.4 BIE ID Creator Functions
 
@@ -143,6 +141,7 @@ These already exist in the foundation layer. Do NOT recreate them:
 - `BieIds` — Identity value type
 - `BSequenceNames` — Naming service
 - `BieIdentityVectorBase` — Identity vector abstract base class
+- `CommonIdentityVector` — Reusable identity vector implementation (use it, don't recreate it)
 - `BieVectorStructureTypes` — Vector structure type enum
 - `EntityBieIdRequest` / `RelationBieIdRequest` — Registration request dataclasses
 - `BieIdIssueScopes` / `BieIdIssueResult` — Registration scope and result types
@@ -154,9 +153,9 @@ Only create domain-specific extensions of these classes and new domain-specific 
 After implementation, verify:
 
 - [ ] Domain enum extends `BieDomainTypes` with a member for every object type in the ontology
-- [ ] Each object type has an identity vector (NamedTuple places + `BieIdentityVectorBase` subclass)
-- [ ] Each identity vector's `bie_domain_type` returns the domain type enum member (not `None`)
-- [ ] Each identity vector's `input_objects()` contains only raw places (does NOT manually include `type.item_bie_identity`)
+- [ ] Each object type has a NamedTuple places definition and uses `CommonIdentityVector` (not a custom `BieIdentityVectorBase` subclass)
+- [ ] Each `CommonIdentityVector` instance is created with the correct `bie_domain_type` (domain type enum member, not `None`), `bie_hr_name`, `places`, and `bie_vector_structure_type`
+- [ ] The NamedTuple places contain only raw identity inputs (does NOT manually include `type.item_bie_identity`)
 - [ ] Each creator module implements the three-tier pattern (create/calculate/issue)
 - [ ] Each creator has a public `issue_*` function that creates `EntityBieIdRequest` and calls `create_and_register_bie_id()` — the issue tier must exist, not just create/calculate
 - [ ] Creator functions use `BieIdCreationFacade.create_bie_id_from_identity_vector()` (not direct hash methods)
