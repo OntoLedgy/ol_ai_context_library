@@ -48,7 +48,7 @@ Parse the 4 ontology deliverables:
 
 Then derive the implementation artifacts you need:
 - **Enum definitions** — map object types to enum members, determine if domain-specific relation type enums are needed
-- **Identity Vectors** — for each object type, define a NamedTuple of typed places; identity vectors are created by instantiating `CommonIdentityVector` with the domain type enum member, human-readable name, places, and vector structure type (do NOT create custom `BieIdentityVectorBase` subclasses)
+- **Identity Vectors** — for each object type, define a NamedTuple of typed places and a `CommonIdentityVector` subclass that takes `bie_type`, `bie_hr_name`, and the typed places as constructor args and calls `super().__init__()` (do NOT subclass `BieIdentityVectorBase` directly)
 - **BIE Calculation Table** *(required deliverable)* — for each bie object type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations. This table must be produced and shown to the user before any code is written — it is a first-class output artifact alongside the identity vectors file
 - **Relation registrations** — determine the bie_id_tuples to register from the relation types table
 
@@ -70,9 +70,13 @@ Only create if the domain model specifies relation types beyond the 7 core types
 
 #### 3.3 Identity Vectors
 
-For each object type, create a `NamedTuple` subclass defining the typed places (identity inputs). Identity vectors are created by instantiating `CommonIdentityVector` in the creator functions — do NOT create custom `BieIdentityVectorBase` subclasses.
+For each object type, create:
+- A `NamedTuple` subclass defining the typed places (identity inputs)
+- A `CommonIdentityVector` subclass whose `__init__` takes `bie_type`, `bie_hr_name`, and the typed places, then calls `super().__init__()` with `bie_domain_type`, `bie_hr_name`, `places`, and `bie_vector_structure_type`
 
-Group related NamedTuple definitions in a single `_identity_vectors.py` file per domain. See `references/implementation-templates.md` for templates.
+Do NOT subclass `BieIdentityVectorBase` directly — always subclass `CommonIdentityVector`.
+
+Group related identity vectors in a single `_identity_vectors.py` file per domain. See `references/implementation-templates.md` for templates.
 
 #### 3.4 BIE ID Creator Functions
 
@@ -86,7 +90,11 @@ See `references/implementation-templates.md` for templates.
 
 #### 3.5 Domain Object Classes
 
-Create classes extending `BieDomainObjects` (or a domain-specific base class). Each class computes its `bie_id` in `__init__` using the appropriate creator function. See `references/implementation-templates.md` for the template.
+Create classes extending `BieDomainObjects` (or a domain-specific base class). Each class:
+1. Implements `_create_vector()` (abstract from `BieObjects`) which constructs and returns the identity vector
+2. Calls `super().__init__(identity_vector=vector)` — `BieObjects.__init__` extracts `bie_hr_name`, `bie_type`, and computes `bie_id` from the vector automatically
+
+See `references/implementation-templates.md` for the template.
 
 #### 3.6 Registration Helper Functions
 
@@ -141,7 +149,7 @@ These already exist in the foundation layer. Do NOT recreate them:
 - `BieIds` — Identity value type
 - `BSequenceNames` — Naming service
 - `BieIdentityVectorBase` — Identity vector abstract base class
-- `CommonIdentityVector` — Reusable identity vector implementation (use it, don't recreate it)
+- `CommonIdentityVector` — Reusable identity vector base (subclass it per object type, don't recreate it)
 - `BieVectorStructureTypes` — Vector structure type enum
 - `EntityBieIdRequest` / `RelationBieIdRequest` — Registration request dataclasses
 - `BieIdIssueScopes` / `BieIdIssueResult` — Registration scope and result types
@@ -153,14 +161,14 @@ Only create domain-specific extensions of these classes and new domain-specific 
 After implementation, verify:
 
 - [ ] Domain enum extends `BieDomainTypes` with a member for every object type in the ontology
-- [ ] Each object type has a NamedTuple places definition and uses `CommonIdentityVector` (not a custom `BieIdentityVectorBase` subclass)
-- [ ] Each `CommonIdentityVector` instance is created with the correct `bie_domain_type` (domain type enum member, not `None`), `bie_hr_name`, `places`, and `bie_vector_structure_type`
+- [ ] Each object type has a NamedTuple places definition and a `CommonIdentityVector` subclass (not a direct `BieIdentityVectorBase` subclass)
+- [ ] Each `CommonIdentityVector` subclass calls `super().__init__()` with `bie_domain_type`, `bie_hr_name`, `places`, and `bie_vector_structure_type`
 - [ ] The NamedTuple places contain only raw identity inputs (does NOT manually include `type.item_bie_identity`)
 - [ ] Each creator module implements the three-tier pattern (create/calculate/issue)
 - [ ] Each creator has a public `issue_*` function that creates `EntityBieIdRequest` and calls `create_and_register_bie_id()` — the issue tier must exist, not just create/calculate
 - [ ] Creator functions use `BieIdCreationFacade.create_bie_id_from_identity_vector()` (not direct hash methods)
 - [ ] Registration uses `EntityBieIdRequest`/`RelationBieIdRequest` with `create_and_register_bie_id()` — the older `register_bie_object_and_type_instance()` and `register_bie_relation()` APIs are NOT the canonical pattern; do not use them
-- [ ] Each object class calls `super().__init__` correctly
+- [ ] Each domain object class implements `_create_vector()` and calls `super().__init__(identity_vector=vector)` — does NOT pass `bie_id`, `base_hr_name`, or `bie_type` separately
 - [ ] Parts are constructed before wholes (matches construction order from ontology)
 - [ ] Construction order is documented in the identity vectors module or domain module docstring
 - [ ] All relation types from the ontology are registered as bie_id_tuples
