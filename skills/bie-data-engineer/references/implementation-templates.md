@@ -31,19 +31,12 @@ Notes:
 
 ## Identity Vector
 
-For each object type, define a NamedTuple of typed places and a `BieIdentityVectorBase` subclass. Group related vectors in a single file.
+For each object type, define a NamedTuple of typed places. Use `CommonIdentityVector` to create identity vectors — do NOT create custom `BieIdentityVectorBase` subclasses. Group related NamedTuple definitions in a single file.
 
 ```python
-from typing import NamedTuple, Optional
-from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.common_knowledge.types.bie_vector_structure_types import \
-    BieVectorStructureTypes
-from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.identity_vectors.bie_identity_vector_base import \
-    BieIdentityVectorBase
-from bclearer_orchestration_services.identification_services.b_identity_ecosystem.common_knowledge.bie_enums import \
-    BieEnums
+from typing import NamedTuple
 from bclearer_orchestration_services.identification_services.b_identity_ecosystem.objects.bie_ids import \
     BieIds
-from your_domain.common_knowledge.your_domain_types import BieDomainNameTypes
 
 
 class ObjectTypeAIdentityVectorPlaces(
@@ -51,107 +44,43 @@ class ObjectTypeAIdentityVectorPlaces(
     object_a_name: str
 
 
-class ObjectTypeAIdentityVector(
-        BieIdentityVectorBase):
-    def __init__(
-            self,
-            places: ObjectTypeAIdentityVectorPlaces) \
-            -> None:
-        _validate_places(
-            places=places,
-            expected_type=ObjectTypeAIdentityVectorPlaces,
-            vector_name='ObjectTypeAIdentityVector')
-
-        self._places = \
-            places
-
-    @property
-    def bie_domain_type(
-            self) \
-            -> Optional[BieEnums]:
-        return \
-            BieDomainNameTypes.BIE_OBJECT_TYPE_A
-
-    @property
-    def bie_vector_structure_type(
-            self) \
-            -> BieVectorStructureTypes:
-        return \
-            BieVectorStructureTypes.MULTI_DIMENSIONAL_ORDER_SENSITIVE
-
-    def input_objects(
-            self) \
-            -> list[object]:
-        return \
-            [
-                self._places.object_a_name
-            ]
-
-
 class ObjectTypeBIdentityVectorPlaces(
         NamedTuple):
     object_a_bie_id: BieIds
     object_b_value: str
+```
+
+Identity vectors are created by instantiating `CommonIdentityVector` in the creator functions (see BIE ID Creator Function below), not as separate classes.
+
+```python
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.identity_vectors.common_identity_vector import \
+    CommonIdentityVector
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.common_knowledge.types.bie_vector_structure_types import \
+    BieVectorStructureTypes
+from your_domain.common_knowledge.your_domain_types import BieDomainNameTypes
+from your_domain.bie.bie_id_creators.your_domain_identity_vectors import \
+    ObjectTypeAIdentityVectorPlaces
 
 
-class ObjectTypeBIdentityVector(
-        BieIdentityVectorBase):
-    def __init__(
-            self,
-            places: ObjectTypeBIdentityVectorPlaces) \
-            -> None:
-        _validate_places(
-            places=places,
-            expected_type=ObjectTypeBIdentityVectorPlaces,
-            vector_name='ObjectTypeBIdentityVector')
-
-        self._places = \
-            places
-
-    @property
-    def bie_domain_type(
-            self) \
-            -> Optional[BieEnums]:
-        return \
-            BieDomainNameTypes.BIE_OBJECT_TYPE_B
-
-    @property
-    def bie_vector_structure_type(
-            self) \
-            -> BieVectorStructureTypes:
-        return \
-            BieVectorStructureTypes.MULTI_DIMENSIONAL_ORDER_SENSITIVE
-
-    def input_objects(
-            self) \
-            -> list[object]:
-        return \
-            [
-                self._places.object_a_bie_id,
-                self._places.object_b_value
-            ]
-
-
-def _validate_places(
-        places: tuple[object, ...],
-        expected_type: type,
-        vector_name: str) \
-        -> None:
-    if not isinstance(places, expected_type):
-        raise \
-            TypeError(f'{vector_name} places must be {expected_type.__name__}')
-
-    if any(place is None for place in places):
-        raise \
-            ValueError(f'{vector_name} places must not contain None')
+# Example: creating a CommonIdentityVector instance
+identity_vector = \
+    CommonIdentityVector(
+        bie_domain_type=BieDomainNameTypes.BIE_OBJECT_TYPE_A,
+        bie_hr_name=object_a_name,
+        places=ObjectTypeAIdentityVectorPlaces(
+            object_a_name=object_a_name),
+        bie_vector_structure_type=BieVectorStructureTypes.MULTI_DIMENSIONAL_ORDER_SENSITIVE)
 ```
 
 Notes:
-- `bie_domain_type` returns the domain type enum member for this object type — the facade uses this to apply the second composition step automatically
-- `input_objects()` contains ONLY the raw identity places — do NOT manually include `type.item_bie_identity`
-- The facade's two-step process: (1) hash input_objects to get base bie_id, (2) `order_sensitive(bie_domain_type.item_bie_identity, base_bie_id)`
-- The NamedTuple defines the typed identity inputs (places)
-- Include a shared `_validate_places()` function at the bottom of the file
+- `CommonIdentityVector` is a reusable class — do NOT subclass `BieIdentityVectorBase` per object type
+- `bie_domain_type` — the domain type enum member for this object type; the facade uses this to apply the second composition step automatically
+- `bie_hr_name` — a human-readable name for the identity (Optional[str]); typically the primary descriptive attribute of the object
+- `places` — a NamedTuple instance containing the raw identity inputs; `CommonIdentityVector` validates that places is a NamedTuple with no None values
+- `bie_vector_structure_type` — determines the hashing strategy (single, order-sensitive, order-insensitive)
+- The NamedTuple places contain ONLY the raw identity inputs — do NOT manually include `type.item_bie_identity`
+- The facade's two-step process: (1) hash input_objects (from places) to get base bie_id, (2) `order_sensitive(bie_domain_type.item_bie_identity, base_bie_id)`
+- No custom `_validate_places()` function is needed — `CommonIdentityVector` validates internally
 
 ## BIE ID Creator Function (Three-Tier Pattern)
 
@@ -160,6 +89,10 @@ Each creator module provides three functions: `create`, `calculate`, and `issue`
 ```python
 from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.bie_id_creation_facade import \
     BieIdCreationFacade
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.common_knowledge.types.bie_vector_structure_types import \
+    BieVectorStructureTypes
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.identity_vectors.common_identity_vector import \
+    CommonIdentityVector
 from bclearer_orchestration_services.identification_services.b_identity_ecosystem.objects.bie_ids import \
     BieIds
 from bclearer_orchestration_services.identification_services.b_identity_ecosystem.registrations.helpers.registerers.bie_id_issue_requests import \
@@ -168,7 +101,7 @@ from bclearer_orchestration_services.identification_services.naming_service.b_se
     BSequenceNames
 from your_domain.common_knowledge.your_domain_types import BieDomainNameTypes
 from your_domain.bie.bie_id_creators.your_domain_identity_vectors import \
-    ObjectTypeBIdentityVector, ObjectTypeBIdentityVectorPlaces
+    ObjectTypeBIdentityVectorPlaces
 
 
 def create_object_type_b_bie_id(
@@ -247,19 +180,23 @@ def __get_input_objects(
 def __get_identity_vector(
         object_a_bie_id: BieIds,
         object_b_value: str) \
-        -> ObjectTypeBIdentityVector:
+        -> CommonIdentityVector:
     return \
-        ObjectTypeBIdentityVector(
+        CommonIdentityVector(
+            bie_domain_type=BieDomainNameTypes.BIE_OBJECT_TYPE_B,
+            bie_hr_name=object_b_value,
             places=ObjectTypeBIdentityVectorPlaces(
                 object_a_bie_id=object_a_bie_id,
-                object_b_value=object_b_value))
+                object_b_value=object_b_value),
+            bie_vector_structure_type=BieVectorStructureTypes.MULTI_DIMENSIONAL_ORDER_SENSITIVE)
 ```
 
 Notes:
 - `create` — pure computation, no side effects; delegates to `calculate`
 - `calculate` — constructs identity vector and calls `BieIdCreationFacade.create_bie_id_from_identity_vector()`
 - `issue` — creates `EntityBieIdRequest` and registers via `create_and_register_bie_id()`; defaults type and name if not provided
-- Private `__get_identity_vector` and `__get_input_objects` helpers shared between tiers
+- Private `__get_identity_vector` creates a `CommonIdentityVector` with the domain type, human-readable name, typed places, and vector structure type
+- `__get_input_objects` delegates to the identity vector's `input_objects()` method
 
 ## Domain Object Class
 

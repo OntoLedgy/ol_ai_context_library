@@ -8,7 +8,7 @@ The BIE framework is organized along two axes, producing four facets:
 | **Domain**         | Domain object types, relation types     | Domain enums, creators, object classes    |
 
 - **Foundation Model** — The abstract type system: BieTypes, BieRelationTypes, BieCoreRelationTypes, BieEnums self-identification
-- **Foundation Implementation** — The code infrastructure: BieIdCreationFacade, BieIdRegistries, BieIdUniverses, BieObjects, hashing pipeline
+- **Foundation Implementation** — The code infrastructure: BieIdCreationFacade, CommonIdentityVector, BieIdRegistries, BieIdUniverses, BieObjects, hashing pipeline
 - **Domain Model** — The ontology for a specific domain: object types, relation types, calculation table, construction order
 - **Domain Implementation** — The Python code for a specific domain: domain enums, bie_id creators, BieDomainObjects subclasses
 

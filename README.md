@@ -98,6 +98,28 @@ npx skills add OntoLedgy/ol_ai_context_library -a claude-code
 npx skills add OntoLedgy/ol_ai_context_library -g
 ```
 
+### Updating skills
+
+The skills CLI checks folder content hashes via the GitHub API to detect changes. For private repositories, unauthenticated requests cannot see the latest state, so `npx skills update` will report no changes even when the skill has been updated.
+
+To update correctly, prepend a GitHub token:
+
+```bash
+# Using a personal access token
+GITHUB_TOKEN=<your-token> npx skills update
+
+# Or using the GitHub CLI token
+GITHUB_TOKEN=$(gh auth token) npx skills update
+```
+
+You can also re-install a specific skill to force the update:
+
+```bash
+GITHUB_TOKEN=$(gh auth token) npx skills add OntoLedgy/ol_ai_context_library --skill bie-data-engineer
+```
+
+> **Tip:** Export `GITHUB_TOKEN` in your shell profile (e.g. `export GITHUB_TOKEN=$(gh auth token)` in `~/.zshrc`) so all skills commands authenticate automatically.
+
 ### Managing installed skills
 
 ```bash
@@ -105,10 +127,7 @@ npx skills add OntoLedgy/ol_ai_context_library -g
 npx skills list
 
 # Check for updates
-npx skills check
-
-# Update to latest
-npx skills update
+GITHUB_TOKEN=$(gh auth token) npx skills check
 
 # Remove a skill
 npx skills remove bie-data-engineer
