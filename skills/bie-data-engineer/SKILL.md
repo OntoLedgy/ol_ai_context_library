@@ -49,7 +49,7 @@ Parse the 4 ontology deliverables:
 Then derive the implementation artifacts you need:
 - **Enum definitions** — map object types to enum members, determine if domain-specific relation type enums are needed
 - **Identity Vectors** — for each object type, define a NamedTuple of typed places and a `BieIdentityVectorBase` subclass where `bie_domain_type` returns the domain type enum member and `input_objects()` returns only the raw identity-dependence inputs
-- **BIE Calculation Table** — for each bie object type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations
+- **BIE Calculation Table** *(required deliverable)* — for each bie object type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations. This table must be produced and shown to the user before any code is written — it is a first-class output artifact alongside the identity vectors file
 - **Relation registrations** — determine the bie_id_tuples to register from the relation types table
 
 ### Step 2: Read the File System Snapshot Domain Reference
@@ -102,6 +102,34 @@ Create universe classes and orchestration functions that wire everything togethe
 
 After implementation, run any available tests to verify correctness.
 
+## Review Mode
+
+Use Review Mode when auditing existing domain code against BIE patterns. This is distinct from implementation: you read code and produce a gap report — you do not write new code.
+
+### Prerequisites for Review
+
+1. **Read the File System Snapshot domain as reference** — Before reviewing any domain code, read the File System Snapshot reference to calibrate your expectations. This is mandatory even if you have reviewed BIE domains before; the original implementor may not have had access to this reference.
+
+2. **Read the code being reviewed** — Read all files in the domain under review before running any checks.
+
+### Review Steps
+
+1. Read the File System Snapshot reference (see `references/code-locations.md`)
+2. Read all files in the domain under review
+3. Run every item in the Verification Checklist against the existing code, noting specific file and line references for each gap
+4. Produce a gap report
+
+### Gap Report Format
+
+For each failed check, report:
+- **Check**: Which verification checklist item failed
+- **File**: File path
+- **Line**: Line number(s)
+- **Issue**: Specific description of the gap
+- **Fix**: Suggested remediation
+
+List gaps in checklist order. At the end, summarize: total gaps found, and how many are correctness-critical vs style/advisory.
+
 ## What NOT to Create
 
 These already exist in the foundation layer. Do NOT recreate them:
@@ -130,10 +158,12 @@ After implementation, verify:
 - [ ] Each identity vector's `bie_domain_type` returns the domain type enum member (not `None`)
 - [ ] Each identity vector's `input_objects()` contains only raw places (does NOT manually include `type.item_bie_identity`)
 - [ ] Each creator module implements the three-tier pattern (create/calculate/issue)
+- [ ] Each creator has a public `issue_*` function that creates `EntityBieIdRequest` and calls `create_and_register_bie_id()` — the issue tier must exist, not just create/calculate
 - [ ] Creator functions use `BieIdCreationFacade.create_bie_id_from_identity_vector()` (not direct hash methods)
-- [ ] Registration uses `EntityBieIdRequest`/`RelationBieIdRequest` with `create_and_register_bie_id()`
+- [ ] Registration uses `EntityBieIdRequest`/`RelationBieIdRequest` with `create_and_register_bie_id()` — the older `register_bie_object_and_type_instance()` and `register_bie_relation()` APIs are NOT the canonical pattern; do not use them
 - [ ] Each object class calls `super().__init__` correctly
 - [ ] Parts are constructed before wholes (matches construction order from ontology)
+- [ ] Construction order is documented in the identity vectors module or domain module docstring
 - [ ] All relation types from the ontology are registered as bie_id_tuples
 - [ ] Code style matches `references/code-style.md`
 - [ ] All imports use full package paths
