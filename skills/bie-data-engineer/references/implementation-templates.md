@@ -33,6 +33,12 @@ Notes:
 
 For each object type, define a NamedTuple of typed places and a `CommonIdentityVector` subclass. Group related identity vectors in a single `_identity_vectors.py` file per domain.
 
+There are two styles depending on whether the vector class serves one object type or multiple:
+
+### Style A: Type-hardcoded (one vector class, one object type)
+
+Use when the identity vector class is specific to exactly one object type. Hardcode `bie_domain_type` inside `__init__`.
+
 ```python
 from typing import NamedTuple
 
@@ -40,10 +46,9 @@ from bclearer_orchestration_services.identification_services.b_identity_ecosyste
     BieVectorStructureTypes
 from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.identity_vectors.common_identity_vector import \
     CommonIdentityVector
-from bclearer_orchestration_services.identification_services.b_identity_ecosystem.common_knowledge.bie_types import \
-    BieTypes
 from bclearer_orchestration_services.identification_services.b_identity_ecosystem.objects.bie_ids import \
     BieIds
+from your_domain.common_knowledge.your_domain_types import BieDomainNameTypes
 
 
 class ObjectTypeAIdentityVectorPlaces(
@@ -56,12 +61,11 @@ class ObjectTypeAIdentityVector(
     def __init__(
             self,
             *,
-            bie_type: BieTypes,
             bie_hr_name: str,
             places: ObjectTypeAIdentityVectorPlaces) \
             -> None:
         super().__init__(
-            bie_domain_type=bie_type,
+            bie_domain_type=BieDomainNameTypes.BIE_OBJECT_TYPE_A,
             bie_hr_name=bie_hr_name,
             places=places,
             bie_vector_structure_type=BieVectorStructureTypes.MULTI_DIMENSIONAL_ORDER_SENSITIVE)
@@ -78,9 +82,33 @@ class ObjectTypeBIdentityVector(
     def __init__(
             self,
             *,
-            bie_type: BieTypes,
             bie_hr_name: str,
             places: ObjectTypeBIdentityVectorPlaces) \
+            -> None:
+        super().__init__(
+            bie_domain_type=BieDomainNameTypes.BIE_OBJECT_TYPE_B,
+            bie_hr_name=bie_hr_name,
+            places=places,
+            bie_vector_structure_type=BieVectorStructureTypes.MULTI_DIMENSIONAL_ORDER_SENSITIVE)
+```
+
+### Style B: Type-parameterized (one vector class, multiple object types)
+
+Use when the same vector structure is shared by multiple object types (e.g., file snapshots vs folder snapshots). The `bie_type` is passed in from the factory.
+
+```python
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.common_knowledge.bie_types import \
+    BieTypes
+
+
+class ObjectTypeSharedIdentityVector(
+        CommonIdentityVector):
+    def __init__(
+            self,
+            *,
+            bie_type: BieTypes,
+            bie_hr_name: str,
+            places: ObjectTypeSharedIdentityVectorPlaces) \
             -> None:
         super().__init__(
             bie_domain_type=bie_type,
@@ -91,8 +119,7 @@ class ObjectTypeBIdentityVector(
 
 Notes:
 - Identity vector classes subclass `CommonIdentityVector` — do NOT subclass `BieIdentityVectorBase` directly
-- Constructor uses keyword-only args (`*`) and takes `bie_type`, `bie_hr_name`, and typed `places`
-- `bie_type` is passed in (not hardcoded) — the domain object provides it when creating the vector
+- Constructor uses keyword-only args (`*`)
 - `bie_hr_name` — a human-readable name for the identity; typically the primary descriptive attribute of the object
 - `places` — a NamedTuple instance containing the raw identity inputs; `CommonIdentityVector` validates that places is a NamedTuple with no None values
 - `bie_vector_structure_type` — determines the hashing strategy (single, order-sensitive, order-insensitive)
@@ -213,16 +240,15 @@ Notes:
 
 ## Domain Object Class
 
+Domain objects are passive data holders. They receive a pre-computed `BieBaseIdentities` from the factory and pass it to `super().__init__`. There is no `_create_vector()` method.
+
 ```python
-from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.identity_vectors import \
-    BieIdentityVectorBase
-from bclearer_orchestration_services.identification_services.b_identity_ecosystem.objects.bie_ids import \
-    BieIds
 from bclearer_core.bie.domain.bie_domain_objects import \
     BieDomainObjects
-from your_domain.common_knowledge.your_domain_types import BieDomainNameTypes
-from your_domain.bie.bie_id_creators.your_domain_identity_vectors import \
-    ObjectTypeBIdentityVector, ObjectTypeBIdentityVectorPlaces
+from bclearer_core.bie.top.bie_base_identities import \
+    BieBaseIdentities
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.objects.bie_ids import \
+    BieIds
 
 
 class ObjectTypeBObjects(
@@ -230,7 +256,8 @@ class ObjectTypeBObjects(
     def __init__(
             self,
             object_a_bie_id: BieIds,
-            object_b_value: str) \
+            object_b_value: str,
+            bie_base_identity: BieBaseIdentities) \
             -> None:
         self.object_a_bie_id = \
             object_a_bie_id
@@ -238,113 +265,111 @@ class ObjectTypeBObjects(
         self.object_b_value = \
             object_b_value
 
-        identity_vector = \
-            self._create_vector()
-
         super().__init__(
-            identity_vector=identity_vector)
-
-    def _create_vector(
-            self) \
-            -> BieIdentityVectorBase:
-        bie_type = \
-            BieDomainNameTypes.BIE_OBJECT_TYPE_B
-
-        bie_hr_name = \
-            self.object_b_value
-
-        vector_places = \
-            self._create_vector_places()
-
-        identity_vector = \
-            ObjectTypeBIdentityVector(
-                bie_type=bie_type,
-                bie_hr_name=bie_hr_name,
-                places=vector_places)
-
-        return \
-            identity_vector
-
-    def _create_vector_places(
-            self) \
-            -> ObjectTypeBIdentityVectorPlaces:
-        return \
-            ObjectTypeBIdentityVectorPlaces(
-                object_a_bie_id=self.object_a_bie_id,
-                object_b_value=self.object_b_value)
+            bie_base_identity=bie_base_identity)
 ```
 
 Notes:
-- Instance attributes are set BEFORE calling `super().__init__` (they are needed by `_create_vector`)
-- `_create_vector()` implements the abstract method from `BieObjects` — constructs the identity vector
-- `_create_vector_places()` creates the NamedTuple places from instance attributes
-- `super().__init__(identity_vector=vector)` — `BieObjects` extracts `bie_hr_name`, `bie_type`, and computes `bie_id` from the vector
-- Do NOT pass `bie_id`, `base_hr_name`, or `bie_domain_type` separately — they come from the vector
+- Instance attributes are set BEFORE calling `super().__init__`
+- `bie_base_identity` is received from the factory — the object does NOT compute it
+- `super().__init__(bie_base_identity=bie_base_identity)` — `BieObjects` extracts `bie_hr_name`, `bie_type`, and `bie_id` from it
+- Do NOT pass `bie_id`, `base_hr_name`, or `bie_domain_type` separately
+- Do NOT implement `_create_vector()` — that method no longer exists in `BieObjects`
 
-## Registration Helper Functions
+## Factory Function
 
-Uses `EntityBieIdRequest` and `RelationBieIdRequest` frozen dataclasses for all registrations.
+For each domain object type, create a `create_*` factory function in a `factories/` sub-package. The factory owns all identity construction and registration logic. Pattern: places → vector → BieBaseIdentities → object → register.
 
 ```python
-from bclearer_core.bie.domain.bie_domain_objects import \
-    BieDomainObjects
-from bclearer_orchestration_services.identification_services.b_identity_ecosystem.bie_id_creation_module.common_knowledge.types.bie_vector_structure_types import \
-    BieVectorStructureTypes
+from bclearer_core.bie.top.bie_base_identities import \
+    BieBaseIdentities, create_bie_base_identity_from_bie_identity_vector
+from bclearer_core.infrastructure.session.bie_id_registerers.bie_id_registerer import \
+    BieIdRegisterer
 from bclearer_orchestration_services.identification_services.b_identity_ecosystem.common_knowledge.bie_core_relation_types import \
     BieCoreRelationTypes
-from bclearer_orchestration_services.identification_services.b_identity_ecosystem.infrastructure.registrations.bie_infrastructure_registries import \
-    BieInfrastructureRegistries
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.objects.bie_ids import \
+    BieIds
 from bclearer_orchestration_services.identification_services.b_identity_ecosystem.registrations.helpers.registerers.bie_id_issue_requests import \
-    BieIdIssueScopes, EntityBieIdRequest, RelationBieIdRequest
+    RelationBieIdRequest
 from bclearer_orchestration_services.identification_services.naming_service.b_sequence_names import \
     BSequenceNames
+from your_domain.common_knowledge.your_domain_types import BieDomainNameTypes
+from your_domain.bie.bie_id_creators.your_domain_identity_vectors import \
+    ObjectTypeBIdentityVector, ObjectTypeBIdentityVectorPlaces
+from your_domain.objects.object_type_b_objects import ObjectTypeBObjects
 
 
-def register_bie_object_and_type_instance(
-        bie_infrastructure_registry: BieInfrastructureRegistries,
-        bie_domain_object: BieDomainObjects) \
-        -> None:
-    bie_sequence_name = \
-        BSequenceNames(
-            initial_b_sequence_name_list=[bie_domain_object.base_hr_name])
+def create_object_type_b_objects(
+        *,
+        object_a_bie_id: BieIds,
+        object_b_value: str,
+        bie_id_registerer: BieIdRegisterer) \
+        -> ObjectTypeBObjects:
+    bie_base_identity = \
+        _create_object_type_b_bie_base_identity(
+            object_a_bie_id=object_a_bie_id,
+            object_b_value=object_b_value)
 
-    object_issue_request = \
-        EntityBieIdRequest(
-            input_objects=(bie_domain_object.bie_id,),
-            bie_id_type_id=bie_domain_object.bie_type.item_bie_identity,
-            b_sequence_name=bie_sequence_name,
-            issue_scope=BieIdIssueScopes.INFRASTRUCTURE,
-            bie_vector_structure_type=BieVectorStructureTypes.SINGLE_DIMENSIONAL)
+    object_type_b = \
+        ObjectTypeBObjects(
+            object_a_bie_id=object_a_bie_id,
+            object_b_value=object_b_value,
+            bie_base_identity=bie_base_identity)
 
-    object_issue_result = \
-        bie_infrastructure_registry.create_and_register_bie_id(
-            request=object_issue_request)
+    bie_id_registerer.register_bie_id(
+        bie_base_identity=bie_base_identity)
 
-    bie_domain_object.bie_id = \
-        object_issue_result.bie_id
-
-
-def register_bie_whole_part(
-        bie_infrastructure_registry: BieInfrastructureRegistries,
-        bie_domain_object_whole: BieDomainObjects,
-        bie_domain_object_part: BieDomainObjects) \
-        -> None:
-    relation_issue_request = \
-        RelationBieIdRequest(
-            bie_place_1_id=bie_domain_object_part.bie_id,
-            bie_place_2_id=bie_domain_object_whole.bie_id,
+    bie_id_registerer.issue_and_register_bie_id(
+        request=RelationBieIdRequest(
+            bie_place_1_id=object_type_b.bie_id,
+            bie_place_2_id=object_a_bie_id,
             bie_relation_type_id=BieCoreRelationTypes.BIE_WHOLES_PARTS.item_bie_identity,
             b_sequence_name=BSequenceNames(
-                initial_b_sequence_name_list=['whole_part']))
+                initial_b_sequence_name_list=['object_type_b_whole_part'])))
 
-    bie_infrastructure_registry.create_and_register_bie_id(
-        request=relation_issue_request)
+    return \
+        object_type_b
+
+
+def _create_object_type_b_bie_base_identity(
+        *,
+        object_a_bie_id: BieIds,
+        object_b_value: str) \
+        -> BieBaseIdentities:
+    places = \
+        ObjectTypeBIdentityVectorPlaces(
+            object_a_bie_id=object_a_bie_id,
+            object_b_value=object_b_value)
+
+    return \
+        create_bie_base_identity_from_bie_identity_vector(
+            identity_vector=ObjectTypeBIdentityVector(
+                bie_hr_name=object_b_value,
+                places=places))
 ```
 
 Notes:
-- `EntityBieIdRequest` registers an object and its type-instance relation in one call
-- `RelationBieIdRequest` registers a relation between two objects
-- Both use `bie_infrastructure_registry.create_and_register_bie_id()` as the single entry point
-- `EntityBieIdRequest.input_objects` wraps the already-computed `bie_id` in a tuple for registration
-- `EntityBieIdRequest.bie_vector_structure_type` is `SINGLE_DIMENSIONAL` when registering a pre-computed bie_id
-- The result's `bie_id` is assigned back to the domain object
+- Factory accepts `bie_id_registerer: BieIdRegisterer` — use `BieIdRegisterer` (wraps real registry) in production, `NoOpBieIdRegisterer` in unit tests
+- `register_bie_id(bie_base_identity=...)` — registers the object and its type-instance relation in one call
+- `issue_and_register_bie_id(request=RelationBieIdRequest(...))` — registers a relation between two objects
+- The private `_create_*_bie_base_identity` helper isolates identity construction — testable independently
+- For type-parameterized vectors (Style B), pass `bie_type=BieDomainNameTypes.BIE_OBJECT_TYPE_B` to the vector constructor
+
+## Registration
+
+Registration is done inside factory functions via `BieIdRegisterer` (see Factory Function template above).
+
+The canonical methods are:
+- `bie_id_registerer.register_bie_id(bie_base_identity=...)` — registers an object and its type-instance relation
+- `bie_id_registerer.issue_and_register_bie_id(request=RelationBieIdRequest(...))` — registers a relation between two objects
+
+`RelationBieIdRequest` fields:
+- `bie_place_1_id` — part/child object's `bie_id`
+- `bie_place_2_id` — whole/parent object's `bie_id`
+- `bie_relation_type_id` — e.g., `BieCoreRelationTypes.BIE_WHOLES_PARTS.item_bie_identity`
+- `b_sequence_name` — a `BSequenceNames` with a descriptive label
+
+**Deprecated patterns — do NOT use:**
+- `register_bie_object_and_type_instance()` / `register_bie_relation()` helper functions
+- Direct `bie_infrastructure_registry.create_and_register_bie_id()` calls inside domain objects
+- `EntityBieIdRequest` in registration code (use `register_bie_id` instead for entity registration)
