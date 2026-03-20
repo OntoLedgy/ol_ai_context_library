@@ -1,0 +1,50 @@
+apiVersion: ol.ai/v1
+kind: Skill
+metadata:
+  name: bie-domain-ontologist
+  version: "1.0.0"
+  description: Review BIE domain code or design a new BIE domain model
+  category: TASK
+  tags: [bie, ontology, review, design, bclearer]
+spec:
+  model:
+    default: claude-sonnet-4-6
+    allowed: [claude-sonnet-4-6, gpt-4o, claude-opus-4-6, llama3.1:8b, qwen3:8b, qwen2.5:7b]
+  input_schema:
+    type: object
+    required: [mode]
+    properties:
+      mode:
+        type: string
+        enum: [design, review]
+      target_path:
+        type: string
+        description: Local filesystem path to the domain code directory (review mode)
+      domain_description:
+        type: string
+        description: Domain requirements narrative (design mode)
+  output_schema:
+    type: object
+    properties:
+      response:
+        type: string
+        description: Full LLM output in markdown
+  tools:
+    - name: filesystem
+      source: builtin
+      description: Read files and directories in the target domain path
+    - name: getConfluencePage
+      source: interop
+      service: atlassian-confluence
+      description: Fetch BIE architecture pages from Confluence
+  prompts:
+    task: prompts/task.md
+    references:
+      - references/four-facet-architecture.md
+      - references/design-deliverables.md
+      - references/review-checklist.md
+      - references/confluence-pages.md
+  execution:
+    timeout_seconds: 180
+    max_llm_calls: 10
+    max_tool_calls: 20

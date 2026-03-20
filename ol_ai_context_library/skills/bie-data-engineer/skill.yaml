@@ -1,0 +1,49 @@
+apiVersion: ol.ai/v1
+kind: Skill
+metadata:
+  name: bie-data-engineer
+  version: "1.0.0"
+  description: Implement an approved BIE domain ontology model using the three-tier construction pattern
+  category: TASK
+  tags: [bie, implementation, factory, bclearer]
+spec:
+  model:
+    default: claude-sonnet-4-6
+    allowed: [claude-sonnet-4-6, gpt-4o, claude-opus-4-6]
+  input_schema:
+    type: object
+    required: [mode]
+    properties:
+      mode:
+        type: string
+        enum: [implement, migrate, review]
+      target_path:
+        type: string
+        description: Local filesystem path to the domain implementation directory
+      ontology_model:
+        type: string
+        description: Approved ontology model from bie-domain-ontologist (markdown, implement mode)
+      domain_description:
+        type: string
+        description: Brief description of the domain being implemented
+  output_schema:
+    type: object
+    properties:
+      response:
+        type: string
+        description: Full LLM output in markdown
+  tools:
+    - name: filesystem
+      source: builtin
+      description: Read and write files in the target domain path
+    - name: bash
+      source: builtin
+      description: Run pytest, mypy, ruff to verify the implementation
+  prompts:
+    task: prompts/task.md
+    references:
+      - references/implementation-guide.md
+  execution:
+    timeout_seconds: 300
+    max_llm_calls: 20
+    max_tool_calls: 40
