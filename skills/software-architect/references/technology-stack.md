@@ -1,10 +1,14 @@
 # Technology Stack Reference
 
-This document describes the bclearer libraries available for use in solutions, their capabilities, and when to choose each.
+This document describes the libraries available for use in solutions, their capabilities, and when to choose each.
+
+> **Platform Note:** Python is the reference implementation platform. All library categories below have Python implementations in the bclearer stack. For other target platforms (JavaScript/TypeScript, C#, Rust), equivalent libraries must be constructed following the same architectural principles. Where a platform-specific equivalent does not yet exist, its construction should be included in the solution development plan.
 
 ---
 
-## Library Overview
+## Python Reference Stack
+
+### Library Overview
 
 | Library | Package Root | Purpose |
 |---------|-------------|---------|
@@ -14,7 +18,7 @@ This document describes the bclearer libraries available for use in solutions, t
 
 ---
 
-## bnop — Upper Ontology
+### bnop — Upper Ontology
 
 **Location:** `/home/khanm/bclearer/ol_bclearer_pdk/libraries/ontology/`
 
@@ -37,7 +41,7 @@ This document describes the bclearer libraries available for use in solutions, t
 
 ---
 
-## interop_services — Data I/O
+### interop_services — Data I/O
 
 **Location:** `/home/khanm/bclearer/ol_bclearer_pdk/libraries/interop_services/`
 
@@ -65,7 +69,7 @@ This document describes the bclearer libraries available for use in solutions, t
 
 ---
 
-## orchestration_services — Pipelines and Identification
+### orchestration_services — Pipelines and Identification
 
 **Location:** `/home/khanm/bclearer/ol_bclearer_pdk/libraries/orchestration_services/`
 
@@ -111,6 +115,38 @@ from bclearer_core.bie.top.bie_base_identities import BieBaseIdentities, create_
 
 ---
 
+## UI Library
+
+UI elements are Infrastructure layer components and must not carry domain logic.
+
+| Platform | Library | Status |
+|----------|---------|--------|
+| Python (and general) | [`ol_ui_library`](https://github.com/OntoLedgy/ol_ui_library) | Reference implementation — pending clean-coding refactor |
+| JavaScript / TypeScript | TBD — to be constructed following ol_ui_library principles | Not yet available |
+| C# | TBD — to be constructed following ol_ui_library principles | Not yet available |
+| Rust | TBD — to be constructed following ol_ui_library principles | Not yet available |
+
+When a solution requires UI components on a platform without an existing library, the construction of that UI library should be included as an explicit phase in the solution development plan.
+
+---
+
+## Cross-Platform Equivalents
+
+When designing solutions for non-Python platforms, each bclearer library category requires an equivalent. Use this as a planning checklist:
+
+| Capability | Python Reference | Required for Other Platforms |
+|------------|-----------------|------------------------------|
+| Upper ontology objects | `bnop` | Equivalent BORO object model library |
+| BIE identity | `orchestration_services.identification_services` | Deterministic identity library |
+| File / DB I/O | `interop_services` | Platform-specific adapter library |
+| Pipeline orchestration | `orchestration_services` | Pipeline / workflow library |
+| Logging | `orchestration_services.logging_service` | Structured logging library |
+| UI components | `ol_ui_library` | Platform UI component library |
+
+If a required equivalent does not exist, flag it as a dependency in the solution development plan and include a phase to build it.
+
+---
+
 ## Decision Guide
 
 Use this to choose the right library for a given concern:
@@ -128,3 +164,4 @@ Use this to choose the right library for a given concern:
 | File metadata/snapshot | `orchestration_services` → `file_system_snapshot_service` |
 | Distributed data (Spark) | `interop_services` → `pyspark_service` |
 | Canonical BIE example | `orchestration_services` → `file_system_snapshot_service` |
+| UI / dashboard | `ol_ui_library` (Python) or platform equivalent |
