@@ -91,14 +91,27 @@ See `references/implementation-templates.md` for templates.
 #### 3.5 Domain Object Classes
 
 Create classes extending `BieDomainObjects` (or a domain-specific base class). Each class:
-1. Implements `_create_vector()` (abstract from `BieObjects`) which constructs and returns the identity vector
-2. Calls `super().__init__(identity_vector=vector)` — `BieObjects.__init__` extracts `bie_hr_name`, `bie_type`, and computes `bie_id` from the vector automatically
+1. Stores all domain-specific attributes as instance variables
+2. Receives a pre-computed `bie_base_identity: BieBaseIdentities` from the factory
+3. Calls `super().__init__(bie_base_identity=bie_base_identity)` — `BieObjects.__init__` extracts `bie_hr_name`, `bie_type`, and `bie_id` from it
+
+Domain objects do NOT compute their identity — that is the factory's responsibility. There is no `_create_vector()` method.
 
 See `references/implementation-templates.md` for the template.
 
-#### 3.6 Registration Helper Functions
+#### 3.6 Factory Functions
 
-Create helper functions that use `EntityBieIdRequest` and `RelationBieIdRequest` frozen dataclasses to register objects, type-instance relations, and domain relations via `bie_infrastructure_registry.create_and_register_bie_id()`. See `references/implementation-templates.md` for the template.
+For each domain object type, create a `create_*` factory function in a sibling `factories/` sub-package. Each factory:
+1. Builds the identity vector places (`NamedTuple`)
+2. Constructs the `CommonIdentityVector` subclass
+3. Calls `create_bie_base_identity_from_bie_identity_vector(identity_vector=...)` to get a `BieBaseIdentities`
+4. Constructs the domain object, passing `bie_base_identity`
+5. Registers via `bie_id_registerer.register_bie_id(bie_base_identity=bie_base_identity)`
+6. Registers relations via `bie_id_registerer.issue_and_register_bie_id(request=RelationBieIdRequest(...))`
+
+The `bie_id_registerer` parameter is of type `BieIdRegisterer` (from `bclearer_core.infrastructure.session.bie_id_registerers.bie_id_registerer`). Use `NoOpBieIdRegisterer` in unit tests.
+
+See `references/implementation-templates.md` for the template.
 
 #### 3.7 Universe/Orchestration Integration
 
@@ -140,6 +153,9 @@ List gaps in checklist order. At the end, summarize: total gaps found, and how m
 
 These already exist in the foundation layer. Do NOT recreate them:
 
+- `BieBaseIdentities` — Frozen dataclass bundling `bie_id`, `bie_type`, `bie_hr_name`
+- `create_bie_base_identity_from_bie_identity_vector()` — Factory helper that computes `bie_id` from an identity vector and returns a `BieBaseIdentities`
+- `BieIdRegisterer` / `NoOpBieIdRegisterer` — Registration wrapper (`register_bie_id`, `issue_and_register_bie_id`); `NoOpBieIdRegisterer` is for unit tests
 - `BieIdCreationFacade` — Identity creation API
 - `BieIdRegistries` / `BieInfrastructureRegistries` — Registration infrastructure
 - `BieIdUniverses` — Universe base class
@@ -167,10 +183,13 @@ After implementation, verify:
 - [ ] Each creator module implements the three-tier pattern (create/calculate/issue)
 - [ ] Each creator has a public `issue_*` function that creates `EntityBieIdRequest` and calls `create_and_register_bie_id()` — the issue tier must exist, not just create/calculate
 - [ ] Creator functions use `BieIdCreationFacade.create_bie_id_from_identity_vector()` (not direct hash methods)
-- [ ] Registration uses `EntityBieIdRequest`/`RelationBieIdRequest` with `create_and_register_bie_id()` — the older `register_bie_object_and_type_instance()` and `register_bie_relation()` APIs are NOT the canonical pattern; do not use them
-- [ ] Each domain object class implements `_create_vector()` and calls `super().__init__(identity_vector=vector)` — does NOT pass `bie_id`, `base_hr_name`, or `bie_type` separately
+- [ ] Each domain object type has a `create_*` factory function in a `factories/` sub-package
+- [ ] Each factory follows the pattern: places → identity vector → `create_bie_base_identity_from_bie_identity_vector()` → domain object → `bie_id_registerer.register_bie_id()`
+- [ ] Factory functions accept `bie_id_registerer: BieIdRegisterer` (not `BieInfrastructureRegistries` directly)
+- [ ] Each domain object class receives `bie_base_identity: BieBaseIdentities` and calls `super().__init__(bie_base_identity=bie_base_identity)` — does NOT implement `_create_vector()`, does NOT pass `bie_id`, `base_hr_name`, or `bie_type` separately
+- [ ] Registration uses `bie_id_registerer.register_bie_id(bie_base_identity=...)` for objects and `bie_id_registerer.issue_and_register_bie_id(request=RelationBieIdRequest(...))` for relations — the older `register_bie_object_and_type_instance()`, `register_bie_relation()`, and direct `create_and_register_bie_id()` APIs are NOT the canonical pattern
 - [ ] Parts are constructed before wholes (matches construction order from ontology)
 - [ ] Construction order is documented in the identity vectors module or domain module docstring
-- [ ] All relation types from the ontology are registered as bie_id_tuples
+- [ ] All relation types from the ontology are registered via `RelationBieIdRequest`
 - [ ] Code style matches `references/code-style.md`
 - [ ] All imports use full package paths

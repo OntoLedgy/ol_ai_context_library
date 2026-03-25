@@ -26,7 +26,7 @@ The BIE framework has a **four-facet architecture** (Foundation/Domain x Model/I
 Key principles:
 - **Deterministic identity** — Same inputs always produce the same BIE ID
 - **Implementation-independent identifiers** — Identity is derived from component properties, not storage details
-- **Construction is registration** — Objects compute their bie_id and register during `__init__`
+- **Construction and registration are decoupled** — Domain objects are passive receivers of a pre-computed `BieBaseIdentities`; factory functions own identity construction (`places → vector → BieBaseIdentities`) and registration (`bie_id_registerer.register_bie_id(...)`)
 - **Two fundamental kinds** — BIE Objects (entities with bie_ids) and BIE Relations (bie_id_tuples linking entities)
 - **Two-step domain typing** — Identity composition is two-step: (1) hash raw inputs (places) to get base bie_id, (2) facade composes with `type.item_bie_identity` automatically when `bie_domain_type` is non-None
 - **Parts before wholes** — Leaf entities must be constructed before their composites
