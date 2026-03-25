@@ -253,6 +253,53 @@ All grounded in existing standards at `prompts/coding/standards/`:
 
 ---
 
+## Refactoring Workflow
+
+The skill set supports a complete refactoring workflow for dirty code. Apply steps
+in order — skipping early steps produces lower quality results.
+
+```
+Step 1: ARCHITECTURAL REVIEW
+  software-architect (Review Mode)
+  → reads existing code
+  → produces: gap analysis + target architecture design
+  → use when: wrong structure, missing abstractions, wrong dependency direction
+
+Step 2: CODE-LEVEL VIOLATION SCAN
+  [language]-data-engineer (Review Mode)  OR  clean-code-reviewer
+  → reads same code
+  → produces: violation report (HIGH/MEDIUM/LOW, with suggested fixes)
+  → use when: function size, naming, error handling, smells
+
+Step 3: STRUCTURAL REFACTOR (if Step 1 found issues)
+  [language]-data-engineer (Implement Mode)
+  → input: architect's target design from Step 1
+  → implements structural changes (module layout, class splits, dependency inversion)
+  → does NOT fix code-level violations — leave those for Step 4
+
+Step 4: CODE-LEVEL REFACTOR (if Step 2 found violations)
+  clean-code-refactor
+  → input: violation report from Step 2 (or re-scan after Step 3)
+  → fixes: function size, naming, error patterns, smells
+  → flags anything structural it cannot fix (those go back to Step 3)
+
+Step 5: VERIFY
+  Run language quality gates (ruff+mypy+pytest / tsc+eslint+vitest / dotnet / cargo clippy+test)
+  Re-run clean-code-reviewer to confirm violations resolved
+```
+
+**Shortcut for code-only dirty code (no architectural issues):**
+```
+clean-code-reviewer → clean-code-refactor → verify
+```
+
+**Shortcut for architectural-only problems (structure is wrong, code style is fine):**
+```
+software-architect (Review Mode) → [language]-data-engineer (Implement Mode) → verify
+```
+
+---
+
 ## Implementation Order
 
 ### Phase 1 — Foundation (complete)
@@ -261,20 +308,24 @@ All grounded in existing standards at `prompts/coding/standards/`:
 2. `data-engineer` — **DONE** (SKILL.md + 2 references)
 3. `bclearer-pipeline-architect` — **DONE** (skeleton — 4 references, TODOs to populate)
 4. `bclearer-pipeline-engineer` — **DONE** (skeleton — 4 references, TODOs to populate)
+5. `python-data-engineer` — **DONE** (SKILL.md + 3 references)
+6. `javascript-data-engineer` — **DONE** (SKILL.md + 3 references)
+7. `csharp-data-engineer` — **DONE** (SKILL.md + 3 references)
+8. `rust-data-engineer` — **DONE** (SKILL.md + 3 references)
 
-### Phase 2 — Core clean coding pair (highest ROI)
+### Phase 2 — Core clean coding pair (complete)
 
-5. `clean-code-reviewer` — establishes baseline; other skills build on its output
-6. `clean-code-refactor` — acts on reviewer output; completes the detect-and-fix loop
+9. `clean-code-reviewer` — **DONE** (SKILL.md + report template + 4 language refs)
+10. `clean-code-refactor` — **DONE** (SKILL.md + change summary template + 4 language refs)
 
 ### Phase 3 — High-frequency standalone
 
-7. `clean-code-naming` — high daily use; narrow scope, easy to validate
-8. `clean-code-tests` — critical for quality gates; ties into existing testing standards
+11. `clean-code-naming` — high daily use; narrow scope, easy to validate
+12. `clean-code-tests` — critical for quality gates; ties into existing testing standards
 
 ### Phase 4 — Workflow integration
 
-9. `clean-code-commit` — narrow scope; CI/CD integration point
+13. `clean-code-commit` — narrow scope; CI/CD integration point
 
 ### Phase 5 — Fill bclearer skeletons (ongoing)
 
