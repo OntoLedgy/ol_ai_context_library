@@ -41,6 +41,17 @@ Package: `bclearer_core.bie`
 |-------|----------------------------------|
 | BieObjects | `top.bie_objects` |
 | BieDomainObjects | `domain.bie_domain_objects` |
+| BieBaseIdentities | `top.bie_base_identities` |
+| create_bie_base_identity_from_bie_identity_vector | `top.bie_base_identities` |
+
+### Registration Helpers
+
+Package: `bclearer_core.infrastructure.session`
+
+| Class | Module path (relative to package) |
+|-------|----------------------------------|
+| BieIdRegisterer | `bie_id_registerers.bie_id_registerer` |
+| NoOpBieIdRegisterer | `bie_id_registerers.bie_id_registerer` |
 
 ## File System Snapshot Domain Reference (canonical implementation example)
 
@@ -52,12 +63,14 @@ Package: `bclearer_orchestration_services.file_system_snapshot_service.universe`
 | `bie/bie_id_creators/file_system_snapshot_identity_vectors.py` | Identity vectors (NamedTuple places + `CommonIdentityVector` subclasses) |
 | `bie/bie_id_creators/file_system_snapshot_object_bie_id_creator.py` | Three-tier creator (create/calculate/issue) |
 | `bie/bie_id_creators/file_reference_number_extended_object_bie_id_creator.py` | Three-tier creator for extended object |
-| `bie/bie_ids_registerers/snapshot_bie_ids_registerer.py` | Registration helpers (EntityBieIdRequest/RelationBieIdRequest) |
-| `bie/bie_ids_registerers/fssu_domain_bie_ids_registerer.py` | Domain-level registration orchestration |
-| `objects/snapshots/file_system_snapshot_objects.py` | Domain object class |
-| `objects/snapshots/individual_file_system_snapshot_objects.py` | Concrete domain object with bie_id creation |
-| `objects/extended/file_reference_numbers.py` | Extended object (attribute object) |
+| `objects/snapshots/file_system_snapshot_objects.py` | Domain object base class |
+| `objects/snapshots/individual_file_system_snapshot_objects.py` | Domain object — receives `bie_base_identity`, no `_create_vector()` |
+| `objects/snapshots/individual_file_system_snapshot_files.py` | Concrete domain object — receives `bie_base_identity` |
+| `objects/snapshots/factories/individual_file_system_snapshot_files_factory.py` | Factory — places → vector → BieBaseIdentities → object → register |
+| `objects/extended/file_reference_numbers.py` | Extended object — receives `bie_base_identity` |
+| `objects/extended/factories/file_reference_numbers_factory.py` | Factory for extended object |
 | `objects/verses/file_system_snapshot_universes.py` | Universe setup and orchestration |
+| `objects/verses/factories/file_system_snapshot_universes_factory.py` | Universe factory |
 
 ## Documentation
 
