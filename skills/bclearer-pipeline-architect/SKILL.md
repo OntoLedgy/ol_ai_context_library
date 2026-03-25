@@ -6,7 +6,6 @@ description: >
   patterns. Use when: designing a new bclearer pipeline or reviewing an existing one
   for alignment with bclearer architectural conventions. Produces architecture designs
   for approval and documents findings in Confluence.
-extends: software-architect
 ---
 
 # bclearer Pipeline Architect

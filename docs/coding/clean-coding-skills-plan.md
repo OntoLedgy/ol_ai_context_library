@@ -14,11 +14,13 @@ Sub-skills are tools a role *uses*. Inheriting roles are specialisations of the 
 
 ## Inheritance Design Decision
 
-> **Decision:** bclearer pipeline roles inherit from general roles; they do not become sub-skills.
+> **Decision:** bclearer pipeline roles and language-specific roles inherit from general roles; they do not become sub-skills.
 
-**Rationale:** A bclearer pipeline architect IS a software architect (same modes, same deliverable format, same design philosophy) — it extends the persona with bclearer pipeline knowledge. Sub-skills are tools with a narrow scope (e.g. `clean-code-reviewer`). The "IS A" vs "USES A" distinction maps directly to role inheritance vs sub-skill delegation.
+**Rationale:** A bclearer pipeline architect IS a software architect (same modes, same deliverable format, same design philosophy) — it extends the persona with bclearer pipeline knowledge. A `python-data-engineer` IS a `data-engineer` — it extends the persona with Python-specific conventions. Sub-skills are tools with a narrow scope (e.g. `clean-code-reviewer`). The "IS A" vs "USES A" distinction maps directly to role inheritance vs sub-skill delegation.
 
-**Inheritance mechanism:** Each child `SKILL.md` declares `extends: [parent]` in its frontmatter and opens with: *"Read `skills/[parent]/SKILL.md` first and follow all of it. This file contains only the additions and overrides."* No duplication of parent content.
+**Inheritance mechanism:** Each child `SKILL.md` opens with: *"Read `skills/[parent]/SKILL.md` first and follow all of it. This file contains only the additions and overrides."* No duplication of parent content.
+
+Note: the `extends:` frontmatter field is not supported by the skill loader. The inheritance relationship is expressed in the `description` field and in the body text only.
 
 **Precedent:** `bie-component-ontologist` and `bie-data-engineer` already follow this pattern implicitly — they are now formally classified as inheriting roles.
 
@@ -38,7 +40,7 @@ skills/
 │       └── confluence-pages.md            (where to document designs)
 │
 ├── bclearer-pipeline-architect/           ← TIER 2: Inherits software-architect
-│   ├── SKILL.md                           (extends: software-architect)
+│   ├── SKILL.md
 │   └── references/
 │       ├── pipeline-patterns.md           (stage topology, universe wiring)
 │       ├── interop-conventions.md         (which services in which contexts)
@@ -48,28 +50,63 @@ skills/
 ├── bie-component-ontologist/              ← TIER 2: Inherits software-architect (implicit)
 │   └── ...                                (BIE component ontology design)
 │
-├── data-engineer/                         ← TIER 1: General implementation role
+├── data-engineer/                         ← TIER 1: General implementation role (language-agnostic)
 │   ├── SKILL.md
 │   └── references/
 │       ├── clean-coding-index.md          (map: concern → standard document)
 │       └── testing-index.md               (testing philosophy, structure, quality gates)
 │
-├── bclearer-pipeline-engineer/            ← TIER 2: Inherits data-engineer
-│   ├── SKILL.md                           (extends: data-engineer)
+├── python-data-engineer/                  ← TIER 2: Inherits data-engineer
+│   ├── SKILL.md
+│   └── references/
+│       ├── language-standards.md          (PEP 8, type hints, naming, idioms)
+│       ├── tooling.md                     (ruff, mypy, pytest, pyproject.toml)
+│       └── patterns.md                    (context managers, dataclasses, generators, protocols)
+│
+├── javascript-data-engineer/              ← TIER 2: Inherits data-engineer
+│   ├── SKILL.md
+│   └── references/
+│       ├── language-standards.md          (TypeScript conventions, type system, modules)
+│       ├── tooling.md                     (eslint, prettier, tsc, vitest)
+│       └── patterns.md                    (async/await, Result type, DI, functional)
+│
+├── csharp-data-engineer/                  ← TIER 2: Inherits data-engineer
+│   ├── SKILL.md
+│   └── references/
+│       ├── language-standards.md          (C# naming, records, nullable, LINQ, async)
+│       ├── tooling.md                     (dotnet CLI, xUnit, Roslyn, .editorconfig)
+│       └── patterns.md                    (Result, DI, Options pattern, async streams)
+│
+├── rust-data-engineer/                    ← TIER 2: Inherits data-engineer
+│   ├── SKILL.md
+│   └── references/
+│       ├── language-standards.md          (ownership, borrowing, traits, naming)
+│       ├── tooling.md                     (cargo, clippy, rustfmt, tarpaulin)
+│       └── patterns.md                    (Result/Option, builder, newtype, iterators, async)
+│
+├── bclearer-pipeline-engineer/            ← TIER 3: Inherits python-data-engineer
+│   ├── SKILL.md
 │   └── references/
 │       ├── pipeline-implementation.md     (stage file layout, class/function conventions)
-│       ├── bclearer-code-style.md         (overrides general style for bclearer conventions)
+│       ├── bclearer-code-style.md         (overrides Python style for bclearer conventions)
 │       └── bie-integration.md             (when/how to delegate to bie-data-engineer)
 │
-├── bie-data-engineer/                     ← TIER 2: Inherits data-engineer (implicit)
+├── bie-data-engineer/                     ← TIER 3: Inherits python-data-engineer (implicit)
 │   └── ...                                (BIE domain implementation)
 │
-├── clean-code-reviewer/                   ← TIER 3 Sub-skill: Detect violations
-├── clean-code-refactor/                   ← TIER 3 Sub-skill: Fix violations
-├── clean-code-naming/                     ← TIER 3 Sub-skill: Naming focus
-├── clean-code-tests/                      ← TIER 3 Sub-skill: Test generation/review
-└── clean-code-commit/                     ← TIER 3 Sub-skill: Commit messages
+├── clean-code-reviewer/                   ← Sub-skill: Detect violations
+├── clean-code-refactor/                   ← Sub-skill: Fix violations
+├── clean-code-naming/                     ← Sub-skill: Naming focus
+├── clean-code-tests/                      ← Sub-skill: Test generation/review
+└── clean-code-commit/                     ← Sub-skill: Commit messages
 ```
+
+**Inheritance chain for bclearer pipeline work:**
+```
+data-engineer → python-data-engineer → bclearer-pipeline-engineer
+```
+
+**Language tier** sits at Tier 2, between the language-agnostic `data-engineer` and any platform-specific engineer (bclearer, etc.). Each language skill adds: naming conventions, error handling idioms, tooling, and language-specific patterns.
 
 ---
 

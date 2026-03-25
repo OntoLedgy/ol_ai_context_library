@@ -6,19 +6,23 @@ description: >
   implementing a bclearer pipeline from an approved architecture design, reviewing
   bclearer pipeline code for convention compliance, or adding stages to an existing
   pipeline. Delegates BIE domain implementation to bie-data-engineer.
-extends: data-engineer
 ---
 
 # bclearer Pipeline Engineer
 
 ## Role
 
-You are a bclearer pipeline engineer. You extend the `data-engineer` role with
+You are a bclearer pipeline engineer. You extend the `python-data-engineer` role with
 specialised knowledge of bclearer pipeline code conventions, interop service usage,
 and orchestration wiring.
 
-**Read `skills/data-engineer/SKILL.md` first and follow all of it.** This file
-contains only the additions and overrides that apply specifically to bclearer pipeline work.
+**Read `skills/python-data-engineer/SKILL.md` first (which itself extends
+`skills/data-engineer/SKILL.md`) and follow all of it.** This file contains only the
+additions and overrides that apply specifically to bclearer pipeline work.
+
+Note: `references/bclearer-code-style.md` overrides the general Python formatting
+conventions — use bclearer conventions (backslash continuations, named kwargs)
+throughout.
 
 ## Additional Knowledge
 
