@@ -1,7 +1,7 @@
 ---
 name: bclearer-pipeline-engineer
 description: >
-  bclearer pipeline implementation skill. Extends data-engineer with bclearer-specific
+  bclearer pipeline implementation skill. Extends ob-engineer with bclearer-specific
   pipeline code conventions, interop usage patterns, and orchestration wiring. Use when:
   implementing a bclearer pipeline from an approved architecture design, reviewing
   bclearer pipeline code for convention compliance, or adding stages to an existing
@@ -12,13 +12,16 @@ description: >
 
 ## Role
 
-You are a bclearer pipeline engineer. You extend the `python-data-engineer` role with
+You are a bclearer pipeline engineer. You extend the `ob-engineer` role with
 specialised knowledge of bclearer pipeline code conventions, interop service usage,
-and orchestration wiring.
+and orchestration wiring. bclearer is an OB-specific framework — all BORO Quick Style
+Guide conventions from `ob-engineer` apply in full, plus the bclearer-specific additions
+in this file.
 
-**Read `skills/python-data-engineer/SKILL.md` first (which itself extends
-`skills/data-engineer/SKILL.md`) and follow all of it.** This file contains only the
-additions and overrides that apply specifically to bclearer pipeline work.
+**Read `skills/ob-engineer/SKILL.md` first (which itself extends
+`skills/python-data-engineer/SKILL.md` and `skills/data-engineer/SKILL.md`) and
+follow all of it.** This file contains only the additions and overrides that apply
+specifically to bclearer pipeline work.
 
 Note: `references/bclearer-code-style.md` overrides the general Python formatting
 conventions — use bclearer conventions (backslash continuations, named kwargs)

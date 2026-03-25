@@ -1,13 +1,24 @@
-# BORO Clean Coding Skills — Plan
+# OB (Ontoledgy/BORO) Skills — Plan
 
 ## Context
 
-BORO has a mature, internally documented clean coding approach used on bCLEARer projects. This is captured in the `BORO Coding` section of the SDS Confluence space. The goal is to build two specialised skills that embed these BORO-specific coding conventions:
+BORO has a mature, internally documented clean coding approach used on bCLEARer projects. This is captured in the `BORO Coding` section of the SDS Confluence space. Ontoledgy shares the same BORO coding conventions but targets a different platform library set.
 
-- **`boro-software-architect`** — extends the existing `software-architect` skill with BORO coding conventions applied at the architectural design level (module naming, orchestration patterns, interface contracts, configuration layers)
-- **`boro-software-engineer`** — extends the existing `python-data-engineer` skill with BORO Quick Style Guide as the implementation standard
+The goal is to build two generic **OB** skills that cover both variants:
 
-These skills do NOT replace the existing skills. They sit above them in the inheritance hierarchy as BORO-flavoured specialisations.
+- **`ob-architect`** — extends the existing `software-architect` skill with BORO coding conventions applied at the architectural design level (module naming, orchestration patterns, interface contracts, configuration layers); reads `ob-library-selection.md` to determine which platform libraries apply
+- **`ob-engineer`** — extends the existing `python-data-engineer` skill with BORO Quick Style Guide as the implementation standard; reads `ob-library-selection.md` to determine which platform libraries apply
+
+### Variant Distinction
+
+| Variant | Platform Libraries | When to use |
+|---------|-------------------|-------------|
+| **BORO** | `nf_common` (`Files`, `Folders`, general utilities) | Code that lives in a BORO/bCLEARer project |
+| **Ontoledgy** | `bclearer_pdk`, `ai`, `ui` | Code that lives in the Ontoledgy codebase |
+
+The coding conventions (naming, layout, structure, error handling) are identical across both variants. Only the platform library references differ. The `ob-library-selection.md` reference file is the single place that captures this mapping — both skills read it before writing or reviewing code.
+
+These skills do NOT replace the existing skills. They sit above them in the inheritance hierarchy and fill the **Ontology scope gap** in the SKILL-ARCHITECTURE facet matrix.
 
 **Sources (Confluence pages):**
 - `6495863472` — BORO Clean Coding Quick Style Guide ← primary source
@@ -122,10 +133,18 @@ All principles extracted from the Confluence pages, organised by category.
 
 ### 1.8 Library Usage
 
-| Rule | BORO Standard |
-|------|--------------|
-| File/folder operations | Use `nf_common` `Files` and `Folders` classes |
-| General functions | **Check `nf_common` first** before writing new ones |
+The platform library to use depends on the active variant. Always read `ob-library-selection.md` first to confirm the correct libraries for the current codebase.
+
+| Rule | BORO variant | Ontoledgy variant |
+|------|-------------|-------------------|
+| File/folder operations | `nf_common` `Files` and `Folders` classes | `bclearer_pdk` equivalents |
+| General utility functions | **Check `nf_common` first** before writing new ones | **Check `bclearer_pdk`, `ai`, `ui` first** |
+| Platform dependency declaration | `nf_common` in requirements | `bclearer_pdk`, `ai`, `ui` in requirements |
+
+The following rules apply to **both** variants:
+
+| Rule | Standard |
+|------|---------|
 | Import style | **Explicit only**: `from file import class/method/constant` |
 | Wildcard imports | Forbidden: `from x import *` |
 | Folder imports | Forbidden: `import folder_a.folder_b` |
@@ -256,22 +275,25 @@ Architectural components have internal hierarchies. The public interface hides i
 
 BORO coding principles, applied at the implementation level, define the `boro-software-engineer` standard.
 
-### 3.1 BORO vs. `python-data-engineer` — Key Differences
+### 3.1 OB vs. `python-data-engineer` — Key Differences
 
-| Dimension | `python-data-engineer` | BORO overrides / adds |
-|-----------|----------------------|----------------------|
-| Line length | PEP8 79 chars | **20 chars** |
-| File structure | One responsibility per file | **One public function per file** |
-| Private methods | `_single_underscore` | **`__double_underscore`** |
-| Named parameters | Best practice | **Mandatory** — use `*` to enforce |
-| Type annotations | Encouraged | **Mandatory** — all params + return types |
-| Strings | No hardcoding | **Mandatory enum/constant pattern** |
-| Import style | Clean imports | **Explicit only** — no folder imports, no `*` |
-| Library reuse | General DRY | **Check `nf_common` first** |
-| File naming | Descriptive | **Actor names** aligned with public function |
-| Orchestration | General pattern | **`orchestrate_*()` in `*_orchestrator.py`** |
-| Exception handling | Use exceptions | **Specific exceptions only** |
-| Comments | Minimal | **None** — code must be self-documenting |
+The coding convention overrides are identical for both BORO and Ontoledgy. The only difference is the platform library column.
+
+| Dimension | `python-data-engineer` | OB overrides / adds | BORO library | Ontoledgy library |
+|-----------|----------------------|----------------------|--------------|-------------------|
+| Line length | PEP8 79 chars | **20 chars** | — | — |
+| File structure | One responsibility per file | **One public function per file** | — | — |
+| Private methods | `_single_underscore` | **`__double_underscore`** | — | — |
+| Named parameters | Best practice | **Mandatory** — use `*` to enforce | — | — |
+| Type annotations | Encouraged | **Mandatory** — all params + return types | — | — |
+| Strings | No hardcoding | **Mandatory enum/constant pattern** | — | — |
+| Import style | Clean imports | **Explicit only** — no folder imports, no `*` | — | — |
+| Library reuse | General DRY | **Check platform library first** | `nf_common` | `bclearer_pdk`, `ai`, `ui` |
+| File/folder ops | stdlib / os | **Use platform library classes** | `nf_common.Files` / `Folders` | `bclearer_pdk` equivalents |
+| File naming | Descriptive | **Actor names** aligned with public function | — | — |
+| Orchestration | General pattern | **`orchestrate_*()` in `*_orchestrator.py`** | — | — |
+| Exception handling | Use exceptions | **Specific exceptions only** | — | — |
+| Comments | Minimal | **None** — code must be self-documenting | — | — |
 
 ### 3.2 BORO Engineer Implementation Checklist
 
@@ -326,28 +348,34 @@ BORO coding principles, applied at the implementation level, define the `boro-so
 
 ### New Skills in the Taxonomy
 
+Both skills use the **Ontology scope** — they fill the `Ontology × all languages` gap identified in `SKILL-ARCHITECTURE.md`. The `:ob` suffix in the canonical address signals the OB variant of the base role.
+
 | Skill | Mode | Role | Scope | Language | Inherits From |
 |-------|------|------|-------|----------|---------------|
-| `boro-software-architect` | Design | Architect | Solution | Agnostic | `software-architect` |
-| `boro-software-engineer` | Implement | Engineer | Solution | Python | `python-data-engineer` |
+| `ob-architect` | Design | Architect | Ontology | Agnostic | `software-architect` |
+| `ob-engineer` | Implement | Engineer | Ontology | Python | `python-data-engineer` |
 
 ### Inheritance Position
 
 ```
 software-architect
-    └── boro-software-architect      ← adds BORO coding conventions to design output
+    └── ob-architect           ← fills architect:design:ontology:agnostic gap
+                                 adds BORO conventions + ob-library-selection dispatch
 
 data-engineer
     └── python-data-engineer
-            └── boro-software-engineer   ← adds BORO Quick Style Guide as coding standard
+            └── ob-engineer        ← fills engineer:implement:ontology:python gap
+                                     adds BORO Quick Style Guide + ob-library-selection dispatch
+                    └── bclearer-pipeline-engineer   ← bclearer is an OB framework;
+                                                       inherits ob-engineer, not py-data-engineer
 ```
 
 ### Canonical Facet Addresses
 
-| Skill | Address |
-|-------|---------|
-| `boro-software-architect` | `architect:design:solution:agnostic:boro` |
-| `boro-software-engineer` | `engineer:implement:solution:python:boro` |
+| Skill | Canonical Address |
+|-------|------------------|
+| `ob-architect` | `architect:design:ontology:agnostic` |
+| `ob-engineer` | `engineer:implement:ontology:python` |
 
 ---
 
@@ -380,37 +408,83 @@ data-engineer
 
 ## Part 6: Files to Create
 
-### `boro-software-architect`
+### Shared reference: `ob-library-selection.md`
+
+Both `ob-architect` and `ob-engineer` read this file at the start of every session. It is the single source of truth for variant → library mapping.
 
 ```
-skills/boro-software-architect/
+skills/ob-architect/references/ob-library-selection.md
+skills/ob-engineer/references/ob-library-selection.md
+```
+
+> Both skills carry their own copy (or symlink). Content is identical — kept in sync manually.
+
+**`ob-library-selection.md` content structure:**
+
+```markdown
+# OB Library Selection
+
+## How to determine the active variant
+- BORO: codebase imports or depends on `nf_common`; lives in a bCLEARer project
+- Ontoledgy: codebase imports or depends on `bclearer_pdk`, `ai`, or `ui`; lives in Ontoledgy repo
+
+## BORO — Platform Libraries
+| Function | Library | Class / Function |
+|----------|---------|-----------------|
+| File operations | `nf_common` | `Files` |
+| Folder operations | `nf_common` | `Folders` |
+| General utilities | `nf_common` | (check catalogue before writing new code) |
+
+## Ontoledgy — Platform Libraries
+| Function | Library | Class / Function |
+|----------|---------|-----------------|
+| Core PDK utilities | `bclearer_pdk` | (check catalogue before writing new code) |
+| AI capabilities | `ai` | (check catalogue before writing new code) |
+| UI components | `ui` | (check catalogue before writing new code) |
+
+## Rule
+Always check the active variant's library catalogue before writing a new utility function.
+Custom code is only justified when no platform function covers the need.
+```
+
+---
+
+### `ob-architect`
+
+```
+skills/ob-architect/
 ├── SKILL.md
 └── references/
-    └── boro-coding-principles.md    ← architectural translations of BORO principles
+    ├── boro-coding-principles.md    ← architectural translations of BORO principles (Sections 2.1–2.8)
+    └── ob-library-selection.md      ← variant → platform library mapping (see above)
 ```
 
 **`SKILL.md` adds to `software-architect`:**
+- Read `ob-library-selection.md` first — determine active variant (BORO or Ontoledgy)
 - Actor-action module naming in all component designs
 - Explicit orchestration layer in every multi-step solution
 - Mandatory constants/enum layer in architecture output
 - Explicit type contracts on all component interfaces
 - Fail-fast validation gates at system boundaries
-- Platform library inventory check before designing custom components
+- Platform library inventory check before designing custom components (use active variant's library set)
 - BORO naming conventions applied to architecture diagrams and specs
 
-### `boro-software-engineer`
+### `ob-engineer`
 
 ```
-skills/boro-software-engineer/
+skills/ob-engineer/
 ├── SKILL.md
 └── references/
-    └── boro-quick-style-guide.md    ← BORO Quick Style Guide as actionable reference
+    ├── boro-quick-style-guide.md    ← BORO Quick Style Guide as actionable reference
+    └── ob-library-selection.md      ← variant → platform library mapping (see above)
 ```
 
 **`SKILL.md` adds to `python-data-engineer`:**
+- Read `ob-library-selection.md` first — determine active variant (BORO or Ontoledgy)
 - BORO Quick Style Guide as the coding standard (overrides PEP8 where they conflict)
 - All rules in Section 3.2 checklist enforced in Implement and Review modes
 - Conflict table (Section 5) included so the engineer knows which standard wins
+- Library reuse: always use active variant's platform libraries before writing custom code
 
 ---
 
@@ -418,7 +492,9 @@ skills/boro-software-engineer/
 
 After skills are created:
 1. Read both `SKILL.md` files — confirm they are self-contained and actionable
-2. Confirm inheritance is explicit (each skill names what it extends)
+2. Confirm inheritance is explicit: `ob-architect` names `software-architect`; `ob-engineer` names `python-data-engineer`
 3. Confirm `references/` files contain all source principles
-4. Update `SKILL-ARCHITECTURE.md` Skills Placement Matrix to add both new skills
-5. Confirm conflicts with existing standards are documented within each skill (no silent overrides)
+4. Confirm `ob-library-selection.md` exists in both skills' `references/` directories with identical content
+5. Update `SKILL-ARCHITECTURE.md` Skills Placement Matrix to add `ob-architect` and `ob-engineer` under the Ontology scope row
+6. Confirm conflicts with existing standards are documented within each skill (no silent overrides)
+7. Confirm `bclearer-pipeline-engineer` inheritance is updated in `SKILL-ARCHITECTURE.md` to reflect `ob-engineer` as its parent (bclearer is an OB-specific framework)

@@ -35,6 +35,9 @@ mindmap
       Naming
       Errors
       Smells
+    F6 Standard · Review and Refactor mode only
+      general
+      ob
 ```
 
 **Operation is derived, not a facet**: `Scope + Role` → Operation name.
@@ -56,12 +59,14 @@ mindmap
 | `software-architect` | Design | Architect | Solution | Agnostic | Solution Architecture |
 | `bie-component-ontologist` | Design | Architect | BIE | Agnostic | BIE Design |
 | `bclearer-pipeline-architect` | Design | Architect | Pipeline | Agnostic | Pipeline Architecture |
+| `ob-architect` | Design | Architect | Ontology | Agnostic | Ontology Architecture |
 | `data-engineer` | Implement | Engineer | Solution | Agnostic | Solution Implementation |
 | `python-data-engineer` | Implement | Engineer | Solution | Python | Solution Implementation |
 | `javascript-data-engineer` | Implement | Engineer | Solution | TypeScript | Solution Implementation |
 | `csharp-data-engineer` | Implement | Engineer | Solution | C# | Solution Implementation |
 | `rust-data-engineer` | Implement | Engineer | Solution | Rust | Solution Implementation |
 | `bie-data-engineer` | Implement | Engineer | BIE | Python | BIE Implementation |
+| `ob-engineer` | Implement | Engineer | Ontology | Python | Ontology Implementation |
 | `bclearer-pipeline-engineer` | Implement | Engineer | Pipeline | Python | Pipeline Implementation |
 | `clean-code-reviewer` | Review | Engineer | Solution | Multi | _(cross-cutting)_ |
 | `clean-code-refactor` | Refactor | Engineer | Solution | Multi | _(cross-cutting)_ |
@@ -144,20 +149,34 @@ UI                 ✓          ✓        ✓       ✓       ✓
 
 The `clean-code-reviewer` and `clean-code-refactor` skills are the dedicated, composable implementations. Embedded review modes within architect/engineer skills are implicitly full-topic reviews scoped to their domain.
 
-### Extended Canonical Address (with Topic)
+### Standard Facet (F6): `general` | `ob`
 
-When targeting a specific topic, the address extends to `[Role]:[Mode]:[Scope]:[Language]:[Topic]`:
+**Standard** is a second conditional facet — like Topic, it only applies in **Review or Refactor mode**. It controls *which convention set* the skill enforces.
+
+| Value | Convention Set | Source |
+|-------|---------------|--------|
+| `general` | Clean Code (Robert C. Martin) | `prompts/coding/standards/clean_coding/` |
+| `ob` | BORO Quick Style Guide + Clean Code base | `ob-engineer/references/boro-quick-style-guide.md` |
+
+When `standard=ob`, the skill loads the OB overrides on top of the general set. Where they conflict, OB wins (see conflict table in `boro-skills-plan.md` Part 5). Rules not covered by OB fall back to `general`.
+
+Standard defaults to `general` when omitted.
+
+### Extended Canonical Address (with Topic and Standard)
+
+Full address format: `[Role]:[Mode]:[Scope]:[Language]:[Topic]:[Standard]`
 
 | Canonical Address | Meaning |
 |---|---|
-| `engineer:review:solution:python:full` | clean-code-reviewer, all topics, Python |
-| `engineer:review:solution:python:naming` | clean-code-reviewer, naming only |
-| `engineer:review:solution:python:functions` | clean-code-reviewer, functions only |
-| `engineer:refactor:solution:python:naming` | clean-code-refactor, fix naming |
-| `engineer:refactor:solution:python:smells` | clean-code-refactor, fix smells |
-| `engineer:review:pipeline:python:errors` | pipeline engineer reviewing error handling |
+| `engineer:review:solution:python:full` | clean-code-reviewer, all topics, general standard |
+| `engineer:review:solution:python:full:ob` | clean-code-reviewer, all topics, OB conventions |
+| `engineer:review:solution:python:naming` | clean-code-reviewer, naming only, general |
+| `engineer:review:solution:python:naming:ob` | clean-code-reviewer, naming only, OB conventions |
+| `engineer:refactor:solution:python:naming:ob` | clean-code-refactor, fix naming, OB conventions |
+| `engineer:refactor:solution:python:smells` | clean-code-refactor, fix smells, general |
+| `engineer:review:pipeline:python:errors:ob` | pipeline engineer reviewing error handling, OB style |
 
-Topic defaults to `full` when omitted.
+Both Topic and Standard default to `full` / `general` when omitted.
 
 ---
 
@@ -196,13 +215,14 @@ Refactor │   structural changes    cc-refactor
               ──────────────────────────────────────────────────────────
 S  Solution   data-eng   py-eng   js-eng       cs-eng rs-eng  cc-rev
 C                                                              cc-ref
-O  Ontology   ·          ·        ·            ·      ·       ·
+O  Ontology   ob-arch†   ob-eng   ·            ·      ·       ·
 P  Pipeline   bcl-arch†  bcl-eng  ·            ·      ·       ·
 E  UI         ·          ·        ·            ·      ·       ·
    BIE        bie-ont†   bie-eng  ·            ·      ·       ·
 ──────────────────────────────────────────────────────────────────────
   † = Architect role (Design mode)
   · = gap (no skill exists for this combination)
+  Note: bcl-eng inherits from ob-eng (bclearer is an OB-specific framework)
 ```
 
 ---
@@ -215,7 +235,9 @@ flowchart TD
         SA[software-architect\nSolution]
         BCO[bie-component-ontologist\nBIE]
         BCL_A[bclearer-pipeline-architect\nPipeline]
+        OB_A[ob-architect\nOntology]
         SA -->|"extends"| BCL_A
+        SA -->|"extends"| OB_A
     end
 
     subgraph Engineer["Role: Engineer"]
@@ -225,6 +247,7 @@ flowchart TD
         CS[csharp-data-engineer\nSolution · C#]
         RS[rust-data-engineer\nSolution · Rust]
         BIE_E[bie-data-engineer\nBIE · Python]
+        OB_E[ob-engineer\nOntology · Python]
         BCL_E[bclearer-pipeline-engineer\nPipeline · Python]
 
         DE -->|"extends"| PY
@@ -232,7 +255,8 @@ flowchart TD
         DE -->|"extends"| CS
         DE -->|"extends"| RS
         DE -->|"extends"| BIE_E
-        PY -->|"extends"| BCL_E
+        PY -->|"extends"| OB_E
+        OB_E -->|"extends"| BCL_E
     end
 
     subgraph Quality["Review + Refactor modes · cross-cutting"]
@@ -244,6 +268,7 @@ flowchart TD
     SA -->|"design feeds"| DE
     BCL_A -->|"design feeds"| BCL_E
     BCO -->|"design feeds"| BIE_E
+    OB_A -->|"design feeds"| OB_E
 ```
 
 ---
@@ -259,17 +284,20 @@ Solution   │ software-        │───►│ data-engineer │───►
            └──────────────────┘    │  variants)    │    ║ clean-code-  ║
                                    └───────────────┘    ║ refactor     ║
            ┌──────────────────┐    ┌───────────────┐    ╚══════════════╝
-Ontology   │ ·                │    │ ·             │   ← scope exists,
-           └──────────────────┘    └───────────────┘     skills pending
-
-           ┌──────────────────┐    ┌───────────────┐
+Ontology   │ ob-architect     │───►│ ob-engineer   │─────────↑
+           │                  │    │ (BORO/Ontlgy) │   applies to
+           └──────────────────┘    └───────┬───────┘   all scopes
+                                           │extends
+           ┌──────────────────┐    ┌───────▼───────┐
 BIE        │ bie-component-   │───►│ bie-data-     │─────────↑
            │ ontologist       │    │ engineer      │   applies to
            └──────────────────┘    └───────────────┘   all scopes
            ┌──────────────────┐    ┌───────────────┐
 Pipeline   │ bclearer-        │───►│ bclearer-     │
            │ pipeline-arch    │    │ pipeline-eng  │
-           └──────────────────┘    └───────────────┘
+           └──────────────────┘    │ (inherits     │
+                                   │  ob-engineer) │
+                                   └───────────────┘
            ┌──────────────────┐    ┌───────────────┐
 UI         │ ·                │    │ ·             │   ← scope exists,
            └──────────────────┘    └───────────────┘     skills pending
@@ -288,13 +316,19 @@ The old "Domain" value "bclearer Pipeline" conflated scope (Pipeline) with platf
 ### 3. UI Scope Is Present but Unpopulated
 The UI scope is named in the taxonomy but has no skills yet. This makes the gap explicit and shows where the library needs to grow.
 
-### 4. Identified Gaps
+### 4. Planned Inheritance Migration (`bie-data-engineer`)
+
+`bie-data-engineer` currently inherits from `python-data-engineer`. It will eventually inherit from `ob-engineer` (BIE is an OB-specific framework, like bclearer). This change is **deferred** until `ob-engineer` is built and validated in production. `bie-data-engineer` is battle-hardened; its inheritance chain will not be touched until Phase 7 of the skills plan.
+
+The inheritance diagram above reflects the **current** state. When Phase 7 completes, `BIE_E` will move from `DE → BIE_E` to `OB_E → BIE_E`.
+
+### 5. Identified Gaps
 
 | Gap | Facet Coords | Implication |
 |---|---|---|
 | BIE × non-Python | Implement / Engineer / BIE / TypeScript, C#, Rust | BIE impl locked to Python |
 | Pipeline × non-Python | Implement / Engineer / Pipeline / TypeScript, C#, Rust | Pipeline impl locked to Python |
-| Ontology × all languages | * / * / Ontology / * | Ontology scope has no skills yet |
+| Ontology × non-Python | Implement / Engineer / Ontology / TypeScript, C#, Rust | `ob-engineer` (Python) exists; other languages still gaps |
 | UI × all | * / * / UI / * | No UI skills exist |
 | Architect:Refactor | Refactor / Architect / * | No structural refactoring skill |
 | Architect:Review (standalone) | Review / Architect / * | Architecture review is embedded, not composable |
@@ -310,12 +344,14 @@ Format: `[Role]:[Mode]:[Scope]:[Language]`
 | `architect:design:solution:*` | software-architect |
 | `architect:design:bie:*` | bie-component-ontologist |
 | `architect:design:pipeline:*` | bclearer-pipeline-architect |
+| `architect:design:ontology:*` | ob-architect |
 | `engineer:implement:solution:*` | data-engineer |
 | `engineer:implement:solution:python` | python-data-engineer |
 | `engineer:implement:solution:typescript` | javascript-data-engineer |
 | `engineer:implement:solution:csharp` | csharp-data-engineer |
 | `engineer:implement:solution:rust` | rust-data-engineer |
 | `engineer:implement:bie:python` | bie-data-engineer |
+| `engineer:implement:ontology:python` | ob-engineer |
 | `engineer:implement:pipeline:python` | bclearer-pipeline-engineer |
 | `engineer:review:solution:multi` | clean-code-reviewer |
 | `engineer:refactor:solution:multi` | clean-code-refactor |

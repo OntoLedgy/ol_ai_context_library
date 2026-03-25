@@ -50,6 +50,12 @@ skills/
 ├── bie-component-ontologist/              ← TIER 2: Inherits software-architect (implicit)
 │   └── ...                                (BIE component ontology design)
 │
+├── ob-architect/                          ← TIER 2: Inherits software-architect
+│   ├── SKILL.md
+│   └── references/
+│       ├── boro-coding-principles.md      (actor-action, orchestration, contract, fail-fast patterns)
+│       └── ob-library-selection.md        (boro: nf_common | ontoledgy: bclearer_pdk + ai + ui)
+│
 ├── data-engineer/                         ← TIER 1: General implementation role (language-agnostic)
 │   ├── SKILL.md
 │   └── references/
@@ -84,7 +90,7 @@ skills/
 │       ├── tooling.md                     (cargo, clippy, rustfmt, tarpaulin)
 │       └── patterns.md                    (Result/Option, builder, newtype, iterators, async)
 │
-├── bclearer-pipeline-engineer/            ← TIER 3: Inherits python-data-engineer
+├── bclearer-pipeline-engineer/            ← TIER 3: Inherits ob-engineer (bclearer is an OB framework)
 │   ├── SKILL.md
 │   └── references/
 │       ├── pipeline-implementation.md     (stage file layout, class/function conventions)
@@ -93,6 +99,12 @@ skills/
 │
 ├── bie-data-engineer/                     ← TIER 3: Inherits python-data-engineer (implicit)
 │   └── ...                                (BIE domain implementation)
+│
+├── ob-engineer/                           ← TIER 2: Inherits python-data-engineer
+│   ├── SKILL.md
+│   └── references/
+│       ├── boro-quick-style-guide.md      (BORO Quick Style Guide + overrides vs PEP8)
+│       └── ob-library-selection.md        (boro: nf_common | ontoledgy: bclearer_pdk + ai + ui)
 │
 ├── clean-code-reviewer/                   ← Sub-skill: Detect violations
 ├── clean-code-refactor/                   ← Sub-skill: Fix violations
@@ -103,8 +115,18 @@ skills/
 
 **Inheritance chain for bclearer pipeline work:**
 ```
-data-engineer → python-data-engineer → bclearer-pipeline-engineer
+data-engineer → python-data-engineer → ob-engineer → bclearer-pipeline-engineer
 ```
+
+> bclearer is an OB-specific framework — `bclearer-pipeline-engineer` now inherits from `ob-engineer`, not `python-data-engineer` directly. This means bclearer pipeline code inherits the full BORO Quick Style Guide and OB library conventions before adding bclearer-specific patterns on top.
+
+**Inheritance chain for OB (Ontoledgy/BORO) work:**
+```
+software-architect → ob-architect
+data-engineer → python-data-engineer → ob-engineer
+```
+
+OB skills fill the **Ontology scope gap** identified in `SKILL-ARCHITECTURE.md`. Both `ob-architect` and `ob-engineer` are variant-aware: they consult `ob-library-selection.md` to determine whether the target codebase is BORO (`nf_common`) or Ontoledgy (`bclearer_pdk + ai + ui`).
 
 **Language tier** sits at Tier 2, between the language-agnostic `data-engineer` and any platform-specific engineer (bclearer, etc.). Each language skill adds: naming conventions, error handling idioms, tooling, and language-specific patterns.
 
@@ -136,6 +158,29 @@ Design philosophy grounded in:
 
 Delegates specialised clean coding tasks to:
 - `clean-code-reviewer`, `clean-code-refactor`, `clean-code-naming`, `clean-code-tests`, `clean-code-commit`
+
+### OB Architect (`ob-architect`)
+
+Extends `software-architect`. Adds BORO coding conventions at the design level:
+- Actor-action module naming in all component designs
+- Explicit orchestration layer in every multi-step solution
+- Mandatory constants/enum configuration layer
+- Explicit type contracts on all component interfaces
+- Fail-fast validation gates at ingress boundaries
+- Platform library inventory check before designing custom components (reads `ob-library-selection.md` to determine which libraries apply)
+
+Scope: **Ontology** — fills the `architect:design:ontology:agnostic` gap in the SKILL-ARCHITECTURE matrix.
+
+### OB Engineer (`ob-engineer`)
+
+Extends `python-data-engineer`. Adds BORO Quick Style Guide as the coding standard, overriding PEP8 where they conflict. Reads `ob-library-selection.md` at the start of every session to determine the active library set.
+
+| Variant | Platform Libraries |
+|---------|-------------------|
+| BORO | `nf_common` — `Files`, `Folders`, and all general utilities |
+| Ontoledgy | `bclearer_pdk`, `ai`, `ui` libraries |
+
+Scope: **Ontology** — fills the `engineer:implement:ontology:python` gap in the SKILL-ARCHITECTURE matrix.
 
 ---
 
@@ -182,9 +227,14 @@ All grounded in existing standards at `prompts/coding/standards/`:
 | `errors` | Exception patterns, null returns/params, context in exceptions |
 | `smells` | Duplication, dead code, magic numbers, feature envy, large classes |
 
-**Input:** `mode` + `target_path` + optional `severity_threshold`
+**Input:** `mode` + `target_path` + optional `severity_threshold` + optional `standard`
 
-**Output:** Violation list — location, rule, severity (HIGH/MEDIUM/LOW), suggested fix
+| `standard` value | Convention set loaded |
+|-----------------|----------------------|
+| `general` _(default)_ | `prompts/coding/standards/clean_coding/` |
+| `ob` | OB overrides from `ob-engineer/references/boro-quick-style-guide.md` layered on top of `general`; OB wins on conflicts |
+
+**Output:** Violation list — location, rule, convention (`general` or `ob`), severity (HIGH/MEDIUM/LOW), suggested fix
 
 ---
 
@@ -200,9 +250,16 @@ All grounded in existing standards at `prompts/coding/standards/`:
 | `errors` | Convert return codes to exceptions, remove null returns/params |
 | `smells` | DRY violations, dead code removal, magic number extraction |
 
-**Input:** `mode` + `target_path` + optional `violations_report`
+**Input:** `mode` + `target_path` + optional `violations_report` + optional `standard`
 
-**Output:** Refactored file(s) with change summary (each change + rule applied)
+| `standard` value | Convention set applied |
+|-----------------|----------------------|
+| `general` _(default)_ | `prompts/coding/standards/clean_coding/` |
+| `ob` | OB overrides from `ob-engineer/references/boro-quick-style-guide.md` layered on top of `general`; OB wins on conflicts |
+
+When `standard=ob` and a `violations_report` is passed from `clean-code-reviewer`, the standards must match — pass the same `standard` value to both skills.
+
+**Output:** Refactored file(s) with change summary (each change + rule applied + convention source: `general` or `ob`)
 
 ---
 
@@ -318,22 +375,46 @@ software-architect (Review Mode) → [language]-data-engineer (Implement Mode) �
 9. `clean-code-reviewer` — **DONE** (SKILL.md + report template + 4 language refs)
 10. `clean-code-refactor` — **DONE** (SKILL.md + change summary template + 4 language refs)
 
-### Phase 3 — High-frequency standalone
+### Phase 3 — High-frequency standalone (complete)
 
-11. `clean-code-naming` — high daily use; narrow scope, easy to validate
-12. `clean-code-tests` — critical for quality gates; ties into existing testing standards
+11. `clean-code-naming` — **DONE** (SKILL.md — modes: review, fix, suggest; supports general + ob standards)
+12. `clean-code-tests` — **DONE** (SKILL.md — modes: generate, review, coverage-check)
 
-### Phase 4 — Workflow integration
+### Phase 4 — Workflow integration (complete)
 
-13. `clean-code-commit` — narrow scope; CI/CD integration point
+13. `clean-code-commit` — **DONE** (SKILL.md — modes: validate, generate)
 
-### Phase 5 — Fill bclearer skeletons (ongoing)
+### Phase 5 — Fill bclearer skeletons (complete)
 
-Populate `TODO` items in bclearer reference files as pipeline patterns are confirmed:
-- `bclearer-pipeline-architect/references/pipeline-patterns.md`
-- `bclearer-pipeline-architect/references/interop-conventions.md`
-- `bclearer-pipeline-architect/references/orchestration-conventions.md`
-- `bclearer-pipeline-engineer/references/pipeline-implementation.md`
+Populated from `ol_bclearer_pdk/libraries/core/bclearer_core/pipeline_builder/` source code:
+- `bclearer-pipeline-architect/references/pipeline-patterns.md` — **DONE** (5-stage topology, B-unit types, Universe wiring, design workflow, CLI config, generated directory structure)
+- `bclearer-pipeline-architect/references/interop-conventions.md` — **DONE** (full service catalogue, format selection guide, adapter boundary rules, credential conventions)
+- `bclearer-pipeline-architect/references/orchestration-conventions.md` — **DONE** (full call chain, all orchestrator templates, Universe lifecycle, environment setup, testing convention)
+- `bclearer-pipeline-engineer/references/pipeline-implementation.md` — **DONE** (file/class naming conventions, all code templates: B-unit, orchestrators, runner, entry point, Universe, test patterns, verification checklist)
+- `bclearer-pipeline-engineer/SKILL.md` — **UPDATED** inheritance from `python-data-engineer` → `ob-engineer` (bclearer is an OB-specific framework)
+
+### Phase 6 — OB (Ontoledgy/BORO) skills (complete)
+
+Fills the **Ontology scope gap** identified in `SKILL-ARCHITECTURE.md`. See `docs/coding/boro-skills-plan.md` for full design.
+
+14. `ob-architect` — **DONE** (SKILL.md + `boro-coding-principles.md` + `ob-library-selection.md`)
+15. `ob-engineer` — **DONE** (SKILL.md + `boro-quick-style-guide.md` + `ob-library-selection.md`)
+
+Both skills carry their own copy of `ob-library-selection.md` (variant → platform library mapping).
+
+### Phase 7 — Migrate `bie-data-engineer` inheritance to `ob-engineer` _(deferred)_
+
+`bie-data-engineer` should eventually inherit from `ob-engineer` (BIE is an OB-specific framework, just as bclearer is). This is deferred because:
+- `bie-data-engineer` is already battle-hardened and in active use
+- `ob-engineer` must be built and validated in production first (Phase 6)
+- Changing `bie-data-engineer`'s inheritance chain carries regression risk until `ob-engineer` is proven
+
+**Trigger:** Begin this phase only after `ob-engineer` has been tested on real OB codebases and is considered stable.
+
+When ready:
+- Update `bie-data-engineer/SKILL.md` inheritance declaration from `python-data-engineer` → `ob-engineer`
+- Update `SKILL-ARCHITECTURE.md` inheritance diagram
+- Re-test `bie-data-engineer` to confirm no regressions from the added OB conventions
 
 ---
 
@@ -351,9 +432,9 @@ Extends `software-architect`. Adds:
 
 Reference files marked `Status: Skeleton` — populate as pipeline patterns are confirmed from the codebase.
 
-### `bclearer-pipeline-engineer` — **SKELETON DONE**
+### `bclearer-pipeline-engineer` — **SKELETON DONE** _(inheritance update pending)_
 
-Extends `data-engineer`. Adds:
+Extends `ob-engineer` (not `data-engineer` directly — bclearer is an OB-specific framework; the SKILL.md inheritance declaration needs updating when `ob-engineer` is built). Adds:
 - Pipeline code layout convention (`bie/`, `adapters/`, `services/`, `orchestrators/`, `runners/`)
 - Construction order for pipelines (common knowledge → BIE objects → adapters → services → orchestrators → runner)
 - bclearer code style overrides (backslash continuations, named kwargs, verbose naming, class plurals)
