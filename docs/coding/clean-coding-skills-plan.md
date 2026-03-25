@@ -2,12 +2,25 @@
 
 ## Overview
 
-This document defines the modular skill architecture for software design and data engineering. Skills are organised into two tiers:
+This document defines the modular skill architecture for software design and data engineering. Skills are organised into three tiers:
 
-1. **Software Architect** — designs solutions grounded in ontological methods; documents in Confluence
-2. **Data Engineer** — implements and reviews code applying clean coding standards
+1. **General roles** (`software-architect`, `data-engineer`) — foundation skills grounded in design philosophy and clean coding standards
+2. **Specialised inheriting roles** (`bclearer-pipeline-architect`, `bclearer-pipeline-engineer`, `bie-component-ontologist`, `bie-data-engineer`) — extend general roles with domain/platform-specific knowledge
+3. **Sub-skills** (`clean-code-*`) — focused tools that engineer roles delegate to for specific tasks
 
-The clean coding skills are modular sub-skills used by the Data Engineer. All skills are designed to be general-purpose and reusable at the bclearer pipeline level when bclearer-specific engineer/architect skills are introduced later.
+Sub-skills are tools a role *uses*. Inheriting roles are specialisations of the same persona — they extend their parent's full workflow and add context-specific knowledge on top.
+
+---
+
+## Inheritance Design Decision
+
+> **Decision:** bclearer pipeline roles inherit from general roles; they do not become sub-skills.
+
+**Rationale:** A bclearer pipeline architect IS a software architect (same modes, same deliverable format, same design philosophy) — it extends the persona with bclearer pipeline knowledge. Sub-skills are tools with a narrow scope (e.g. `clean-code-reviewer`). The "IS A" vs "USES A" distinction maps directly to role inheritance vs sub-skill delegation.
+
+**Inheritance mechanism:** Each child `SKILL.md` declares `extends: [parent]` in its frontmatter and opens with: *"Read `skills/[parent]/SKILL.md` first and follow all of it. This file contains only the additions and overrides."* No duplication of parent content.
+
+**Precedent:** `bie-component-ontologist` and `bie-data-engineer` already follow this pattern implicitly — they are now formally classified as inheriting roles.
 
 ---
 
@@ -16,28 +29,46 @@ The clean coding skills are modular sub-skills used by the Data Engineer. All sk
 ```
 skills/
 │
-├── software-architect/              ← TIER 1: Design
+├── software-architect/                    ← TIER 1: General design role
 │   ├── SKILL.md
 │   └── references/
-│       ├── design-philosophy.md     (BORO, BNOP, BIE identity concepts)
-│       ├── technology-stack.md      (bnop, interop_services, orchestration_services)
-│       ├── design-patterns.md       (factory, registry, adapter, leaf-before-whole...)
-│       └── confluence-pages.md      (where to document designs)
+│       ├── design-philosophy.md           (BORO, BNOP, BIE identity concepts)
+│       ├── technology-stack.md            (bnop, interop_services, orchestration_services)
+│       ├── design-patterns.md             (factory, registry, adapter, leaf-before-whole...)
+│       └── confluence-pages.md            (where to document designs)
 │
-├── data-engineer/                   ← TIER 2: Implementation
+├── bclearer-pipeline-architect/           ← TIER 2: Inherits software-architect
+│   ├── SKILL.md                           (extends: software-architect)
+│   └── references/
+│       ├── pipeline-patterns.md           (stage topology, universe wiring)
+│       ├── interop-conventions.md         (which services in which contexts)
+│       ├── orchestration-conventions.md   (runner, universe lifecycle)
+│       └── confluence-pages.md            (pipeline-specific Confluence space)
+│
+├── bie-component-ontologist/              ← TIER 2: Inherits software-architect (implicit)
+│   └── ...                                (BIE component ontology design)
+│
+├── data-engineer/                         ← TIER 1: General implementation role
 │   ├── SKILL.md
 │   └── references/
-│       ├── clean-coding-index.md    (map: concern → standard document)
-│       └── testing-index.md         (testing philosophy, structure, quality gates)
+│       ├── clean-coding-index.md          (map: concern → standard document)
+│       └── testing-index.md               (testing philosophy, structure, quality gates)
 │
-├── clean-code-reviewer/             ← TIER 2 Sub-skill: Detect violations
-├── clean-code-refactor/             ← TIER 2 Sub-skill: Fix violations
-├── clean-code-naming/               ← TIER 2 Sub-skill: Naming focus
-├── clean-code-tests/                ← TIER 2 Sub-skill: Test generation/review
-└── clean-code-commit/               ← TIER 2 Sub-skill: Commit messages
+├── bclearer-pipeline-engineer/            ← TIER 2: Inherits data-engineer
+│   ├── SKILL.md                           (extends: data-engineer)
+│   └── references/
+│       ├── pipeline-implementation.md     (stage file layout, class/function conventions)
+│       ├── bclearer-code-style.md         (overrides general style for bclearer conventions)
+│       └── bie-integration.md             (when/how to delegate to bie-data-engineer)
 │
-├── bie-component-ontologist/        ← EXISTING: BIE domain ontology design
-└── bie-data-engineer/               ← EXISTING: BIE domain implementation
+├── bie-data-engineer/                     ← TIER 2: Inherits data-engineer (implicit)
+│   └── ...                                (BIE domain implementation)
+│
+├── clean-code-reviewer/                   ← TIER 3 Sub-skill: Detect violations
+├── clean-code-refactor/                   ← TIER 3 Sub-skill: Fix violations
+├── clean-code-naming/                     ← TIER 3 Sub-skill: Naming focus
+├── clean-code-tests/                      ← TIER 3 Sub-skill: Test generation/review
+└── clean-code-commit/                     ← TIER 3 Sub-skill: Commit messages
 ```
 
 ---
@@ -187,45 +218,61 @@ All grounded in existing standards at `prompts/coding/standards/`:
 
 ## Implementation Order
 
-### Phase 1 — Foundation (implement first)
+### Phase 1 — Foundation (complete)
 
-1. `software-architect` — **DONE** (SKILL.md + 4 references created)
-2. `data-engineer` — **DONE** (SKILL.md + 2 references created)
+1. `software-architect` — **DONE** (SKILL.md + 4 references)
+2. `data-engineer` — **DONE** (SKILL.md + 2 references)
+3. `bclearer-pipeline-architect` — **DONE** (skeleton — 4 references, TODOs to populate)
+4. `bclearer-pipeline-engineer` — **DONE** (skeleton — 4 references, TODOs to populate)
 
 ### Phase 2 — Core clean coding pair (highest ROI)
 
-3. `clean-code-reviewer` — establishes baseline; other skills build on its output
-4. `clean-code-refactor` — acts on reviewer output; completes the detect-and-fix loop
+5. `clean-code-reviewer` — establishes baseline; other skills build on its output
+6. `clean-code-refactor` — acts on reviewer output; completes the detect-and-fix loop
 
 ### Phase 3 — High-frequency standalone
 
-5. `clean-code-naming` — high daily use; narrow scope, easy to validate
-6. `clean-code-tests` — critical for quality gates; ties into existing testing standards
+7. `clean-code-naming` — high daily use; narrow scope, easy to validate
+8. `clean-code-tests` — critical for quality gates; ties into existing testing standards
 
 ### Phase 4 — Workflow integration
 
-7. `clean-code-commit` — narrow scope; CI/CD integration point
+9. `clean-code-commit` — narrow scope; CI/CD integration point
+
+### Phase 5 — Fill bclearer skeletons (ongoing)
+
+Populate `TODO` items in bclearer reference files as pipeline patterns are confirmed:
+- `bclearer-pipeline-architect/references/pipeline-patterns.md`
+- `bclearer-pipeline-architect/references/interop-conventions.md`
+- `bclearer-pipeline-architect/references/orchestration-conventions.md`
+- `bclearer-pipeline-engineer/references/pipeline-implementation.md`
 
 ---
 
-## Future Extension Points
+## bclearer Pipeline Skills (Tier 2 — Skeletons Created)
 
-### bclearer Data Engineer (planned)
+### `bclearer-pipeline-architect` — **SKELETON DONE**
 
-Extends `data-engineer` with:
-- bclearer code style conventions (`bie-data-engineer/references/code-style.md`)
-- BIE factory/identity patterns
-- bclearer pipeline construction patterns
-- Delegates to existing `bie-data-engineer` for BIE-specific domain implementation
+Extends `software-architect`. Adds:
+- Pipeline topology (4-stage: Ingest / Identify / Transform / Load)
+- Additional Design Mode deliverable: Pipeline Stage Map
+- Additional Review Mode checklist items (stage separation, interop boundaries, universe scoping)
+- bclearer interop service conventions (`references/interop-conventions.md`)
+- bclearer orchestration conventions — runner, universe lifecycle (`references/orchestration-conventions.md`)
+- Pipeline-specific Confluence page structure
 
-### bclearer Architect (planned)
+Reference files marked `Status: Skeleton` — populate as pipeline patterns are confirmed from the codebase.
 
-Extends `software-architect` with:
-- bclearer pipeline design patterns
-- Interop service selection patterns specific to bclearer contexts
-- Deeper integration with BIE component ontology workflow
+### `bclearer-pipeline-engineer` — **SKELETON DONE**
 
-These future skills will import and extend (not duplicate) the general skills defined here.
+Extends `data-engineer`. Adds:
+- Pipeline code layout convention (`bie/`, `adapters/`, `services/`, `orchestrators/`, `runners/`)
+- Construction order for pipelines (common knowledge → BIE objects → adapters → services → orchestrators → runner)
+- bclearer code style overrides (backslash continuations, named kwargs, verbose naming, class plurals)
+- BIE integration protocol — when to delegate to `bie-data-engineer`, handoff format, identity flow through stages
+- Additional verification checklist (stage independence, interop boundary, universe scoping)
+
+Reference files marked `Status: Skeleton` — populate as implementation patterns are confirmed.
 
 ---
 
