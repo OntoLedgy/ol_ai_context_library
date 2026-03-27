@@ -64,6 +64,43 @@ Python prompt modules for text extraction from documents.
 
 Skills can be installed using [`npx skills`](https://github.com/vercel-labs/skills), the open agent skills CLI that supports Claude Code, OpenCode, Codex, Cursor, and more.
 
+### Authentication (required for private repositories)
+
+If this repository is private, `npx skills add` will fail with an authentication error. You must provide a GitHub token before running any skills command.
+
+**Option 1 — Use the GitHub CLI token (recommended):**
+
+```bash
+# Log in once with the GitHub CLI
+gh auth login
+
+# Then prefix all skills commands with the token
+GITHUB_TOKEN=$(gh auth token) npx skills add OntoLedgy/ol_ai_context_library -g
+```
+
+**Option 2 — Use a personal access token (PAT):**
+
+```bash
+# Create a PAT at https://github.com/settings/tokens (needs `repo` scope)
+GITHUB_TOKEN=<your-token> npx skills add OntoLedgy/ol_ai_context_library -g
+```
+
+**Option 3 — Export once in your shell profile (recommended for daily use):**
+
+Add the following to `~/.bashrc` or `~/.zshrc` so the token is always available:
+
+```bash
+export GITHUB_TOKEN=$(gh auth token)
+```
+
+Then reload your shell (`source ~/.bashrc`) and run skills commands without the prefix:
+
+```bash
+npx skills add OntoLedgy/ol_ai_context_library -g
+```
+
+> **Note:** The WSL2 browser-based `gh auth login` flow may fail to open a browser automatically. If it hangs, copy the one-time code shown in the terminal, open `https://github.com/login/device` manually in your browser, and enter the code there.
+
 ### List available skills
 
 ```bash
