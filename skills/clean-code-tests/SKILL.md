@@ -3,8 +3,7 @@ name: clean-code-tests
 description: >
   Generate and review tests following project testing standards. Use when: adding
   tests for a new or untested function/class, reviewing existing tests for quality
-  compliance, or identifying untested paths in a module. Grounded in the project
-  testing standards at prompts/coding/standards/testing/. Supports Python,
+  compliance, or identifying untested paths in a module. Supports Python,
   JavaScript/TypeScript, C#, and Rust.
 ---
 
@@ -35,11 +34,11 @@ code issues as recommendations for `[language]-data-engineer` Implement Mode.
 ## Standards Loaded in All Modes
 
 Always load:
-- `prompts/coding/standards/testing/TESTING_GUIDELINES.md` — testing philosophy and structure
-- `prompts/coding/standards/testing/TEST_QUALITY_REQUIREMENTS.md` — coverage, quality gates, assertion patterns
+- `references/testing-philosophy.md` — F.I.R.S.T., TDD, why clean tests matter
+- `references/testing-standards.md` — coverage, naming, AAA, fixtures, mocking, markers, anti-patterns
 
-For `unit` tests also load:
-- `prompts/coding/standards/testing/unit_tests.md` — isolation, mocking, test doubles
+Always load the language-specific reference:
+- `references/languages/[language].md` — framework, tooling, and idioms for the target language
 
 ---
 
@@ -49,7 +48,11 @@ Generate tests for the class or function at `target_path`. Produces a complete t
 
 ### Workflow
 
-**Step 1 — Read the target code**
+**Step 1 — Read standards**
+
+Load all three references listed above before writing a single line of test code.
+
+**Step 2 — Read the target code**
 
 Read `target_path` completely. Identify:
 - Public interface: all public functions/methods with their signatures and return types
@@ -57,28 +60,24 @@ Read `target_path` completely. Identify:
 - Post-conditions: what the function guarantees on success
 - Error paths: exceptions raised, edge conditions
 
-**Step 2 — Plan test cases**
+**Step 3 — Plan test cases**
 
 For each public function, plan:
 
 | Category | What to cover |
 |----------|---------------|
 | Happy path | One test per distinct valid input shape |
-| Boundary conditions | Min/max values, empty collections, zero, None/null |
+| Boundary conditions | Min/max values, empty collections, zero, null/None |
 | Error conditions | Each exception type; invalid inputs; pre-condition violations |
 | Edge cases | Single-element collections, large inputs, special characters |
 
-**Step 3 — Write tests following quality standards**
+**Step 4 — Write tests**
 
-Apply from `TEST_QUALITY_REQUIREMENTS.md`:
-- One assertion focus per test — test one behaviour, not one line
-- Descriptive test names: `test_[unit]_[scenario]_[expected_outcome]`
-- Arrange / Act / Assert structure — separated by blank lines
-- No logic in tests — no loops, conditionals, or try/except in test bodies
-- Tests must be independent — no shared mutable state between tests
-- Use test doubles (mocks/stubs) only for external dependencies; never mock the thing under test
+Apply the standards from `references/testing-standards.md` and the language idioms
+from `references/languages/[language].md`. Do not invent patterns — use only what
+the references define.
 
-**Step 4 — Produce test file**
+**Step 5 — Produce test file**
 
 ### Output (generate)
 
@@ -100,9 +99,6 @@ Apply from `TEST_QUALITY_REQUIREMENTS.md`:
 
 | Test Name | What It Covers | Category |
 |-----------|---------------|----------|
-| `test_load_transactions_returns_list_when_valid_csv` | Happy path — valid input | Happy path |
-| `test_load_transactions_raises_file_not_found_when_missing` | Error path — missing file | Error |
-| `test_load_transactions_returns_empty_list_when_csv_is_empty` | Edge case — empty file | Edge |
 
 ---
 
@@ -115,34 +111,36 @@ Apply from `TEST_QUALITY_REQUIREMENTS.md`:
 
 ## Mode: `review`
 
-Review existing tests at `test_path` (or inferred location) against quality standards.
-Produces an annotated report.
+Review existing tests at `test_path` against quality standards. Produces an annotated report.
 
 ### Workflow
 
-**Step 1 — Read production code and test code**
+**Step 1 — Read standards**
 
-Read `target_path` (production) and `test_path` (tests). Build a picture of:
-- What the production code does
-- What the tests cover and how they test it
+Load all three references listed above.
 
-**Step 2 — Apply quality checklist**
+**Step 2 — Read production code and test code**
 
-Work through `TEST_QUALITY_REQUIREMENTS.md`:
+Read `target_path` (production) and `test_path` (tests). Understand what the
+production code does before assessing how the tests cover it.
 
-| Check | Pass criteria |
-|-------|--------------|
-| Test names reveal intent | `test_[unit]_[scenario]_[outcome]` format; no `test_1`, `test_stuff` |
-| Single assertion focus | Each test covers one behaviour; multiple asserts allowed if they express the same behaviour |
-| AAA structure | Arrange / Act / Assert clearly separated |
-| No test logic | No conditionals or loops in test bodies |
-| Independence | No shared mutable state; tests pass in any order |
-| Mocking scope | External dependencies mocked; the thing under test is never mocked |
-| Error path coverage | At least one test per error condition in production code |
-| Edge case coverage | Boundary values represented |
-| No magic numbers | Test data is named and meaningful |
+**Step 3 — Apply the compliance checklist**
 
-**Step 3 — Produce review report**
+Work through the checklist in `references/testing-standards.md`. For each violation:
+- Record exact file and line number
+- Name the rule violated
+- Assign severity (HIGH / MEDIUM / LOW)
+- Write a specific, actionable suggested fix
+
+**Severity criteria:**
+
+| Severity | Criteria |
+|----------|---------|
+| HIGH | Hides real behaviour; test passes when it should fail; tests the mock not the code |
+| MEDIUM | Reduces clarity or makes the test fragile; names don't reveal intent |
+| LOW | Minor style issue; not a correctness risk |
+
+**Step 4 — Produce review report**
 
 ### Output (review)
 
@@ -175,11 +173,14 @@ Work through `TEST_QUALITY_REQUIREMENTS.md`:
 ## Mode: `coverage-check`
 
 Identify paths in the production code at `target_path` that have no corresponding tests.
-Produces a gap analysis with recommended test cases.
 
 ### Workflow
 
-**Step 1 — Map production code paths**
+**Step 1 — Read standards**
+
+Load all three references listed above.
+
+**Step 2 — Map production code paths**
 
 Read `target_path`. For each public function, enumerate all logical paths:
 - Normal path
@@ -187,18 +188,18 @@ Read `target_path`. For each public function, enumerate all logical paths:
 - Each exception raised
 - Edge cases visible from the signature (empty input, zero, None/null)
 
-**Step 2 — Read existing tests**
+**Step 3 — Read existing tests**
 
 Read `test_path` (or inferred location). Map each test to the path(s) it exercises.
 
-**Step 3 — Identify gaps**
+**Step 4 — Identify gaps**
 
 Mark each production path as covered or uncovered. Flag paths with:
 - No test at all
 - Only happy-path coverage (no error or edge coverage)
 - Mocked-away behaviour that should be integration-tested
 
-**Step 4 — Produce gap analysis**
+**Step 5 — Produce gap analysis**
 
 ### Output (coverage-check)
 
@@ -224,8 +225,6 @@ Mark each production path as covered or uncovered. Flag paths with:
 
 | Function | Uncovered Path | Risk | Recommended Test Name |
 |----------|---------------|------|----------------------|
-| `load_transactions` | File not found (raises FileNotFoundError) | HIGH | `test_load_transactions_raises_file_not_found_when_missing` |
-| `load_transactions` | Empty CSV (returns empty list) | MEDIUM | `test_load_transactions_returns_empty_list_when_csv_is_empty` |
 
 ---
 
