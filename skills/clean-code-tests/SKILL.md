@@ -4,7 +4,8 @@ description: >
   Generate and review tests following project testing standards. Use when: adding
   tests for a new or untested function/class, reviewing existing tests for quality
   compliance, or identifying untested paths in a module. Supports Python,
-  JavaScript/TypeScript, C#, and Rust.
+  JavaScript/TypeScript, C#, and Rust. Supports both general (Clean Code) and OB
+  (BORO Quick Style Guide) convention sets via the `standard` parameter.
 ---
 
 # Clean Code Tests
@@ -28,6 +29,52 @@ code issues as recommendations for `[language]-data-engineer` Implement Mode.
 | `language` | Yes | `python` \| `javascript` \| `csharp` \| `rust` |
 | `test_category` | No | `unit` (default) \| `integration` — scope of tests to generate or review |
 | `test_path` | No (review, coverage-check) | Path to existing test file(s); inferred if omitted |
+| `standard` | No | `general` (default) \| `ob` — convention set to enforce in generated/reviewed tests |
+
+`standard` defaults to `general` when omitted. Set `standard: ob` for BORO/Ontoledgy codebases.
+
+---
+
+## Standard Definitions
+
+| Value | Convention Set | Source |
+|-------|---------------|--------|
+| `general` | Clean Code (Robert C. Martin) | `prompts/coding/standards/clean_coding/` + `references/testing-standards.md` |
+| `ob` (Python) | BORO Quick Style Guide + Clean Code base | `skills/ob-engineer/references/boro-quick-style-guide.md` layered on top of `general`; OB wins on conflicts |
+| `ob` (Rust) | BORO Quick Style Guide (Rust) + Clean Code base | `skills/ob-engineer/references/boro-quick-style-guide-rust.md` layered on top of `general`; OB wins on conflicts |
+
+When `standard=ob`, tests are generated and reviewed against OB conventions in addition to
+the general testing standards. Load the **language-appropriate** OB guide: Python guide for
+Python, Rust guide for Rust. OB mode supports Python and Rust. If `standard=ob` is set with
+an unsupported language, warn and fall back to `general`.
+
+### OB Overrides for Tests (Python)
+
+OB mode applies BORO conventions to test code itself:
+
+| Category | OB Rule for Tests |
+|----------|-------------------|
+| **Naming** | Test function names use action verbs; no vague names (`data`, `tmp`, `process`); `is_`/`has_` prefix for boolean helpers; `__double_underscore` for private test helpers |
+| **Layout** | 20-char line length; each arg on own line; type annotations on all test helper signatures; named params with `*` for helpers with > 1 param |
+| **Strings** | Single quotes only; no hardcoded strings in assertions — use constants for expected values where the string represents domain vocabulary |
+| **Structure** | One test class per file (aligns with one public function per file); test helpers as `__private` functions in the test file |
+| **Error assertions** | Test for specific exception types only (matching the specific-exceptions-only production rule) |
+| **Imports** | Explicit only (`from file import name`); no `*`; no folder imports |
+| **Comments** | None except `# TODO` — test names must be self-documenting |
+
+### OB Overrides for Tests (Rust)
+
+| Category | OB Rule for Tests |
+|----------|-------------------|
+| **Naming** | Test function names use action verbs (`test_export_returns_records_when_valid`); no vague names; `is_`/`has_` prefix for boolean helpers; no single-letter variables except `self` |
+| **Layout** | 20-char line length; each arg on own line; type annotations on test helper signatures; explicit `-> ()` on test functions |
+| **Strings** | No hardcoded strings in assertions — use `const` for expected values where the string represents domain vocabulary |
+| **Structure** | `#[cfg(test)] mod tests` block per source file; test helpers as private `fn` (no `pub`) within the test module; builder/`make_*` functions for fixtures |
+| **Types** | Test fixture structs use named fields (no tuple structs); `#[derive(Debug)]` on all test types |
+| **Error assertions** | `assert_matches!` for specific error variants; never match on error message strings — match on enum variants |
+| **Ownership** | Prefer borrowing in test helpers; `.clone()` acceptable in test setup for readability but not as a default |
+| **Imports** | Explicit `use` — glob import of the parent module (`use super::*`) is the only permitted exception |
+| **Comments** | None except `// TODO` — test names must be self-documenting |
 
 ---
 
@@ -39,6 +86,13 @@ Always load:
 
 Always load the language-specific reference:
 - `references/languages/[language].md` — framework, tooling, and idioms for the target language
+
+If `standard=ob`, also load the language-appropriate BORO Quick Style Guide:
+- **Python**: `skills/ob-engineer/references/boro-quick-style-guide.md`
+- **Rust**: `skills/ob-engineer/references/boro-quick-style-guide-rust.md`
+
+OB rules override general where they conflict. Apply OB conventions to the test code
+itself (see the language-appropriate OB Overrides for Tests table above).
 
 ---
 
@@ -85,6 +139,7 @@ the references define.
 ## Test Generation — [target_path]
 
 **Language:** [language]
+**Standard:** [general | ob]
 **Category:** [unit | integration]
 **Tests generated:** [N]
 **Coverage of public interface:** [functions covered / total functions]
@@ -148,6 +203,7 @@ Work through the checklist in `references/testing-standards.md`. For each violat
 ## Test Review — [test_path]
 
 **Language:** [language]
+**Standard:** [general | ob]
 **Category:** [unit | integration]
 **Tests reviewed:** [N]
 **Violations:** [N] (HIGH: N, MEDIUM: N, LOW: N)
@@ -207,6 +263,7 @@ Mark each production path as covered or uncovered. Flag paths with:
 ## Coverage Gap Analysis — [target_path]
 
 **Language:** [language]
+**Standard:** [general | ob]
 **Category:** [unit | integration]
 **Functions analysed:** [N]
 **Paths covered:** [N] / [Total paths]
