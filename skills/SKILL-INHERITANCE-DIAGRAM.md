@@ -137,6 +137,11 @@ classDiagram
         +specialises: BIE data identity domain
         +outputs: Object Types, Relations, Identity Dependence, Construction Order
     }
+    class boro_ontologist {
+        +role: supporting BORO methodology layer
+        +scope: platform-independent BORO foundations, patterns, method
+        +reused_by: ob-ontologist and future BORO-native model skills
+    }
 
     %% Ontologist inheritance
     RoleOntologist <|-- ontologist
@@ -151,6 +156,7 @@ classDiagram
     ob_ontologist <|-- bie_component_ontologist
     ScopeBIE <|-- bie_component_ontologist
     StandardOB <|-- bie_component_ontologist
+    ob_ontologist ..> boro_ontologist : loads when needed
 
     %% ═══════════════════════════════════════════════
     %% CONCRETE SKILLS — ENGINEERS (Solution)
@@ -322,6 +328,8 @@ flowchart LR
         OB_ONT -->|extends| BIE_ONT
     end
 
+    BORO_CORE[boro-ontologist\nplatform-independent BORO method]
+
     subgraph Architect["Architect (Design)"]
         SA[software-architect]
         OB_A[ob-architect]
@@ -358,6 +366,7 @@ flowchart LR
     end
 
     %% Cross-role feeds
+    BORO_CORE -.->|loads when needed| OB_ONT
     OB_ONT -.->|model feeds| OB_A
     OB_ONT -.->|model feeds| OB_E
     BIE_ONT -.->|model feeds| BIE_E
@@ -492,14 +501,17 @@ The skill library now has a complete three-role pipeline: **Ontologist** (analys
 ### 2. Ontologist Hierarchy Mirrors Architect/Engineer
 Just as `software-architect -> ob-architect` and `data-engineer -> python-data-engineer -> ob-engineer`, the ontologist chain is `ontologist -> ob-ontologist -> bie-component-ontologist`. The OB specialisation sits in the middle, with domain-specific ontologists (BIE) at the leaf.
 
-### 3. OB/BIE/Pipeline Scopes Remain Python-Only for Engineers
+### 3. BORO Methodology Is Reused Beneath the Main Hierarchy
+`boro-ontologist` sits below the main role/scope hierarchy as a reusable BORO methodology layer. `ob-ontologist` loads it when deeper BORO foundations, patterns, or re-engineering guidance are needed, and the same layer can later support BNOP and other language-specific BORO-native model skills.
+
+### 4. OB/BIE/Pipeline Scopes Remain Python-Only for Engineers
 All three OB-domain scopes (Ontology, Pipeline, BIE) only have Python engineer implementations. Ontologists and Architects are language-agnostic by nature.
 
-### 4. UI Scope is Empty Across All Roles
+### 5. UI Scope is Empty Across All Roles
 No ontologist, architect, or engineer skills exist for UI.
 
-### 5. Phase 7 Migration Still Pending
+### 6. Phase 7 Migration Still Pending
 `bie-data-engineer` currently extends `python-data-engineer` directly. When migrated to extend `ob-engineer`, it will properly inherit BORO conventions.
 
-### 6. BORO Book as a New Standard Source
+### 7. BORO Book as a New Standard Source
 The `ob-ontologist` introduces the BORO book (Partridge 1996) as a distinct standard source, separate from the BORO Quick Style Guide (which is a coding standard for engineers). The book grounds the ontological method; the style guide grounds the coding conventions.

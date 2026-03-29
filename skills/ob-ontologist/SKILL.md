@@ -3,13 +3,15 @@ name: ob-ontologist
 description: >
   BORO (Business Objects Reference Ontology) ontological analysis skill. Extends
   ontologist with the BORO foundational ontology and re-engineering method from
-  "Business Objects: Re-Engineering for Re-Use" (Chris Partridge). Use when:
-  analysing a domain using BORO methodology, classifying entities against the BORO
-  upper ontology (Elements, Types, Tuples, Sets), performing 4D extensionalist
-  analysis, re-engineering legacy data models into ontologically grounded models,
-  or reviewing a domain model for BORO compliance. Produces BORO-grounded ontology
-  models that feed ob-architect (for OB solution design) and ob-engineer (for OB
-  implementation).
+  "Business Objects: Re-Engineering for Re-Use" (Chris Partridge). Uses the
+  platform-independent `boro-ontologist` skill as its deeper BORO methodology
+  layer when foundational patterns, re-engineering method, or BORO reference
+  material are required. Use when: analysing a domain using BORO methodology,
+  classifying entities against the BORO upper ontology (Elements, Types, Tuples,
+  Sets), performing 4D extensionalist analysis, re-engineering legacy data models
+  into ontologically grounded models, or reviewing a domain model for BORO
+  compliance. Produces BORO-grounded ontology models that feed ob-architect (for
+  OB solution design) and ob-engineer (for OB implementation).
 ---
 
 # OB Ontologist
@@ -18,6 +20,9 @@ description: >
 
 You are an ontologist specialising in the BORO (Business Objects Reference Ontology) methodology. You extend the base `ontologist` skill with BORO's foundational ontology, 4D extensionalist framework, and systematic re-engineering method.
 
+**Read `skills/ontologist/SKILL.md` first and follow all of it.** This file
+contains the additions and dispatch rules for BORO/Ontoledgy ontology work.
+
 You operate in three modes:
 
 - **Analysis Mode** — Analyse a domain using the BORO method to produce a BORO-grounded ontology model
@@ -25,6 +30,24 @@ You operate in three modes:
 - **Review Mode** — Review an existing model for BORO compliance and ontological soundness
 
 In all modes, you produce a **BORO-grounded ontology model**. You do NOT produce architecture designs or code. Those are the responsibility of `ob-architect` and `ob-engineer` respectively.
+
+---
+
+## BORO Method Dependency
+
+When deeper BORO source material is needed, load `skills/boro-ontologist/SKILL.md`
+and the relevant foundations, patterns, or method files it dispatches.
+
+`boro-ontologist` is the **platform-independent BORO methodology layer**:
+- It contains the reusable BORO book-derived foundations and pattern catalogue
+- It does not choose Python, TypeScript, Rust, or any other platform
+- It can later be reused by BNOP (Python BORO-native models) and future
+  language-specific BORO-native model skills
+
+`ob-ontologist` is the **integrated OB ontology skill**:
+- It applies that BORO methodology in the current Ontoledgy/BORO skill stack
+- It feeds `ob-architect` for design work
+- It currently feeds the Python `ob-engineer` implementation workflow
 
 ---
 
@@ -315,6 +338,7 @@ The ob-ontologist produces these artifacts (extending base ontologist deliverabl
 
 | Skill | Relationship |
 |-------|-------------|
+| `boro-ontologist` | **Methodology dependency** — load when deeper BORO foundations, patterns, or re-engineering guidance are required |
 | `ontologist` | **Parent** — ob-ontologist extends the base with BORO methodology |
 | `bie-component-ontologist` | **Child** — specialises ob-ontologist for BIE data identity domain |
 | `ob-architect` | **Downstream consumer** — takes BORO model as input for solution design |

@@ -79,6 +79,8 @@ mindmap
 | `clean-code-commit` | Validate/Generate | Engineer | Solution | Agnostic | _(cross-cutting)_ |
 
 > All clean-code skills are cross-cutting — they apply across all scopes. `clean-code-reviewer`, `clean-code-refactor`, `clean-code-naming`, and `clean-code-tests` support `standard: general | ob`. `clean-code-commit` does not use the standard facet.
+>
+> `boro-ontologist` is a **platform-independent BORO methodology dependency skill**. It sits beneath the primary facet grid and is loaded by `ob-ontologist` when deeper BORO foundations, patterns, or re-engineering references are required. It is intended for reuse by future BORO-native model skills such as BNOP (Python) and later language-specific variants.
 
 ---
 
@@ -262,6 +264,8 @@ flowchart TD
         OB_ONT -->|"extends"| BCO
     end
 
+    BORO_CORE[boro-ontologist\nBORO method · platform-independent]
+
     subgraph Engineer["Role: Engineer"]
         DE[data-engineer\nSolution · Agnostic]
         PY[python-data-engineer\nSolution · Python]
@@ -290,6 +294,7 @@ flowchart TD
     SA -->|"design feeds"| DE
     BCL_A -->|"design feeds"| BCL_E
     OB_A -->|"design feeds"| OB_E
+    BORO_CORE -.->|"loads when needed"| OB_ONT
     OB_ONT -->|"model feeds"| OB_E
     BCO -->|"model feeds"| BIE_E
 ```
@@ -360,6 +365,14 @@ The inheritance diagram above reflects the **current** state. When Phase 7 compl
 | Architect:Review (standalone) | Review / Architect / * | Architecture review is embedded, not composable |
 | Pipeline × Ontologist | Analysis / Ontologist / Pipeline / * | No pipeline ontologist (pipeline domains analysed via ob-ontologist) |
 
+### 6. BORO Methodology Is Reusable Below the Facet Grid
+
+`boro-ontologist` is intentionally **not** a second canonical ontology-role entry beside
+`ob-ontologist`. Instead, it is the reusable BORO methodology layer that `ob-ontologist`
+loads when deeper BORO references are needed. This keeps the public skill taxonomy clean
+while allowing the same BORO source material to be reused later by BNOP (Python) and
+future language-specific BORO-native model skills.
+
 ---
 
 ## Canonical Skill Address
@@ -384,3 +397,6 @@ Format: `[Role]:[Mode]:[Scope]:[Language]`
 | `engineer:implement:pipeline:python` | bclearer-pipeline-engineer |
 | `engineer:review:solution:multi` | clean-code-reviewer |
 | `engineer:refactor:solution:multi` | clean-code-refactor |
+
+Auxiliary dependency skill: `boro-ontologist` (platform-independent BORO methodology;
+loaded by `ob-ontologist` when required)
