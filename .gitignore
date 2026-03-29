@@ -19,5 +19,4 @@ env/
 # OS
 .DS_Store
 
-# Generated skill packages
-*-skill.tar.gz
+

@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "skills": {
+    "bclearer-pipeline-architect": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "50a687996875645f1e7367292cc77937b6aa8f514fbf228778c9e388d6b7bed9"
+    },
+    "bclearer-pipeline-engineer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "ce0b210f7b037d55d1f929f1c16375a885cad9e21d757eac60b9ced50f57ab33"
+    },
+    "bie-component-ontologist": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "bb364f1e3a43cddb0c31611d4384416d027d35918b0c8f569f533d0b28e6cbb9"
+    },
+    "bie-data-engineer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "51ff8f6190c6b4e9a1177b0a03594e8df08b1434d82c3c59e4661c3c9a1473d7"
+    },
+    "boro-ontologist": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "64b0525fbb6fd7e2b231320a5202ab1bd2c930382c5bfbf6e0b199fe0433af19"
+    },
+    "clean-code-commit": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "225ddd686a1c285e77ebfa905a8a73c25b5c61fd583135d5b1a9264fa41da290"
+    },
+    "clean-code-naming": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "4ac7a19d2b24e9781e1ee9c2963a9062f56333f23c111d97862613e92bf8ee69"
+    },
+    "clean-code-refactor": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "da529884ef5692b42e4bea74ae747278328e6d83b115e29512c5765b9daf88d9"
+    },
+    "clean-code-reviewer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "b1ab7ba159719e704e4f9c2999d4475844bb9620ccfcf4792a6639618a1ea0aa"
+    },
+    "clean-code-tests": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "a080e539bde302e3cc2cc2de110e2c32dd0304a9b096c042219909bf6ac73ce7"
+    },
+    "csharp-data-engineer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "55a7e4edca10fda8b0ebdaa375ea476a1b754346ccf7101c6964501c330573c1"
+    },
+    "data-engineer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "af3612d3095431bfb2ce2114c4070262e2318857aa0fa5ad8b78d3b5ab24fa9a"
+    },
+    "javascript-data-engineer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "a761bb8c43e98aef8648b4efa33aafdf409ac6e697fb499688ae530f26c1407e"
+    },
+    "ob-architect": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "db03983ae889e0a3b2e3192d6e19ca630e957e10dd452c50ef73de826417f59a"
+    },
+    "ob-engineer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "c8f28be66b547a337de8d7c4779a7f6e94e4912a516a2960efd663aebb91ecf3"
+    },
+    "ob-ontologist": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "7f9794494e9138d018e6517f3a125d45b62bfe1096ce57ee6f8f9e6518288064"
+    },
+    "ontologist": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "78a93ceaf180c768733a7a45ebf194998adb3c748e31203cb69e434fa4c6957d"
+    },
+    "python-data-engineer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "867d384dade7f1778a91eb3d5099cde6e5bda0b001bcb9d1046716afcb47ba7b"
+    },
+    "rust-data-engineer": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "85998bd6885d445685d609a60c48d41c65a0f91f71dd8e08c39c3913f88ba6cb"
+    },
+    "software-architect": {
+      "source": "OntoLedgy/ol_ai_context_library",
+      "sourceType": "github",
+      "computedHash": "682063ad46e26791880bd1cd7bf5c979c248b5360ec8ebe15498c591f093c1ca"
+    }
+  }
+}
