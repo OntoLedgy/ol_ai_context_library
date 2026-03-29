@@ -12,11 +12,13 @@ mindmap
     F1 Mode
       Design
       Implement
+      Analysis
       Review
       Refactor
     F2 Role
       Architect
       Engineer
+      Ontologist
     F3 Scope
       Solution
       Ontology
@@ -42,13 +44,13 @@ mindmap
 
 **Operation is derived, not a facet**: `Scope + Role` → Operation name.
 
-| Scope | Architect | Engineer |
-|---|---|---|
-| Solution | Solution Architecture | Solution Implementation |
-| Ontology | Ontology Design | Ontology Implementation |
-| Pipeline | Pipeline Architecture | Pipeline Implementation |
-| UI | UI Design | UI Implementation |
-| BIE | BIE Design | BIE Implementation |
+| Scope | Architect | Engineer | Ontologist |
+|---|---|---|---|
+| Solution | Solution Architecture | Solution Implementation | Solution Ontology |
+| Ontology | Ontology Design | Ontology Implementation | Ontology Analysis (OB) |
+| Pipeline | Pipeline Architecture | Pipeline Implementation | — |
+| UI | UI Design | UI Implementation | — |
+| BIE | BIE Design | BIE Implementation | BIE Component Ontology |
 
 ---
 
@@ -57,9 +59,11 @@ mindmap
 | Skill | Mode | Role | Scope | Language | → Operation |
 |---|---|---|---|---|---|
 | `software-architect` | Design | Architect | Solution | Agnostic | Solution Architecture |
-| `bie-component-ontologist` | Design | Architect | BIE | Agnostic | BIE Design |
 | `bclearer-pipeline-architect` | Design | Architect | Pipeline | Agnostic | Pipeline Architecture |
 | `ob-architect` | Design | Architect | Ontology | Agnostic | Ontology Architecture |
+| `ontologist` | Analysis | Ontologist | Solution | Agnostic | Ontological Analysis |
+| `ob-ontologist` | Analysis | Ontologist | Ontology | Agnostic | BORO Ontological Analysis |
+| `bie-component-ontologist` | Analysis | Ontologist | BIE | Agnostic | BIE Component Ontology |
 | `data-engineer` | Implement | Engineer | Solution | Agnostic | Solution Implementation |
 | `python-data-engineer` | Implement | Engineer | Solution | Python | Solution Implementation |
 | `javascript-data-engineer` | Implement | Engineer | Solution | TypeScript | Solution Implementation |
@@ -70,8 +74,11 @@ mindmap
 | `bclearer-pipeline-engineer` | Implement | Engineer | Pipeline | Python | Pipeline Implementation |
 | `clean-code-reviewer` | Review | Engineer | Solution | Multi | _(cross-cutting)_ |
 | `clean-code-refactor` | Refactor | Engineer | Solution | Multi | _(cross-cutting)_ |
+| `clean-code-naming` | Review/Fix/Suggest | Engineer | Solution | Multi | _(cross-cutting)_ |
+| `clean-code-tests` | Generate/Review/Coverage | Engineer | Solution | Multi | _(cross-cutting)_ |
+| `clean-code-commit` | Validate/Generate | Engineer | Solution | Agnostic | _(cross-cutting)_ |
 
-> `clean-code-reviewer` and `clean-code-refactor` are cross-cutting — they apply across all scopes. Assigned to Solution scope as the broadest default.
+> All clean-code skills are cross-cutting — they apply across all scopes. `clean-code-reviewer`, `clean-code-refactor`, `clean-code-naming`, and `clean-code-tests` support `standard: general | ob`. `clean-code-commit` does not use the standard facet.
 
 ---
 
@@ -151,14 +158,15 @@ The `clean-code-reviewer` and `clean-code-refactor` skills are the dedicated, co
 
 ### Standard Facet (F6): `general` | `ob`
 
-**Standard** is a second conditional facet — like Topic, it only applies in **Review or Refactor mode**. It controls *which convention set* the skill enforces.
+**Standard** is a second conditional facet — it applies to all clean-code skills except `clean-code-commit`. It controls *which convention set* the skill enforces.
 
 | Value | Convention Set | Source |
 |-------|---------------|--------|
 | `general` | Clean Code (Robert C. Martin) | `prompts/coding/standards/clean_coding/` |
-| `ob` | BORO Quick Style Guide + Clean Code base | `ob-engineer/references/boro-quick-style-guide.md` |
+| `ob` (Python) | BORO Quick Style Guide + Clean Code base | `ob-engineer/references/boro-quick-style-guide.md` |
+| `ob` (Rust) | BORO Quick Style Guide (Rust) + Clean Code base | `ob-engineer/references/boro-quick-style-guide-rust.md` |
 
-When `standard=ob`, the skill loads the OB overrides on top of the general set. Where they conflict, OB wins (see conflict table in `boro-skills-plan.md` Part 5). Rules not covered by OB fall back to `general`.
+When `standard=ob`, the skill loads the language-appropriate OB overrides on top of the general set. Where they conflict, OB wins (see conflict table in `boro-skills-plan.md` Part 5). Rules not covered by OB fall back to `general`. The Rust guide includes additional Rust-specific sections (ownership, types, iterators, concurrency) derived from the same BORO design philosophy.
 
 Standard defaults to `general` when omitted.
 
@@ -184,23 +192,27 @@ Both Topic and Standard default to `full` / `general` when omitted.
 
 ```
              ROLE
-             ─────────────────────────────────────────
-             Architect             Engineer
-MODE ────────────────────────────────────────────────────
-Design   │   PRIMARY               (upstream input)
-         │   s-arch, bie-ont,
-         │   bcl-arch
-─────────────────────────────────────────────────────────
-Implement│   (driven by design)    PRIMARY
+             ──────────────────────────────────────────────────────────────────
+             Architect             Engineer              Ontologist
+MODE ────────────────────────────────────────────────────────────────────────────
+Design   │   PRIMARY               (upstream input)      (upstream input)
+         │   s-arch,
+         │   bcl-arch, ob-arch
+─────────────────────────────────────────────────────────────────────────────────
+Analysis │   (downstream consumer) (downstream consumer) PRIMARY
+         │                                               ontologist, ob-ont,
+         │                                               bie-comp-ont
+─────────────────────────────────────────────────────────────────────────────────
+Implement│   (driven by design)    PRIMARY               (model feeds engineer)
          │                         d-eng, py-eng,
          │                         js/cs/rs-eng,
          │                         bie-eng, bcl-eng
-─────────────────────────────────────────────────────────
-Review   │   embedded in each      cc-reviewer
-         │   Architect skill       + embedded in each
-         │   (gap analysis)        Engineer skill
-─────────────────────────────────────────────────────────
-Refactor │   structural changes    cc-refactor
+─────────────────────────────────────────────────────────────────────────────────
+Review   │   embedded in each      cc-reviewer            embedded in each
+         │   Architect skill       + embedded in each     Ontologist skill
+         │   (gap analysis)        Engineer skill         (model validation)
+─────────────────────────────────────────────────────────────────────────────────
+Refactor │   structural changes    cc-refactor            (via new analysis)
          │   (via new design)      (code-level only)
 ```
 
@@ -211,18 +223,21 @@ Refactor │   structural changes    cc-refactor
 ```
               LANGUAGE AXIS
               ──────────────────────────────────────────────────────────
-              Agnostic   Python   TypeScript   C#     Rust    Multi
+              Agnostic       Python   TypeScript   C#     Rust    Multi
               ──────────────────────────────────────────────────────────
-S  Solution   data-eng   py-eng   js-eng       cs-eng rs-eng  cc-rev
-C                                                              cc-ref
-O  Ontology   ob-arch†   ob-eng   ·            ·      ·       ·
-P  Pipeline   bcl-arch†  bcl-eng  ·            ·      ·       ·
-E  UI         ·          ·        ·            ·      ·       ·
-   BIE        bie-ont†   bie-eng  ·            ·      ·       ·
+S  Solution   data-eng       py-eng   js-eng       cs-eng rs-eng  cc-rev
+C             ontologist‡                                          cc-ref
+O  Ontology   ob-arch†       ob-eng   ·            ·      ·       ·
+P             ob-ontologist‡
+E  Pipeline   bcl-arch†      bcl-eng  ·            ·      ·       ·
+   UI         ·              ·        ·            ·      ·       ·
+   BIE        bie-comp-ont‡  bie-eng  ·            ·      ·       ·
 ──────────────────────────────────────────────────────────────────────
   † = Architect role (Design mode)
+  ‡ = Ontologist role (Analysis mode)
   · = gap (no skill exists for this combination)
   Note: bcl-eng inherits from ob-eng (bclearer is an OB-specific framework)
+  Note: bie-comp-ont inherits from ob-ontologist (BIE is an OB/BORO framework)
 ```
 
 ---
@@ -233,11 +248,18 @@ E  UI         ·          ·        ·            ·      ·       ·
 flowchart TD
     subgraph Architect["Role: Architect"]
         SA[software-architect\nSolution]
-        BCO[bie-component-ontologist\nBIE]
         BCL_A[bclearer-pipeline-architect\nPipeline]
         OB_A[ob-architect\nOntology]
         SA -->|"extends"| BCL_A
         SA -->|"extends"| OB_A
+    end
+
+    subgraph Ontologist["Role: Ontologist"]
+        ONT[ontologist\nSolution · Agnostic]
+        OB_ONT[ob-ontologist\nOntology · Agnostic]
+        BCO[bie-component-ontologist\nBIE · Agnostic]
+        ONT -->|"extends"| OB_ONT
+        OB_ONT -->|"extends"| BCO
     end
 
     subgraph Engineer["Role: Engineer"]
@@ -267,8 +289,9 @@ flowchart TD
 
     SA -->|"design feeds"| DE
     BCL_A -->|"design feeds"| BCL_E
-    BCO -->|"design feeds"| BIE_E
     OB_A -->|"design feeds"| OB_E
+    OB_ONT -->|"model feeds"| OB_E
+    BCO -->|"model feeds"| BIE_E
 ```
 
 ---
@@ -276,31 +299,34 @@ flowchart TD
 ## Mode × Scope Lanes
 
 ```
-MODE:      Design ───────────────► Implement ──────────► Review/Refactor
+MODE:      Design ──► Analysis ──────────► Implement ──────────► Review/Refactor
 
-           ┌──────────────────┐    ┌───────────────┐    ╔══════════════╗
-Solution   │ software-        │───►│ data-engineer │───►║ clean-code-  ║
-           │ architect        │    │ (+ language   │    ║ reviewer     ║
-           └──────────────────┘    │  variants)    │    ║ clean-code-  ║
-                                   └───────────────┘    ║ refactor     ║
-           ┌──────────────────┐    ┌───────────────┐    ╚══════════════╝
-Ontology   │ ob-architect     │───►│ ob-engineer   │─────────↑
-           │                  │    │ (BORO/Ontlgy) │   applies to
-           └──────────────────┘    └───────┬───────┘   all scopes
-                                           │extends
-           ┌──────────────────┐    ┌───────▼───────┐
-BIE        │ bie-component-   │───►│ bie-data-     │─────────↑
-           │ ontologist       │    │ engineer      │   applies to
-           └──────────────────┘    └───────────────┘   all scopes
-           ┌──────────────────┐    ┌───────────────┐
-Pipeline   │ bclearer-        │───►│ bclearer-     │
-           │ pipeline-arch    │    │ pipeline-eng  │
-           └──────────────────┘    │ (inherits     │
-                                   │  ob-engineer) │
-                                   └───────────────┘
-           ┌──────────────────┐    ┌───────────────┐
-UI         │ ·                │    │ ·             │   ← scope exists,
-           └──────────────────┘    └───────────────┘     skills pending
+           ┌────────────┐                  ┌───────────────┐    ╔══════════════╗
+Solution   │ software-  │                  │ data-engineer │───►║ clean-code-  ║
+           │ architect  │─────────────────►│ (+ language   │    ║ reviewer     ║
+           └────────────┘  ┌────────────┐  │  variants)    │    ║ clean-code-  ║
+                           │ ontologist │  └───────────────┘    ║ refactor     ║
+                           └─────┬──────┘                       ╚══════════════╝
+                                 │extends                              ↑
+           ┌────────────┐  ┌─────▼──────┐  ┌───────────────┐   applies to
+Ontology   │ ob-        │  │ ob-        │  │ ob-engineer   │   all scopes
+           │ architect  │  │ ontologist │─►│ (BORO/Ontlgy) │
+           └────────────┘  └─────┬──────┘  └───────┬───────┘
+                  │              │extends          │extends
+                  │        ┌─────▼──────┐  ┌───────▼───────┐
+BIE               │        │ bie-comp-  │  │ bie-data-     │
+                  │        │ ontologist │─►│ engineer      │
+                  │        └────────────┘  └───────────────┘
+                  │
+           ┌──────▼─────┐                  ┌───────────────┐
+Pipeline   │ bclearer-  │────────────────►│ bclearer-     │
+           │ pipe-arch  │                  │ pipeline-eng  │
+           └────────────┘                  │ (inherits     │
+                                           │  ob-engineer) │
+                                           └───────────────┘
+UI         ┌────────────┐                  ┌───────────────┐
+           │ ·          │                  │ ·             │   ← scope exists,
+           └────────────┘                  └───────────────┘     skills pending
 ```
 
 ---
@@ -332,6 +358,7 @@ The inheritance diagram above reflects the **current** state. When Phase 7 compl
 | UI × all | * / * / UI / * | No UI skills exist |
 | Architect:Refactor | Refactor / Architect / * | No structural refactoring skill |
 | Architect:Review (standalone) | Review / Architect / * | Architecture review is embedded, not composable |
+| Pipeline × Ontologist | Analysis / Ontologist / Pipeline / * | No pipeline ontologist (pipeline domains analysed via ob-ontologist) |
 
 ---
 
@@ -342,9 +369,11 @@ Format: `[Role]:[Mode]:[Scope]:[Language]`
 | Canonical Address | Skill |
 |---|---|
 | `architect:design:solution:*` | software-architect |
-| `architect:design:bie:*` | bie-component-ontologist |
 | `architect:design:pipeline:*` | bclearer-pipeline-architect |
 | `architect:design:ontology:*` | ob-architect |
+| `ontologist:analysis:solution:*` | ontologist |
+| `ontologist:analysis:ontology:*` | ob-ontologist |
+| `ontologist:analysis:bie:*` | bie-component-ontologist |
 | `engineer:implement:solution:*` | data-engineer |
 | `engineer:implement:solution:python` | python-data-engineer |
 | `engineer:implement:solution:typescript` | javascript-data-engineer |

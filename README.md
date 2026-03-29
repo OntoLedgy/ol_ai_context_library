@@ -1,17 +1,19 @@
 # OntoLedgy AI Context Library
 
-Curated library of AI context artefacts for the OL AI Services platform — including prompts, skills, agent configurations, and workflow instructions. Designed as a code-free, installable collection for use across OntoLedgy's LLM-orchestrated chemical engineering workflows.
+Curated library of AI context artefacts for the OL AI Services platform — including prompts, skills, agent configurations, and workflow instructions. Designed as a code-free, installable collection for use across OntoLedgy's LLM-orchestrated engineering, ontology, and delivery workflows.
 
 ## Repository Contents
 
 ### Skills
 
-Installable Claude Code skills for BIE (BORO Identity Ecosystem) development workflows.
+Installable agent skills for ontological analysis, architecture, implementation, and clean-code workflows.
 
-| Skill | Description |
-|-------|-------------|
-| `bie-data-engineer` | Implements a BIE domain in Python from an approved ontology model. Creates domain enums, bie_id creator functions, BieDomainObjects subclasses, registration helpers, and domain universe setup. |
-| `bie-component-ontologist` | Designs and reviews BIE component ontology models. Operates in Design Mode (new component) or Review Mode (validate/extract from existing code). Produces the 4 ontology deliverables required before implementation. |
+| Skill Family | Examples | Purpose |
+|-------------|----------|---------|
+| Ontologists | `ontologist`, `ob-ontologist`, `bie-component-ontologist` | Analyse a domain, build ontology models, and validate ontological coherence before design or implementation |
+| Architects | `software-architect`, `ob-architect`, `bclearer-pipeline-architect` | Design solution architecture, ontology-aware systems, and bclearer pipelines |
+| Engineers | `data-engineer`, `python-data-engineer`, `javascript-data-engineer`, `csharp-data-engineer`, `rust-data-engineer`, `ob-engineer`, `bclearer-pipeline-engineer`, `bie-data-engineer` | Implement approved designs in the target language or platform |
+| Clean Code | `clean-code-reviewer`, `clean-code-refactor`, `clean-code-naming`, `clean-code-tests`, `clean-code-commit` | Review, refactor, test, and commit changes using shared quality standards |
 
 ### Prompts
 
@@ -116,6 +118,12 @@ npx skills add OntoLedgy/ol_ai_context_library
 ### Install a specific skill
 
 ```bash
+# Install the base ontologist skill
+npx skills add OntoLedgy/ol_ai_context_library --skill ontologist
+
+# Install the OB ontologist skill
+npx skills add OntoLedgy/ol_ai_context_library --skill ob-ontologist
+
 # Install the BIE data engineer skill
 npx skills add OntoLedgy/ol_ai_context_library --skill bie-data-engineer
 
@@ -177,12 +185,18 @@ Once installed, skills are available in your coding agent sessions and can be tr
 ```
 ol_ai_context_library/
 ├── skills/
-│   ├── bie-data-engineer/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   └── bie-component-ontologist/
-│       ├── SKILL.md
-│       └── references/
+│   ├── ontologist/
+│   ├── ob-ontologist/
+│   ├── software-architect/
+│   ├── ob-architect/
+│   ├── data-engineer/
+│   ├── python-data-engineer/
+│   ├── rust-data-engineer/
+│   ├── clean-code-reviewer/
+│   ├── clean-code-refactor/
+│   ├── bie-component-ontologist/
+│   └── bie-data-engineer/
+├── skills-lock.json
 └── prompts/
     ├── coding/
     │   ├── agents/
