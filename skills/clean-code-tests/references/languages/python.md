@@ -303,6 +303,179 @@ PYTHONPATH=tests pytest tests/unit_tests
 
 ---
 
+## Test Output Conventions (bclearer / Python repos)
+
+Tests that produce data for inspection or capture logging output MUST write to
+structured, timestamped folders under `tests/data/`. This keeps outputs isolated
+per run, traceable by test name, and out of source control (add to `.gitignore`).
+
+### Folder layout
+
+```
+tests/data/
+├── output/
+│   └── <sanitized_test_name>/
+│       └── <YYYY_MM_DD_HH_MM_SS>/   ← data files for inspection (JSON, CSV, etc.)
+└── logs/
+    └── <sanitized_test_name>/
+        └── <YYYY_MM_DD_HH_MM_SS>/
+            └── log_file<YYYY_MM_DD_HH_MM_SS>.txt   ← logging decorator output
+```
+
+Log output (from the bclearer orchestration logging decorator) goes to `logs/`.
+Data output for inspection (JSON, CSV, graphs, etc.) goes to `output/`.
+These are always separate — never mix logs and data in the same folder.
+
+### Timestamp format
+
+Use `now_time_as_string_for_files()` from bclearer orchestration:
+
+```python
+from bclearer_orchestration_services.datetime_service.time_helpers.time_getter import (
+    now_time_as_string_for_files,
+)
+# Returns: "YYYY_MM_DD_HH_MM_SS"
+```
+
+If the bclearer orchestration service is not available, fall back to:
+
+```python
+from datetime import datetime
+timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+```
+
+### Test name sanitisation
+
+Replace all non-alphanumeric characters (except `.`, `_`, `-`) with underscores.
+This makes the folder name safe for all operating systems:
+
+```python
+import re
+
+def _sanitize_test_name(test_name: str) -> str:
+    sanitized = re.sub(r"[^A-Za-z0-9._-]+", "_", test_name).strip("_")
+    return sanitized or "run"
+```
+
+### Standard fixtures
+
+Define these in `tests/fixtures/` and import in `conftest.py`. The `run_stamp`
+and `test_run_name` fixtures feed into both `run_output_folder` and `run_log_folder`
+so both folders always share the same timestamp.
+
+```python
+import re
+import pytest
+from pathlib import Path
+from bclearer_orchestration_services.datetime_service.time_helpers.time_getter import (
+    now_time_as_string_for_files,
+)
+from bclearer_orchestration_services.reporting_service.reporters.log_file import LogFiles
+
+_OUTPUT_ROOT = Path(__file__).resolve().parents[1] / "data" / "output"
+_LOG_ROOT    = Path(__file__).resolve().parents[1] / "data" / "logs"
+
+
+def _sanitize_test_name(test_name: str) -> str:
+    sanitized = re.sub(r"[^A-Za-z0-9._-]+", "_", test_name).strip("_")
+    return sanitized or "run"
+
+
+@pytest.fixture(scope="function")
+def run_stamp() -> str:
+    """Timestamp for the current test run: YYYY_MM_DD_HH_MM_SS."""
+    return now_time_as_string_for_files()
+
+
+@pytest.fixture(scope="function")
+def test_run_name(request: pytest.FixtureRequest) -> str:
+    """Sanitized test name, safe for use as a directory name."""
+    return _sanitize_test_name(request.node.name)
+
+
+@pytest.fixture(scope="function")
+def run_output_folder(
+    test_run_name: str,
+    run_stamp: str,
+) -> Path:
+    """Create and return tests/data/output/<test_name>/<timestamp>/."""
+    folder = _OUTPUT_ROOT / test_run_name / run_stamp
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
+@pytest.fixture(scope="function")
+def run_log_folder(
+    test_run_name: str,
+    run_stamp: str,
+) -> Iterator[Path]:
+    """Create tests/data/logs/<test_name>/<timestamp>/ and open the log file."""
+    folder = _LOG_ROOT / test_run_name / run_stamp
+    folder.mkdir(parents=True, exist_ok=True)
+    LogFiles.open_log_file(folder_path=str(folder), now_time=run_stamp)
+    try:
+        yield folder
+    finally:
+        LogFiles.close_log_file()
+```
+
+### Using the fixtures in tests
+
+Apply `run_log_folder` at module level so every test in the file gets logging:
+
+```python
+import pytest
+from pathlib import Path
+
+pytestmark = pytest.mark.usefixtures("run_log_folder")
+
+
+class TestFileSystemSnapshotWorkflow:
+    """Integration tests for the file system snapshot service."""
+
+    def test_run_basic_snapshot(
+        self,
+        run_output_folder: Path,
+        snapshot_configuration: FileSystemSnapshotConfigurations,
+    ) -> None:
+        """Test that a basic snapshot produces a populated universe."""
+        # Act
+        universe = FileSystemSnapshotServiceFacade.run_file_system_snapshot(
+            configurations=snapshot_configuration,
+        )
+
+        # Assert
+        assert universe is not None
+
+        # Write data output for inspection (separate from logs)
+        (run_output_folder / "universe_summary.json").write_text(
+            json.dumps(universe.to_summary_dict(), indent=2),
+        )
+```
+
+### Parallel execution (pytest-xdist)
+
+When running with `-n auto`, isolate output by worker to avoid folder collisions:
+
+```python
+import os
+
+worker_id = os.environ.get("PYTEST_XDIST_WORKER")
+if worker_id:
+    folder = _OUTPUT_ROOT / worker_id / test_run_name / run_stamp
+```
+
+### .gitignore entries
+
+Add these to `.gitignore` — test outputs are never committed:
+
+```
+tests/data/output/
+tests/data/logs/
+```
+
+---
+
 ## bclearer / BIE / BORO Patterns
 
 ### Identity vector tests

@@ -5,7 +5,8 @@ description: >
   Use when: auditing code before a refactoring task, reviewing a PR for clean coding
   compliance, or establishing a baseline before applying clean-code-refactor. Produces
   a violation report that clean-code-refactor and data-engineer Implement Mode can act on.
-  Supports Python, JavaScript/TypeScript, C#, and Rust.
+  Supports Python, JavaScript/TypeScript, C#, and Rust. Supports both general (Clean Code)
+  and OB (BORO Quick Style Guide) convention sets via the `standard` parameter.
 ---
 
 # Clean Code Reviewer
@@ -29,6 +30,39 @@ code-level violations) or the appropriate `[language]-data-engineer` in Implemen
 | `mode` | Yes | `full` \| `functions` \| `classes` \| `naming` \| `errors` \| `smells` |
 | `language` | Yes | `python` \| `javascript` \| `csharp` \| `rust` |
 | `severity_threshold` | No | `low` \| `medium` \| `high` — filter output below this level |
+| `standard` | No | `general` (default) \| `ob` — convention set to enforce |
+
+`standard` defaults to `general` when omitted. Set `standard: ob` for BORO/Ontoledgy codebases.
+
+---
+
+## Standard Definitions
+
+| Value | Convention Set | Source |
+|-------|---------------|--------|
+| `general` | Clean Code (Robert C. Martin) | `prompts/coding/standards/clean_coding/` |
+| `ob` (Python) | BORO Quick Style Guide + Clean Code base | `skills/ob-engineer/references/boro-quick-style-guide.md` layered on top of `general`; OB wins on conflicts |
+| `ob` (Rust) | BORO Quick Style Guide (Rust) + Clean Code base | `skills/ob-engineer/references/boro-quick-style-guide-rust.md` layered on top of `general`; OB wins on conflicts |
+
+When `standard=ob`, the reviewer checks all general rules **plus** the OB-specific rules below.
+Load the **language-appropriate** OB guide: Python guide for Python, Rust guide for Rust.
+OB mode supports Python and Rust. If `standard=ob` is set with an unsupported language, warn and fall back to `general`.
+
+### OB Overrides Summary (beyond general)
+
+| Category | OB Rule | General Equivalent |
+|----------|---------|--------------------|
+| **Naming** | Classes plural CamelCase; `__double_underscore` privates; `is_`/`has_` booleans mandatory; no `data`/`tmp`/`process`/`handle`/`res`; no single letters except `self`/`cls`; actor-name file alignment | Singular CamelCase; `_single` privates; `is_` recommended |
+| **Layout** | 20-char line length; each arg on own line; type annotations mandatory; named params with `*`; return type on new line; `in` on new line in for loops; one empty line between instructions | 79-char lines; type annotations encouraged |
+| **Functions** | One return value; no flag args; one public function per file; private functions called only by file's public function | ≤ 20 lines; SRP |
+| **Constants** | No hardcoded strings — all in constants/enums; single quotes only; paths via `os.path.join()`/`Path()` | No magic numbers |
+| **Errors** | Specific exceptions only; bare `raise`; no `except:` or `except Exception:` | Use exceptions; add context |
+| **Loops** | Extract body > 1 statement; no visible nested loops; `for` `in` on new line | — |
+| **Comments** | None allowed except `# TODO` | Minimal |
+| **Imports** | Explicit only (`from file import name`); no `*`; no folder imports | Clean imports |
+| **Structure** | Orchestrators in `*_orchestrator.py` (Python) / `*_orchestrator.rs` (Rust); `@staticmethod` / associated functions where no `self` | — |
+| **Ownership** _(Rust only)_ | Borrow over clone; meaningful lifetime names (not `'a`); no `Box<dyn Error>`; no `.unwrap()`; `unsafe` only with approval | — |
+| **Types** _(Rust only)_ | `#[derive(Debug)]` mandatory; no tuple structs in public API; no raw tuples in returns; private fields with getters | — |
 
 ---
 
@@ -61,6 +95,18 @@ Load the relevant standard documents from `prompts/coding/standards/clean_coding
 | `errors` | `error_handling.md` |
 | `smells` | `smells_and_heuristics.md` |
 | `full` | All of the above + `clean_coding_standards.md` |
+
+### Step 1b: Load OB Overrides (if `standard=ob`)
+
+If `standard=ob`, load the language-appropriate BORO Quick Style Guide:
+- **Python**: `skills/ob-engineer/references/boro-quick-style-guide.md`
+- **Rust**: `skills/ob-engineer/references/boro-quick-style-guide-rust.md`
+
+OB rules override general rules where they conflict. Rules not covered by OB fall back
+to general. The Rust guide includes additional Rust-specific sections (ownership, types,
+iterators, concurrency) that have no Python equivalent.
+
+Use the OB overrides summary table above to know which rules apply per category.
 
 ### Step 2: Load Language-Specific Rules
 
@@ -104,6 +150,7 @@ Use the template from `references/violation-report-template.md`.
 
 **Language:** [language]
 **Mode:** [mode]
+**Standard:** [general | ob]
 **Files reviewed:** [N]
 **Total violations:** [N] (HIGH: N, MEDIUM: N, LOW: N)
 
