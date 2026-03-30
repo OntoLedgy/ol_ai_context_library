@@ -1,17 +1,19 @@
 # OntoLedgy AI Context Library
 
-Curated library of AI context artefacts for the OL AI Services platform — including prompts, skills, agent configurations, and workflow instructions. Designed as a code-free, installable collection for use across OntoLedgy's LLM-orchestrated chemical engineering workflows.
+Curated library of AI context artefacts for the OL AI Services platform — including prompts, skills, agent configurations, and workflow instructions. Designed as a code-free, installable collection for use across OntoLedgy's LLM-orchestrated engineering, ontology, and delivery workflows.
 
 ## Repository Contents
 
 ### Skills
 
-Installable Claude Code skills for BIE (BORO Identity Ecosystem) development workflows.
+Installable agent skills for ontological analysis, architecture, implementation, and clean-code workflows.
 
-| Skill | Description |
-|-------|-------------|
-| `bie-data-engineer` | Implements a BIE domain in Python from an approved ontology model. Creates domain enums, bie_id creator functions, BieDomainObjects subclasses, registration helpers, and domain universe setup. |
-| `bie-component-ontologist` | Designs and reviews BIE component ontology models. Operates in Design Mode (new component) or Review Mode (validate/extract from existing code). Produces the 4 ontology deliverables required before implementation. |
+| Skill Family | Examples | Purpose |
+|-------------|----------|---------|
+| Ontologists | `ontologist`, `boro-ontologist`, `ob-ontologist`, `bie-component-ontologist` | Analyse a domain, build ontology models, and validate ontological coherence before design or implementation |
+| Architects | `software-architect`, `ob-architect`, `bclearer-pipeline-architect` | Design solution architecture, ontology-aware systems, and bclearer pipelines |
+| Engineers | `data-engineer`, `python-data-engineer`, `javascript-data-engineer`, `csharp-data-engineer`, `rust-data-engineer`, `ob-engineer`, `bclearer-pipeline-engineer`, `bie-data-engineer` | Implement approved designs in the target language or platform |
+| Clean Code | `clean-code-reviewer`, `clean-code-refactor`, `clean-code-naming`, `clean-code-tests`, `clean-code-commit` | Review, refactor, test, and commit changes using shared quality standards |
 
 ### Prompts
 
@@ -64,6 +66,43 @@ Python prompt modules for text extraction from documents.
 
 Skills can be installed using [`npx skills`](https://github.com/vercel-labs/skills), the open agent skills CLI that supports Claude Code, OpenCode, Codex, Cursor, and more.
 
+### Authentication (required for private repositories)
+
+If this repository is private, `npx skills add` will fail with an authentication error. You must provide a GitHub token before running any skills command.
+
+**Option 1 — Use the GitHub CLI token (recommended):**
+
+```bash
+# Log in once with the GitHub CLI
+gh auth login
+
+# Then prefix all skills commands with the token
+GITHUB_TOKEN=$(gh auth token) npx skills add OntoLedgy/ol_ai_context_library -g
+```
+
+**Option 2 — Use a personal access token (PAT):**
+
+```bash
+# Create a PAT at https://github.com/settings/tokens (needs `repo` scope)
+GITHUB_TOKEN=<your-token> npx skills add OntoLedgy/ol_ai_context_library -g
+```
+
+**Option 3 — Export once in your shell profile (recommended for daily use):**
+
+Add the following to `~/.bashrc` or `~/.zshrc` so the token is always available:
+
+```bash
+export GITHUB_TOKEN=$(gh auth token)
+```
+
+Then reload your shell (`source ~/.bashrc`) and run skills commands without the prefix:
+
+```bash
+npx skills add OntoLedgy/ol_ai_context_library -g
+```
+
+> **Note:** The WSL2 browser-based `gh auth login` flow may fail to open a browser automatically. If it hangs, copy the one-time code shown in the terminal, open `https://github.com/login/device` manually in your browser, and enter the code there.
+
 ### List available skills
 
 ```bash
@@ -79,6 +118,15 @@ npx skills add OntoLedgy/ol_ai_context_library
 ### Install a specific skill
 
 ```bash
+# Install the base ontologist skill
+npx skills add OntoLedgy/ol_ai_context_library --skill ontologist
+
+# Install the platform-independent BORO methodology skill
+npx skills add OntoLedgy/ol_ai_context_library --skill boro-ontologist
+
+# Install the OB ontologist skill
+npx skills add OntoLedgy/ol_ai_context_library --skill ob-ontologist
+
 # Install the BIE data engineer skill
 npx skills add OntoLedgy/ol_ai_context_library --skill bie-data-engineer
 
@@ -140,12 +188,19 @@ Once installed, skills are available in your coding agent sessions and can be tr
 ```
 ol_ai_context_library/
 ├── skills/
-│   ├── bie-data-engineer/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   └── bie-component-ontologist/
-│       ├── SKILL.md
-│       └── references/
+│   ├── ontologist/
+│   ├── boro-ontologist/
+│   ├── ob-ontologist/
+│   ├── software-architect/
+│   ├── ob-architect/
+│   ├── data-engineer/
+│   ├── python-data-engineer/
+│   ├── rust-data-engineer/
+│   ├── clean-code-reviewer/
+│   ├── clean-code-refactor/
+│   ├── bie-component-ontologist/
+│   └── bie-data-engineer/
+├── skills-lock.json
 └── prompts/
     ├── coding/
     │   ├── agents/

@@ -41,16 +41,25 @@ the responsibility of `clean-code-refactor` or the appropriate `[language]-data-
 | Value | Convention Set | Source |
 |-------|---------------|--------|
 | `general` | Clean Code (Robert C. Martin) | `prompts/coding/standards/clean_coding/meaningful_names.md` |
-| `ob` | BORO Quick Style Guide + Clean Code base | `skills/ob-engineer/references/boro-quick-style-guide.md` layered on top of `general`; OB wins on conflicts |
+| `ob` (Python) | BORO Quick Style Guide + Clean Code base | `skills/ob-engineer/references/boro-quick-style-guide.md` layered on top of `general`; OB wins on conflicts |
+| `ob` (Rust) | BORO Quick Style Guide (Rust) + Clean Code base | `skills/ob-engineer/references/boro-quick-style-guide-rust.md` layered on top of `general`; OB wins on conflicts |
 
-Key OB overrides for naming:
-- Classes: CamelCase, **plural** (e.g. `MyObjectTypes` not `MyObjectType`)
-- File names: **actor names** aligned with the file's public function
-- Private methods: `__double_underscore` (not `_single`)
-- Boolean functions: `is_` or `has_` prefix
+Key OB overrides for naming (both languages):
+- Structs/classes: PascalCase, **plural** (e.g. `MyObjectTypes` not `MyObjectType`)
+- File/module names: **actor names** aligned with the file's public function
+- Boolean functions: `is_` or `has_` prefix mandatory
 - No vague names: `data`, `tmp`, `process`, `handle`, `res` are forbidden
-- Forbidden single letters (except `self`, `cls`)
+- Forbidden single letters (except `self` / `cls`)
+
+Python-specific OB naming:
+- Private methods: `__double_underscore` (not `_single`)
 - String delimiter: single quotes only
+
+Rust-specific OB naming:
+- Private functions: `fn` (module-private) only — no `pub(crate)` for helpers
+- Enum variants: singular PascalCase (`OutputFormats::Csv`)
+- Lifetime names: meaningful words, not single letters (`'record`, not `'a`)
+- No tuple structs in public API — named fields only
 
 ---
 
@@ -63,8 +72,11 @@ Audit all names in `target_path` and produce a violation report.
 **Step 1 — Load standards**
 
 Load `prompts/coding/standards/clean_coding/meaningful_names.md`. If `standard=ob`, also
-load `skills/ob-engineer/references/boro-quick-style-guide.md` — OB rules override where
-they conflict.
+load the language-appropriate BORO Quick Style Guide:
+- **Python**: `skills/ob-engineer/references/boro-quick-style-guide.md`
+- **Rust**: `skills/ob-engineer/references/boro-quick-style-guide-rust.md`
+
+OB rules override where they conflict.
 
 **Step 2 — Read the code**
 
@@ -74,15 +86,16 @@ Read all files in `target_path`. Build the full symbol list before flagging viol
 
 For each symbol (function, class, variable, constant, module, parameter):
 
-| Check | general | ob override |
-|-------|---------|-------------|
-| Reveals intent | Names express purpose; no abbreviations or encodings | Same + no vague names (`data`, `process`, `handle`) |
-| Noun/verb convention | Classes = nouns; functions = verbs/verb phrases | Classes = plural CamelCase nouns; functions = action verbs |
-| No single letters | Except loop indices in small scopes | Except `self`, `cls` — no loop index exceptions |
-| No abbreviations | Full words only | Full words only; actor-name file alignment |
-| No encodings | No type prefixes (`strName`, `iCount`) | Same |
-| Searchable | Avoid generic names that produce too many search hits | Same + check actor/action file/function alignment |
-| Private convention | language-specific (`_` prefix in Python) | `__` double underscore in Python |
+| Check | general | ob override (Python) | ob override (Rust) |
+|-------|---------|-------------|-------------|
+| Reveals intent | Names express purpose; no abbreviations or encodings | Same + no vague names (`data`, `process`, `handle`) | Same as Python ob |
+| Noun/verb convention | Classes/structs = nouns; functions = verbs/verb phrases | Classes = plural CamelCase nouns; functions = action verbs | Structs/enums = plural PascalCase; enum variants = singular; functions = action verbs |
+| No single letters | Except loop indices in small scopes | Except `self`, `cls` — no loop index exceptions | Except `self` — no loop index exceptions |
+| No abbreviations | Full words only | Full words only; actor-name file alignment | Same + meaningful lifetime names (`'record`, not `'a`) |
+| No encodings | No type prefixes (`strName`, `iCount`) | Same | Same |
+| Searchable | Avoid generic names that produce too many search hits | Same + check actor/action file/function alignment | Same as Python ob |
+| Private convention | language-specific (`_` prefix in Python) | `__` double underscore in Python | `fn` (module-private) — no `pub(crate)` for helpers |
+| Type naming _(Rust only)_ | — | — | No tuple structs in public API; named fields only |
 
 **Step 4 — Produce violation report**
 
