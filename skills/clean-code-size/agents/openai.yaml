@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Code Size"
+  short_description: "Audit oversized files and propose splits"
+  default_prompt: "Use $clean-code-size to find oversized files and propose an architect-led module split plan."
