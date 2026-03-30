@@ -352,6 +352,7 @@ Notes:
 - Factory accepts `bie_id_registerer: BieIdRegisterer` — use `BieIdRegisterer` (wraps real registry) in production, `NoOpBieIdRegisterer` in unit tests
 - `register_bie_id(bie_base_identity=...)` — registers the object and its type-instance relation in one call
 - `issue_and_register_bie_id(request=RelationBieIdRequest(...))` — registers a relation between two objects
+- If additional local-domain `BieIds` are created during assembly, those `BieIds` must be materialised as objects and registered before they are used as relation targets
 - The private `_create_*_bie_base_identity` helper isolates identity construction — testable independently
 - For type-parameterized vectors (Style B), pass `bie_type=BieDomainNameTypes.BIE_OBJECT_TYPE_B` to the vector constructor
 
@@ -362,6 +363,13 @@ Registration is done inside factory functions via `BieIdRegisterer` (see Factory
 The canonical methods are:
 - `bie_id_registerer.register_bie_id(bie_base_identity=...)` — registers an object and its type-instance relation
 - `bie_id_registerer.issue_and_register_bie_id(request=RelationBieIdRequest(...))` — registers a relation between two objects
+
+In this skill, "register" always means writing rows into the parallel BIE universe / infrastructure registry tables. Local dictionaries, caches, or object attributes do NOT count as registration.
+
+Coverage rules:
+- Every local object `BieId` must have an object-registration path
+- Every local relation target must already exist in the object/type-instance tables
+- Every composite identity dependency should be visible in registered relations unless the dependency is explicitly external and already registered elsewhere
 
 `RelationBieIdRequest` fields:
 - `bie_place_1_id` — part/child object's `bie_id`
