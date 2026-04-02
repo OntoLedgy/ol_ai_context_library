@@ -158,17 +158,35 @@ Every component story must include:
 
 ## Accessibility Standards
 
-All components in `ol_ui_library` must meet **WCAG 2.1 AA** minimum:
+All components in `ol_ui_library` must meet **WCAG 2.2 AA** minimum. The POUR framework
+organises every requirement into four pillars:
+
+| Pillar | Meaning | Examples |
+|--------|---------|---------|
+| **Perceivable** | Content can be perceived through multiple senses | Alt text, colour contrast, captions |
+| **Operable** | All functionality works without a mouse | Keyboard nav, focus management, no time traps |
+| **Understandable** | Content and UI behaviour are predictable | Consistent nav, clear errors, explicit labels |
+| **Robust** | Works with current and future assistive technologies | Semantic HTML first; ARIA only when HTML is insufficient |
+
+### Hard Requirements (Level AA)
 
 | Requirement | Standard |
 |-------------|---------|
 | Colour contrast (text) | 4.5:1 minimum against background |
-| Colour contrast (large text > 18pt) | 3:1 minimum |
+| Colour contrast (large text ≥ 18pt or 14pt bold) | 3:1 minimum |
 | Colour contrast (UI components, focus rings) | 3:1 minimum |
-| Keyboard navigation | All interactive elements reachable and operable via keyboard |
-| Focus indicator | Visible focus ring on all interactive elements |
-| Screen reader | Meaningful ARIA labels; correct roles; live regions for dynamic content |
-| Motion | Respect `prefers-reduced-motion` — disable animations when set |
+| Keyboard navigation | All interactive elements reachable and operable via keyboard alone |
+| Focus indicator | Visible `:focus-visible` ring on all interactive elements — never `outline: none` without replacement |
+| Screen reader | Meaningful ARIA labels; correct semantic roles; `aria-live` regions for dynamic content |
+| Focus not obscured | Focused element must not be entirely hidden by sticky headers or overlays (new in WCAG 2.2) |
+| Dragging alternatives | Any drag-and-drop functionality has a single-pointer alternative (new in WCAG 2.2) |
+| Target size | Interactive targets ≥ 24×24 CSS pixels (new in WCAG 2.2) |
+| Motion | Respect `prefers-reduced-motion` — disable or significantly reduce animations when set |
+| Colour alone | Colour is never the sole means of conveying information — use shape, label, or pattern as secondary encoding |
 
-Components that manage focus (modals, dropdowns, tooltips) must implement focus trapping
-and return focus to the trigger element on close.
+### Implementation Rules
+
+- **Native HTML first**: `<button>`, `<a>`, `<input>` carry accessibility semantics for free. Use ARIA only when there is no native element for the role.
+- **Focus trapping**: Components that manage focus (modals, dropdowns, tooltips) must trap focus within the component while open and return focus to the trigger element on close.
+- **Functional images**: `alt` text describes the image's function, not appearance. Decorative images: `alt=""`.
+- **Form errors**: `aria-describedby` links the input to its error message. Error summary at top of form focuses the first error field on submit.

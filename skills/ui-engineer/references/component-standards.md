@@ -257,3 +257,300 @@ Rules:
 | `useEffect` for data derivation | Causes extra renders | Use `useMemo` for derived values |
 | `index` as React `key` | Causes incorrect reconciliation on reorder | Use stable entity IDs |
 | Nested ternaries in JSX | Unreadable | Extract to a named variable or helper function |
+| `outline: none` without replacement | Destroys keyboard accessibility | Replace with `:focus-visible` ring using design tokens |
+| `transition: all` | Animates layout properties; causes CLS and jank | List only `transform` and `opacity` explicitly |
+| `user-scalable=no` in viewport meta | Blocks zoom for low-vision users | Never set; let users zoom |
+| `<div onClick={...}>` | Not keyboard accessible; not announced by screen readers | Use `<button>` or `<a>` with correct role |
+| Hardcoded date formats | Locale-incompatible | Use `Intl.DateTimeFormat` with explicit locale |
+
+---
+
+## Implementation Micro-rules
+
+Specific rules derived from Vercel web-interface-guidelines and addyosmani/web-quality-skills.
+These are quick wins that prevent the most common accessibility, performance, and UX bugs.
+
+### Focus and Keyboard
+
+```css
+/* Always use :focus-visible — only shows ring for keyboard, not mouse */
+.button:focus-visible {
+  outline: 2px solid var(--shadow-focus);
+  outline-offset: 2px;
+}
+
+/* Never do this — removes focus ring for keyboard users */
+.button:focus { outline: none; }
+```
+
+```tsx
+// Icon-only buttons always need aria-label
+<button aria-label="Close dialog" onClick={onClose}>
+  <CloseIcon aria-hidden="true" />
+</button>
+```
+
+### Forms
+
+```tsx
+// Inputs need autocomplete + name for password managers and autofill
+<input
+  type="email"
+  name="email"
+  autoComplete="email"
+  aria-label="Email address"
+/>
+
+// Always associate label with input — never rely on placeholder alone
+<label htmlFor="pipeline-name">Pipeline name</label>
+<input id="pipeline-name" type="text" />
+
+// Never block paste — users paste passwords, OTP codes, and data
+// Remove: onPaste={e => e.preventDefault()}
+
+// On form submit with errors: focus the first error field
+function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  const firstError = formRef.current?.querySelector('[aria-invalid="true"]');
+  (firstError as HTMLElement)?.focus();
+}
+```
+
+### Animation
+
+```css
+/* Only animate transform and opacity — compositor-thread only */
+.panel {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity   150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Never animate layout properties */
+/* BAD: .panel { transition: height 200ms; } */
+/* BAD: .panel { transition: margin 200ms; } */
+
+/* Always respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
+}
+```
+
+### Typography
+
+```css
+/* Balance heading line breaks — prevents orphaned words */
+h1, h2, h3 { text-wrap: balance; }
+
+/* Align number columns in tables and dashboards */
+.metric-value, td.numeric { font-variant-numeric: tabular-nums; }
+```
+
+### Navigation and URL State
+
+```tsx
+// Deep-linkable state belongs in the URL, not in useState
+// Use <Link> for navigation — never <div onClick={() => navigate(...)}>
+
+// Bad: state in React, not URL — not shareable, not bookmarkable
+const [activeTab, setActiveTab] = useState('overview');
+
+// Good: state in URL — shareable, bookmarkable, browser-back works
+const [searchParams, setSearchParams] = useSearchParams();
+const activeTab = searchParams.get('tab') ?? 'overview';
+```
+
+### Destructive Actions
+
+```tsx
+// Always confirm before irreversible operations
+function DeletePipelineButton({ onConfirm }: { onConfirm: () => void }) {
+  const [showConfirm, setShowConfirm] = useState(false);
+  return (
+    <>
+      <Button intent="danger" onClick={() => setShowConfirm(true)}>
+        Delete pipeline
+      </Button>
+      {showConfirm && (
+        <ConfirmationModal
+          title="Delete pipeline?"
+          description="This action cannot be undone."
+          confirmLabel="Delete"
+          onConfirm={onConfirm}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
+    </>
+  );
+}
+```
+
+### Dynamic Content
+
+```tsx
+// Announce non-critical async updates to screen readers
+<div aria-live="polite" aria-atomic="true">
+  {uploadStatus && <p>{uploadStatus}</p>}
+</div>
+
+// Announce errors immediately
+<div role="alert">
+  {error && <p>{error.message}</p>}
+</div>
+```
+
+---
+
+## Compound Component Pattern
+
+Use when a component family needs flexible internal composition without a proliferation of
+boolean props. Replaces: `<Tabs activeTab="x" showBorder hideIcons verticalLayout />`.
+
+```typescript
+// Context holds shared state
+interface TabsContextValue {
+  readonly activeTab: string;
+  readonly setActiveTab: (id: string) => void;
+}
+const TabsContext = createContext<TabsContextValue | null>(null);
+
+function useTabsContext() {
+  const ctx = useContext(TabsContext);
+  if (!ctx) throw new Error('Must be used inside <Tabs>');
+  return ctx;
+}
+
+// Root component owns the state
+function Tabs({ defaultTab, children }: { defaultTab: string; children: React.ReactNode }) {
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  return (
+    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+      <div className={styles.tabs}>{children}</div>
+    </TabsContext.Provider>
+  );
+}
+
+// Sub-components consume the context
+function TabList({ children }: { children: React.ReactNode }) {
+  return <div role="tablist" className={styles.tabList}>{children}</div>;
+}
+
+function Tab({ id, children }: { id: string; children: React.ReactNode }) {
+  const { activeTab, setActiveTab } = useTabsContext();
+  return (
+    <button
+      role="tab"
+      aria-selected={activeTab === id}
+      onClick={() => setActiveTab(id)}
+      className={`${styles.tab} ${activeTab === id ? styles.active : ''}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function TabPanel({ id, children }: { id: string; children: React.ReactNode }) {
+  const { activeTab } = useTabsContext();
+  if (activeTab !== id) return null;
+  return <div role="tabpanel">{children}</div>;
+}
+
+// Attach sub-components to root for ergonomic usage
+Tabs.List  = TabList;
+Tabs.Tab   = Tab;
+Tabs.Panel = TabPanel;
+
+// Consumer usage — composition, no boolean props
+<Tabs defaultTab="overview">
+  <Tabs.List>
+    <Tabs.Tab id="overview">Overview</Tabs.Tab>
+    <Tabs.Tab id="stages">Stages</Tabs.Tab>
+    <Tabs.Tab id="logs">Logs</Tabs.Tab>
+  </Tabs.List>
+  <Tabs.Panel id="overview"><OverviewContent /></Tabs.Panel>
+  <Tabs.Panel id="stages"><StagesContent /></Tabs.Panel>
+  <Tabs.Panel id="logs"><LogsContent /></Tabs.Panel>
+</Tabs>
+```
+
+**When to use compound components**: Navigation (Tabs, Accordion, Menu), form field
+families, multi-step containers. **When not to**: Simple standalone components — compound
+pattern adds ceremony that is not justified for a single component.
+
+---
+
+## React 19 Patterns
+
+### `use()` Hook for Promises
+
+```typescript
+// React 19: unwrap a promise inside a component (must be wrapped in Suspense)
+import { use } from 'react';
+
+function PipelineDetails({ pipelinePromise }: { pipelinePromise: Promise<Pipeline> }) {
+  const pipeline = use(pipelinePromise);  // Suspends until resolved
+  return <div>{pipeline.name}</div>;
+}
+
+// Parent wraps with Suspense
+<Suspense fallback={<PipelineSkeleton />}>
+  <PipelineDetails pipelinePromise={fetchPipeline(id)} />
+</Suspense>
+```
+
+### Form Actions (React 19)
+
+```typescript
+// React 19: useActionState replaces manual isPending + error state for form submissions
+import { useActionState } from 'react';
+
+async function submitPipelineAction(
+  previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const name = formData.get('name') as string;
+  try {
+    await createPipeline({ name });
+    return { status: 'success' };
+  } catch (error) {
+    return { status: 'error', message: 'Failed to create pipeline' };
+  }
+}
+
+function CreatePipelineForm() {
+  const [state, action, isPending] = useActionState(submitPipelineAction, { status: 'idle' });
+  return (
+    <form action={action}>
+      <input name="name" type="text" required />
+      {state.status === 'error' && <p role="alert">{state.message}</p>}
+      <Button type="submit" loading={isPending}>Create</Button>
+    </form>
+  );
+}
+```
+
+### `useOptimistic` for Instant Feedback
+
+```typescript
+// Optimistically update UI before server confirms
+import { useOptimistic } from 'react';
+
+function PipelineList({ pipelines, onDelete }: PipelineListProps) {
+  const [optimisticPipelines, removeOptimistically] = useOptimistic(
+    pipelines,
+    (current, idToRemove: string) => current.filter(p => p.id !== idToRemove),
+  );
+
+  const handleDelete = async (id: string) => {
+    removeOptimistically(id);   // Instant UI update
+    await deletePipeline(id);   // Server call — UI already reflects the change
+  };
+
+  return (
+    <ul>
+      {optimisticPipelines.map(p => (
+        <PipelineItem key={p.id} pipeline={p} onDelete={handleDelete} />
+      ))}
+    </ul>
+  );
+}
+```

@@ -36,7 +36,8 @@ Default to **TypeScript** and **React** unless the project specifies otherwise.
 | Reference | Content |
 |-----------|---------|
 | `skills/ui-architect/references/project-structure.md` | Canonical folder naming (`frontend/`), product application layout (Feature-Sliced), ol_ui_library layout (Atomic), file naming conventions |
-| `references/component-standards.md` | SOLID principles for React, component size limits, naming conventions, co-location rules |
+| `references/component-standards.md` | SOLID principles, compound components, React 19 patterns, implementation micro-rules (focus, forms, animation, typography, URL state), forbidden patterns |
+| `references/performance.md` | Core Web Vitals (LCP/INP/CLS targets), eliminating waterfalls, bundle optimisation, list virtualisation, re-render memoisation |
 | `references/ux-journey-implementation.md` | Wizard, file upload, monitoring dashboard, results dashboard implementation patterns |
 | `references/data-visualisation.md` | Recharts/ECharts usage, real-time data hooks, chart component patterns |
 | `references/ol-ui-library.md` | ol_ui_library component catalogue, usage patterns, Storybook contribution workflow |
@@ -127,6 +128,7 @@ vitest run             # unit + component tests (React Testing Library)
 vitest run --coverage  # coverage report (80% line coverage minimum for ol_ui_library)
 playwright test        # end-to-end journey tests
 storybook build        # confirm all stories compile without errors
+npx lighthouse <url>   # Core Web Vitals: LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1
 ```
 
 All gates must pass before declaring implementation complete.
@@ -161,7 +163,7 @@ When reviewing UI code, apply these checks in addition to the `data-engineer` re
 | **Component size** | Within size limits? Logic extracted to hooks? |
 | **SOLID compliance** | One responsibility? Domain logic absent from render? Props interface not over-specified? |
 | **State co-location** | Server state in React Query? No unnecessary lifts to global store? |
-| **Accessibility** | jsx-a11y rules passing? ARIA labels present? Keyboard interaction implemented? |
+| **Accessibility** | jsx-a11y rules passing? WCAG 2.2 AA met (POUR)? `:focus-visible` used? No `outline: none`? `prefers-reduced-motion` respected? ARIA labels present? |
 | **Naming** | `handle*` for internal handlers, `on*` for callback props, `use*` for hooks? |
 | **ol_ui_library usage** | Using library components where they exist? Not re-implementing atoms? |
 | **Test quality** | Tests cover states (loading, error, empty, populated)? Testing behaviour not implementation? |

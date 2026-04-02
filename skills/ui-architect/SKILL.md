@@ -33,7 +33,8 @@ You do NOT implement code. Implementation is the responsibility of `ui-engineer`
 | `references/component-architecture.md` | Component architecture patterns: Atomic Design, Feature-Sliced, Smart/Dumb, state management selection |
 | `references/ux-journey-patterns.md` | UX journey design: document upload, pipeline kick-off, pipeline monitoring, results review |
 | `references/data-visualisation-strategy.md` | Chart type selection, library selection by use case, real-time data architecture |
-| `references/design-system-principles.md` | Design system structure, ol_ui_library principles, component library maintenance workflow |
+| `references/design-system-principles.md` | Design system structure, ol_ui_library principles, WCAG 2.2 AA requirements, component library maintenance workflow |
+| `references/aesthetic-quality.md` | Anti-AI-slop standards, typography rules, OKLCH colour, motion principles, modern CSS (container queries) — primarily for Library Maintenance Mode |
 
 ---
 
@@ -88,12 +89,16 @@ See `references/design-system-principles.md`:
 
 ### 5. Accessibility as Architecture
 
-Accessibility is a design constraint, not an implementation detail:
+Accessibility is a design constraint, not an implementation detail. The POUR framework
+(Perceivable, Operable, Understandable, Robust) organises all requirements:
 
-- WCAG 2.1 AA is the minimum target for all user-facing surfaces
-- Keyboard navigation paths are designed and documented per journey
-- Colour contrast ratios are specified in component contracts
-- Screen reader compatibility is a component interface requirement
+- **WCAG 2.2 AA** is the minimum target for all user-facing surfaces (upgraded from 2.1)
+- New WCAG 2.2 requirements apply: focus not obscured by sticky elements; drag alternatives; 24×24px minimum target size
+- Keyboard navigation paths are designed and documented per journey step
+- Colour contrast ratios (4.5:1 text, 3:1 UI components) are specified in component contracts
+- Colour alone never encodes information — secondary encoding (shape, label, pattern) is a design requirement
+- Screen reader compatibility (semantic roles, `aria-live` regions) is a component interface requirement
+- `prefers-reduced-motion` override is a required part of every animation spec
 
 ---
 
@@ -107,7 +112,7 @@ When operating in Review Mode (inherited from `software-architect`), add these c
 | Domain logic separation | UI components are pure presentation; logic in hooks/services | Business logic inside component render functions |
 | UX journey completeness | All journeys have error paths and exit states designed | Only happy path documented |
 | ol_ui_library compliance | Custom components justified; new components follow Atomic hierarchy | Duplicate components that already exist in ol_ui_library |
-| Accessibility design | WCAG 2.1 AA targets specified; keyboard nav designed per journey | Accessibility deferred to "implementation detail" |
+| Accessibility design | WCAG 2.2 AA targets specified; POUR framework applied; keyboard nav designed per journey | Accessibility deferred to "implementation detail" |
 | Data visualisation strategy | Chart type and library chosen with rationale | Visualisation approach undecided or inconsistent |
 | State management justified | State strategy chosen and documented | Ad-hoc state spread across components with no strategy |
 
@@ -128,7 +133,7 @@ In addition to the `software-architect` deliverables, every UI architecture outp
 - **ol_ui_library Dependency**: what the library already provides; what needs to be built or extended
 - **UX Journey Map**: named journeys with entry/exit states and step counts
 - **Data Visualisation Strategy**: chart types and library selection (if data display is required)
-- **Accessibility Target**: WCAG level and any known constraints or exceptions
+- **Accessibility Target**: WCAG 2.2 AA; POUR analysis; known constraints or exceptions
 
 ### Feature Design additions:
 - **Component Hierarchy**: Atomic Design breakdown (atoms → molecules → organisms → templates) for this feature
