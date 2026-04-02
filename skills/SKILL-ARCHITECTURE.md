@@ -72,6 +72,8 @@ mindmap
 | `bie-data-engineer` | Implement | Engineer | BIE | Python | BIE Implementation |
 | `ob-engineer` | Implement | Engineer | Ontology | Python | Ontology Implementation |
 | `bclearer-pipeline-engineer` | Implement | Engineer | Pipeline | Python | Pipeline Implementation |
+| `ui-architect` | Design | Architect | UI | Agnostic | UI Design |
+| `ui-engineer` | Implement | Engineer | UI | TypeScript | UI Implementation |
 | `clean-code-reviewer` | Review | Engineer | Solution | Multi | _(cross-cutting)_ |
 | `clean-code-refactor` | Refactor | Engineer | Solution | Multi | _(cross-cutting)_ |
 | `clean-code-naming` | Review/Fix/Suggest | Engineer | Solution | Multi | _(cross-cutting)_ |
@@ -232,7 +234,7 @@ C             ontologist‡                                          cc-ref
 O  Ontology   ob-arch†       ob-eng   ·            ·      ·       ·
 P             ob-ontologist‡
 E  Pipeline   bcl-arch†      bcl-eng  ·            ·      ·       ·
-   UI         ·              ·        ·            ·      ·       ·
+   UI         ui-arch†       ·        ui-eng       ·      ·       ·
    BIE        bie-comp-ont‡  bie-eng  ·            ·      ·       ·
 ──────────────────────────────────────────────────────────────────────
   † = Architect role (Design mode)
@@ -254,6 +256,7 @@ flowchart TD
         OB_A[ob-architect\nOntology]
         SA -->|"extends"| BCL_A
         SA -->|"extends"| OB_A
+        SA -->|"extends"| UI_A[ui-architect\nUI]
     end
 
     subgraph Ontologist["Role: Ontologist"]
@@ -281,6 +284,7 @@ flowchart TD
         DE -->|"extends"| CS
         DE -->|"extends"| RS
         DE -->|"extends"| BIE_E
+        JS -->|"extends"| UI_E[ui-engineer\nUI · TypeScript]
         PY -->|"extends"| OB_E
         OB_E -->|"extends"| BCL_E
     end
@@ -294,6 +298,7 @@ flowchart TD
     SA -->|"design feeds"| DE
     BCL_A -->|"design feeds"| BCL_E
     OB_A -->|"design feeds"| OB_E
+    UI_A -->|"design feeds"| UI_E
     BORO_CORE -.->|"loads when needed"| OB_ONT
     OB_ONT -->|"model feeds"| OB_E
     BCO -->|"model feeds"| BIE_E
@@ -330,8 +335,9 @@ Pipeline   │ bclearer-  │────────────────►
                                            │  ob-engineer) │
                                            └───────────────┘
 UI         ┌────────────┐                  ┌───────────────┐
-           │ ·          │                  │ ·             │   ← scope exists,
-           └────────────┘                  └───────────────┘     skills pending
+           │ ui-        │────────────────►│ ui-engineer   │
+           │ architect  │                  │ (TypeScript)  │
+           └────────────┘                  └───────────────┘
 ```
 
 ---
@@ -360,7 +366,8 @@ The inheritance diagram above reflects the **current** state. When Phase 7 compl
 | BIE × non-Python | Implement / Engineer / BIE / TypeScript, C#, Rust | BIE impl locked to Python |
 | Pipeline × non-Python | Implement / Engineer / Pipeline / TypeScript, C#, Rust | Pipeline impl locked to Python |
 | Ontology × non-Python | Implement / Engineer / Ontology / TypeScript, C#, Rust | `ob-engineer` (Python) exists; other languages still gaps |
-| UI × all | * / * / UI / * | No UI skills exist |
+| UI × non-TypeScript | Implement / Engineer / UI / Python, C#, Rust | `ui-engineer` (TypeScript) exists; other UI languages still gaps |
+| UI × Architect (non-Agnostic) | Design / Architect / UI / Python, C# | `ui-architect` is agnostic; no platform-specific UI architect variants |
 | Architect:Refactor | Refactor / Architect / * | No structural refactoring skill |
 | Architect:Review (standalone) | Review / Architect / * | Architecture review is embedded, not composable |
 | Pipeline × Ontologist | Analysis / Ontologist / Pipeline / * | No pipeline ontologist (pipeline domains analysed via ob-ontologist) |
@@ -395,6 +402,8 @@ Format: `[Role]:[Mode]:[Scope]:[Language]`
 | `engineer:implement:bie:python` | bie-data-engineer |
 | `engineer:implement:ontology:python` | ob-engineer |
 | `engineer:implement:pipeline:python` | bclearer-pipeline-engineer |
+| `architect:design:ui:agnostic` | ui-architect |
+| `engineer:implement:ui:typescript` | ui-engineer |
 | `engineer:review:solution:multi` | clean-code-reviewer |
 | `engineer:refactor:solution:multi` | clean-code-refactor |
 
