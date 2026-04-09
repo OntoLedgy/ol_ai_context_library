@@ -50,7 +50,14 @@ Then derive the implementation artifacts you need:
 - **Enum definitions** — map object types to enum members, determine if domain-specific relation type enums are needed
 - **Identity Vectors** — for each object type, define a NamedTuple of typed places and a `CommonIdentityVector` subclass that takes `bie_type`, `bie_hr_name`, and the typed places as constructor args and calls `super().__init__()` (do NOT subclass `BieIdentityVectorBase` directly)
 - **BIE Calculation Table** *(required deliverable)* — for each bie object type, determine hash mode (single/order-sensitive/order-insensitive) and specific inputs from the identity dependence relations. This table must be produced and shown to the user before any code is written — it is a first-class output artifact alongside the identity vectors file
-- **Relation registrations** — determine the bie_id_tuples to register from the relation types table
+- **Registration coverage map** — for each local object type and each additional local `BieId` created during assembly, decide where object registration happens (`register_bie_id`) and where identity-dependence / containment relations are registered (`issue_and_register_bie_id`)
+
+Registration semantics for this skill:
+- "Register" means writing rows into the parallel BIE universe / infrastructure registry tables
+- `register_bie_id(...)` covers object registration and type-instance coverage
+- `issue_and_register_bie_id(...)` covers relation registration
+- Storing a `BieId` on an object or in a local dictionary does NOT count as registration
+- A bare `BieId` is acceptable only for an explicit external dependency that is already registered elsewhere
 
 ### Step 2: Read the File System Snapshot Domain Reference
 
@@ -108,6 +115,7 @@ For each domain object type, create a `create_*` factory function in a sibling `
 4. Constructs the domain object, passing `bie_base_identity`
 5. Registers via `bie_id_registerer.register_bie_id(bie_base_identity=bie_base_identity)`
 6. Registers relations via `bie_id_registerer.issue_and_register_bie_id(request=RelationBieIdRequest(...))`
+7. If additional local-domain `BieIds` are created during assembly, materialises and registers those objects before using them as relation targets
 
 The `bie_id_registerer` parameter is of type `BieIdRegisterer` (from `bclearer_core.infrastructure.session.bie_id_registerers.bie_id_registerer`). Use `NoOpBieIdRegisterer` in unit tests.
 
@@ -188,6 +196,9 @@ After implementation, verify:
 - [ ] Factory functions accept `bie_id_registerer: BieIdRegisterer` (not `BieInfrastructureRegistries` directly)
 - [ ] Each domain object class receives `bie_base_identity: BieBaseIdentities` and calls `super().__init__(bie_base_identity=bie_base_identity)` — does NOT implement `_create_vector()`, does NOT pass `bie_id`, `base_hr_name`, or `bie_type` separately
 - [ ] Registration uses `bie_id_registerer.register_bie_id(bie_base_identity=...)` for objects and `bie_id_registerer.issue_and_register_bie_id(request=RelationBieIdRequest(...))` for relations — the older `register_bie_object_and_type_instance()`, `register_bie_relation()`, and direct `create_and_register_bie_id()` APIs are NOT the canonical pattern
+- [ ] Every local object `BieId` created or retained by the domain is registered in the parallel BIE universe, or is explicitly identified as an external dependency already registered elsewhere
+- [ ] No local relation points at an unregistered `BieId`
+- [ ] Every composite identity dependency from the ontology and creator code is mirrored by registered relations unless it is explicitly external
 - [ ] Parts are constructed before wholes (matches construction order from ontology)
 - [ ] Construction order is documented in the identity vectors module or domain module docstring
 - [ ] All relation types from the ontology are registered via `RelationBieIdRequest`
