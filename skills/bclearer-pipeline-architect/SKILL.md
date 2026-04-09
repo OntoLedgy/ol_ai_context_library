@@ -26,6 +26,7 @@ Beyond the base `software-architect` references, you draw on:
 | Reference | Content |
 |-----------|---------|
 | `references/pipeline-patterns.md` | bclearer pipeline topology: stages, runners, universe wiring |
+| `references/stage-guidelines.md` | Detailed per-stage responsibilities, scenarios, and anti-patterns |
 | `references/interop-conventions.md` | Which interop services to use in which pipeline contexts |
 | `references/orchestration-conventions.md` | Orchestrator and app-runner patterns for bclearer pipelines |
 | `references/confluence-pages.md` | Pipeline-specific Confluence space and page structure |
