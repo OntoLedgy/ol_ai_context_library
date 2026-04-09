@@ -177,10 +177,29 @@ B-units are named with a stage-letter prefix + sequential letter + optional desc
 ## Universe Wiring
 
 - Universe is created at the **top of the runner** — not inside a stage or B-unit
-- Passed as `input_object` to all object-passing B-units
+- Passed as a named parameter through every orchestrator level (pipeline → thin slice → stage → sub-stage) and then as `input_object` to all object-passing B-units
 - Holds all registries and registers for the lifetime of the pipeline run
 - Never stored in global or module-level state
 - Disposed (or serialised via `export_to_disk()`) after the final stage
+
+### Universe Naming Between Stages
+
+**Do not rename the universe parameter between stages.** Use a single, consistent
+parameter name at every orchestrator level from the pipeline orchestrator downward.
+
+The exemplar pattern (from `bie_core_graph`):
+
+| Level | Parameter Name | Type Hint |
+|-------|---------------|-----------|
+| Runner (creation) | `{domain_specific_name}` (e.g. `neo4j_import_spoke_bclearer_run_universe`) | Specific subclass |
+| Pipeline orchestrator | `bclearer_run_universe` | `BClearerRunUniverses` (base class) |
+| Stage orchestrator | `bclearer_run_universe` | `BClearerRunUniverses` |
+| Sub-stage orchestrator | `bclearer_run_universe` | `BClearerRunUniverses` |
+| B-unit creation call | `bclearer_run_universe=bclearer_run_universe` | `BClearerRunUniverses` |
+
+The runner may use a domain-specific variable name when creating the universe, but once
+it is passed into the pipeline orchestrator, the parameter name becomes the generic
+`bclearer_run_universe` and **stays the same through every stage and sub-stage**.
 
 ---
 
