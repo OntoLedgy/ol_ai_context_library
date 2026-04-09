@@ -37,6 +37,7 @@ Beyond the base `data-engineer` references, you draw on:
 | `references/bclearer-code-style.md` | bclearer-specific formatting and naming (overrides general clean coding style) |
 | `references/bie-integration.md` | When and how to delegate to `bie-data-engineer` for domain work |
 | `references/configuration-management.md` | Configuration flow, env var rules, path resolution, application-pipeline boundary |
+| `references/bunit-implementation-guidelines.md` | bUnit implementation patterns, domain configuration, bUnit Type generalisation, and type extraction refactoring |
 
 The base data-engineer references (`clean-coding-index.md`, `testing-index.md`) remain
 fully in scope, but `references/bclearer-code-style.md` takes precedence for formatting
@@ -102,6 +103,29 @@ Beyond pytest/mypy/ruff, verify:
 ---
 
 ## bclearer-Specific Additions to Review Mode
+
+### bUnit Type Extraction (Review/Refactor sub-mode)
+
+When reviewing existing bclearer pipeline code, additionally assess whether
+concrete bUnits should be refactored into reusable **bUnit Types**. Follow the
+process in `references/bunit-implementation-guidelines.md` § "Review/Refactor
+Mode: bUnit Type Extraction":
+
+1. **Catalogue** all bUnits with their helper functions and varying parameters
+2. **Group** bUnits that call the same helper function with different parameters
+3. **Extract** the varying parameters as bUnit Type constructor arguments
+4. **Implement** the bUnit Type in `libraries/core/bclearer_core/objects/b_units/types/`
+5. **Refactor** concrete bUnits to inherit from the type, passing parameters via constructor
+6. **Verify** all gate contracts, data lineage traces, and tests remain unchanged
+
+Add these checks to the review checklist:
+
+| Principle | Expected | Actual | Status |
+|-----------|----------|--------|--------|
+| bUnit atomicity | Each `b_unit_process_function()` does one thing | | |
+| Helper function fan-in | Shared helpers identified as type candidates | | |
+| bUnit Type extraction | Duplicate patterns refactored into types | | |
+| Gate contract preservation | Input/output registers unchanged after refactor | | |
 
 When reviewing bclearer pipeline code, add to the standard review checklist:
 
