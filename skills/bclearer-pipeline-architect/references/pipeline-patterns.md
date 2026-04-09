@@ -44,24 +44,29 @@ for every pipeline — include only the stages that apply.
 ```
 1c_collect   →  2l_load   →  3e_evolve   →  4a_assimilate   →  5r_reuse
    Collect        Load          Evolve         Assimilate          Reuse
- (raw ingest)  (prepare)   (transform)     (integrate)         (output)
+  (gather)     (read/parse)  (transform)     (integrate)         (output)
 ```
 
 ### Stage 1 — `1c_collect` (Collect)
 
-- **Responsibility**: Read raw data from an external source
+- **Responsibility**: Gather data from external sources into the pipeline's staging area
 - **Input**: External source (file system, database, API, message queue)
-- **Output**: Raw Python data structures loaded into Universe registers (dicts, DataFrames, file paths)
+- **Output**: File paths, URIs, or raw extracted data registered in Universe registers
 - **Pattern**: Adapter — wraps a `bclearer_interop_services` module; no domain logic
-- **Must NOT**: Create BIE objects, apply transformations, or write to external targets
+- **Must NOT**: Read or parse file contents, create DataFrames from files, create BIE objects, apply transformations, or write to external targets
+
+For file-based sources (Excel, CSV, JSON, Parquet), Collect acquires the file — it does
+NOT open or parse it. For database sources where the query IS the acquisition step,
+Collect may return result sets directly. See `references/stage-guidelines.md` for
+detailed scenario guidance.
 
 ### Stage 2 — `2l_load` (Load)
 
-- **Responsibility**: Prepare and normalise raw data before processing
-- **Input**: Raw data from stage 1 in Universe registers
+- **Responsibility**: Read, parse, and prepare collected data for processing
+- **Input**: File paths or raw data from stage 1 in Universe registers
 - **Output**: Cleaned, typed, validated in-memory structures in Universe registers
-- **Pattern**: Service — pure transformation on in-memory data
-- **Must NOT**: Read from external sources or write to external targets
+- **Pattern**: Service — reads locally-staged files and transforms into typed structures
+- **Must NOT**: Acquire data from external sources or write to external targets
 
 ### Stage 3 — `3e_evolve` (Evolve)
 
