@@ -93,3 +93,4 @@ When reviewing an existing bclearer pipeline, add to the standard review checkli
 | Universe scoping | One Universe per pipeline run; not global state | | |
 | Runner wiring follows convention | `b_app_runner_service` or equivalent used for entry point | | |
 | Construction order respected | BIE leaf entities before composites within pipeline | | |
+| Configuration boundary | Env vars read at entry point only; paths absolute in Universe; no `os.getenv()` in orchestrators or B-units | | |

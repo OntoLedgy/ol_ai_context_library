@@ -285,6 +285,14 @@ not inside a stage. This ensures all stages share the same Universe instance.
 - Configuration is set in the pipeline runner or orchestrator, not in individual B-units
 - B-units read configuration from `universe.get_configuration(ConfigEnum.SOME_KEY)`
 - Enum keys for configuration live in `{pipeline_name}/objects/enums/`
+- Environment variables are read **once** at the application entry point or pipeline
+  runner, then injected into the Universe — B-units and orchestrators never call
+  `os.getenv()`
+- All file paths must be **absolute** by the time they enter the Universe — the
+  application layer resolves relative paths before injection
+
+For full configuration rules, templates, and the application-pipeline boundary
+contract, see `bclearer-pipeline-engineer/references/configuration-management.md`.
 
 ---
 
