@@ -472,7 +472,7 @@ Beyond `ruff`, `mypy`, `pytest`, verify after implementation:
 - [ ] `create_and_run_b_unit()` used to instantiate and run all B-units (not direct instantiation)
 - [ ] Universe created in the runner — not inside a stage orchestrator or B-unit
 - [ ] Universe parameter named `bclearer_run_universe` consistently across all stages — not renamed per stage
-- [ ] Interop service imports only in `1c_collect` and `5r_reuse` B-units
+- [ ] Interop service imports only in `1c_collect`, `2l_load`, and `5r_reuse` B-units
 - [ ] BIE factories only in `bie/` folder (if BIE domain used)
 - [ ] No cross-stage imports (stage A B-units do not import stage B B-units)
 - [ ] Configuration values read from Universe, not hardcoded in B-units

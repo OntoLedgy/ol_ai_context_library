@@ -7,25 +7,30 @@ Grounded in the bclearer PDK source at `ol_bclearer_pdk/libraries/interop_servic
 ## Principle
 
 Interop services are **boundary adapters only**. They appear exclusively in:
-- **Stage 1c_collect** — reading raw data from an external source
+- **Stage 1c_collect** — gathering data from an external source into the pipeline's staging area
+- **Stage 2l_load** — reading locally-staged files into in-memory structures (the file
+  is already under the pipeline's control after Collect)
 - **Stage 5r_reuse** — writing results to an external target
 
-Domain logic stages (2l_load, 3e_evolve, 4a_assimilate) must NOT import or depend on
-any `bclearer_interop_services` module directly.
+Domain logic stages (3e_evolve, 4a_assimilate) must NOT import or depend on any
+`bclearer_interop_services` module directly.
 
 ```
 External Source
     ↓
 [1c_collect B-unit] ── bclearer_interop_services ──→ Universe registers
-                                                         (raw data)
+                                                       (file paths / raw data)
+    ↓
+[2l_load B-unit] ── bclearer_interop_services ──→ Universe registers
+                                                    (parsed, typed structures)
                             ...domain stages...
 Universe registers
     ↓
 [5r_reuse B-unit] ── bclearer_interop_services ──→ External Target
 ```
 
-This boundary makes stages independently testable — domain stages can be tested
-with mock Universe data without any I/O.
+This boundary makes domain stages independently testable — 3e_evolve and 4a_assimilate
+can be tested with mock Universe data without any I/O.
 
 ---
 
@@ -93,11 +98,12 @@ All services live under `bclearer_interop_services`:
 
 ## Adapter Boundary Rules
 
-1. **Import interop services only in B-units inside `1c_collect` and `5r_reuse` stages.**
+1. **Import interop services only in B-units inside `1c_collect`, `2l_load`, and `5r_reuse` stages.**
 2. **Never import interop services in orchestrators, services, or BIE modules.**
-3. **Data leaving a collect B-unit enters the Universe as a raw Python structure** (DataFrame, list of dicts, path string) — domain stages receive it from there.
-4. **Data entering a reuse B-unit is read from Universe registers** — the B-unit calls the interop service to write it out.
-5. **Error handling at adapter boundaries**: raise a specific exception type (not bare `Exception`) if a source file is missing, malformed, or a target write fails. Log the specific path or query that failed.
+3. **Data leaving a collect B-unit enters the Universe as file paths, URIs, or raw extracted data** — Load parses it into typed structures.
+4. **Data leaving a load B-unit enters the Universe as typed, in-memory structures** (DataFrames, typed dicts) — domain stages receive it from there.
+5. **Data entering a reuse B-unit is read from Universe registers** — the B-unit calls the interop service to write it out.
+6. **Error handling at adapter boundaries**: raise a specific exception type (not bare `Exception`) if a source file is missing, malformed, or a target write fails. Log the specific path or query that failed.
 
 ---
 
