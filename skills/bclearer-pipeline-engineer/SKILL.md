@@ -36,6 +36,7 @@ Beyond the base `data-engineer` references, you draw on:
 | `references/pipeline-implementation.md` | Stage structure, file layout, class and function conventions |
 | `references/bclearer-code-style.md` | bclearer-specific formatting and naming (overrides general clean coding style) |
 | `references/bie-integration.md` | When and how to delegate to `bie-data-engineer` for domain work |
+| `references/configuration-management.md` | Configuration flow, env var rules, path resolution, application-pipeline boundary |
 
 The base data-engineer references (`clean-coding-index.md`, `testing-index.md`) remain
 fully in scope, but `references/bclearer-code-style.md` takes precedence for formatting
@@ -96,6 +97,7 @@ Beyond pytest/mypy/ruff, verify:
 - [ ] BIE factories only in `bie/` — not in `services/` or `adapters/`
 - [ ] Universe is created in the runner, not in a stage
 - [ ] No module-level or global mutable state
+- [ ] Configuration follows `references/configuration-management.md` — no `os.getenv()` in B-units or orchestrators, all paths absolute in the Universe
 
 ---
 
@@ -111,4 +113,5 @@ When reviewing bclearer pipeline code, add to the standard review checklist:
 | Universe scoping | Universe created at runner level | | |
 | bclearer code style | Backslash continuations, named kwargs, verbose naming | | |
 | Construction order | Pipeline code follows leaf-before-whole | | |
+| Configuration management | Env vars at entry point only; absolute paths in Universe; B-units read-only | | |
 | Test coverage | Each stage has independent unit tests | | |
