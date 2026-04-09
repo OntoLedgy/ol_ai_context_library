@@ -107,7 +107,9 @@ def run_{pipeline_name}() \
 ## Pipeline Orchestrator
 
 Calls thin slice orchestrators. Uses the `__run_contained_bie_pipeline_components`
-private function pattern — the public orchestrate function delegates immediately:
+private function pattern — the public orchestrate function delegates immediately.
+
+For **bare B-unit** pipelines (no shared state):
 
 ```python
 # {pipeline_name}_orchestrator.py
@@ -126,11 +128,40 @@ def __run_contained_bie_pipeline_components() \
     orchestrate_{thin_slice_name}()
 ```
 
+For **object-passing** pipelines, the universe is received as a parameter and forwarded:
+
+```python
+# {pipeline_name}_orchestrator.py
+
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.pipeline.universes.b_clearer_run_universes import (
+    BClearerRunUniverses,
+)
+from bclearer_pipelines.{domain_name}.b_source.{pipeline_name}.orchestrators.thin_slices.{thin_slice_name}_orchestrator import (
+    orchestrate_{thin_slice_name},
+)
+
+
+def orchestrate_{pipeline_name}(
+        bclearer_run_universe: BClearerRunUniverses) \
+        -> None:
+    __run_contained_bie_pipeline_components(
+        bclearer_run_universe=bclearer_run_universe)
+
+
+def __run_contained_bie_pipeline_components(
+        bclearer_run_universe: BClearerRunUniverses) \
+        -> None:
+    orchestrate_{thin_slice_name}(
+        bclearer_run_universe=bclearer_run_universe)
+```
+
 ---
 
 ## Thin Slice Orchestrator
 
-Calls stage orchestrators in fixed order (only the stages that exist):
+Calls stage orchestrators in fixed order (only the stages that exist).
+
+For **bare B-unit** pipelines:
 
 ```python
 # {thin_slice_name}_orchestrator.py
@@ -153,6 +184,38 @@ def __run_contained_bie_pipeline_components() \
     orchestrate_{pipeline_name}_3e_evolve()
 ```
 
+For **object-passing** pipelines, forward the universe — do not rename it:
+
+```python
+# {thin_slice_name}_orchestrator.py
+
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.pipeline.universes.b_clearer_run_universes import (
+    BClearerRunUniverses,
+)
+from bclearer_pipelines.{domain_name}.b_source.{pipeline_name}.orchestrators.stages.{pipeline_name}_1c_collect_orchestrator import (
+    orchestrate_{pipeline_name}_1c_collect,
+)
+from bclearer_pipelines.{domain_name}.b_source.{pipeline_name}.orchestrators.stages.{pipeline_name}_3e_evolve_orchestrator import (
+    orchestrate_{pipeline_name}_3e_evolve,
+)
+
+
+def orchestrate_{thin_slice_name}(
+        bclearer_run_universe: BClearerRunUniverses) \
+        -> None:
+    __run_contained_bie_pipeline_components(
+        bclearer_run_universe=bclearer_run_universe)
+
+
+def __run_contained_bie_pipeline_components(
+        bclearer_run_universe: BClearerRunUniverses) \
+        -> None:
+    orchestrate_{pipeline_name}_1c_collect(
+        bclearer_run_universe=bclearer_run_universe)
+    orchestrate_{pipeline_name}_3e_evolve(
+        bclearer_run_universe=bclearer_run_universe)
+```
+
 ---
 
 ## Stage Orchestrator
@@ -160,6 +223,8 @@ def __run_contained_bie_pipeline_components() \
 Each stage orchestrator is decorated with `@run_and_log_function()`. It either:
 - Calls sub-stage orchestrators (if the stage has sub-stages), or
 - Calls `create_and_run_b_unit()` for each B-unit directly
+
+For **bare B-unit** pipelines:
 
 ```python
 # {pipeline_name}_1c_collect_orchestrator.py
@@ -185,6 +250,42 @@ def __run_contained_bie_pipeline_components() \
         -> None:
     create_and_run_b_unit(
         b_unit_type=CaReadSourceBUnits)
+```
+
+For **object-passing** pipelines, the universe is forwarded with the **same parameter
+name** — it is not renamed per stage:
+
+```python
+# {pipeline_name}_1c_collect_orchestrator.py
+
+from bclearer_orchestration_services.reporting_service.wrappers.run_and_log_function_wrapper_latest import (
+    run_and_log_function,
+)
+from bclearer_orchestration_services.identification_services.b_identity_ecosystem.pipeline.universes.b_clearer_run_universes import (
+    BClearerRunUniverses,
+)
+from bclearer_pipelines.{domain_name}.b_source.common.operations.b_units.b_unit_creator_and_runner import (
+    create_and_run_b_unit,
+)
+from bclearer_pipelines.{domain_name}.b_source.{pipeline_name}.objects.b_units.{pipeline_name}_1c_collect.ca_read_source_b_units import (
+    CaReadSourceBUnits,
+)
+
+
+@run_and_log_function()
+def orchestrate_{pipeline_name}_1c_collect(
+        bclearer_run_universe: BClearerRunUniverses) \
+        -> None:
+    __run_contained_bie_pipeline_components(
+        bclearer_run_universe=bclearer_run_universe)
+
+
+def __run_contained_bie_pipeline_components(
+        bclearer_run_universe: BClearerRunUniverses) \
+        -> None:
+    create_and_run_b_unit(
+        b_unit_type=CaReadSourceBUnits,
+        input_object=bclearer_run_universe)
 ```
 
 ---
@@ -258,23 +359,30 @@ It is the bclearer mechanism for structured execution tracing.
 ```
 run_{domain}_b_clearer_pipeline_b_application()
     ↓
-run_{pipeline_name}()
-    ↓
-orchestrate_{pipeline_name}()          ← Universe created here (or in thin slice)
-    ↓ pass universe as input_object
-orchestrate_{thin_slice_name}()
-    ↓ pass universe
-orchestrate_{pipeline_name}_1c_collect()  → B-units populate Universe registers
-orchestrate_{pipeline_name}_2l_load()     → B-units process Universe registers
-orchestrate_{pipeline_name}_3e_evolve()   → B-units build domain objects in Universe
-orchestrate_{pipeline_name}_4a_assimilate() → B-units reconcile Universe registers
-orchestrate_{pipeline_name}_5r_reuse()   → B-units export from Universe
+run_{pipeline_name}()                              ← Universe created here
+    ↓ pass bclearer_run_universe
+orchestrate_{pipeline_name}(bclearer_run_universe)
+    ↓ pass bclearer_run_universe
+orchestrate_{thin_slice_name}(bclearer_run_universe)
+    ↓ pass bclearer_run_universe (same name at every stage)
+orchestrate_{pipeline_name}_1c_collect(bclearer_run_universe)  → B-units populate registers
+orchestrate_{pipeline_name}_2l_load(bclearer_run_universe)     → B-units process registers
+orchestrate_{pipeline_name}_3e_evolve(bclearer_run_universe)   → B-units build domain objects
+orchestrate_{pipeline_name}_4a_assimilate(bclearer_run_universe) → B-units reconcile registers
+orchestrate_{pipeline_name}_5r_reuse(bclearer_run_universe)    → B-units export from Universe
     ↓
 [Universe disposed or serialised via universe.export_to_disk()]
 ```
 
-**Universe creation rule**: Create the Universe at the **pipeline orchestrator level**,
+**Universe creation rule**: Create the Universe at the **runner level**,
 not inside a stage. This ensures all stages share the same Universe instance.
+
+**Universe naming rule**: Do not rename the universe parameter between stages.
+Use `bclearer_run_universe` as the parameter name from the pipeline orchestrator
+downward through all stages and sub-stages. The runner may use a domain-specific
+variable name (e.g. `neo4j_import_spoke_bclearer_run_universe`) when creating the
+universe, but the orchestrator parameter name is always the generic
+`bclearer_run_universe`.
 
 ---
 
