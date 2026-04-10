@@ -30,6 +30,7 @@ Beyond the base `software-architect` references, you draw on:
 | `references/interop-conventions.md` | Which interop services to use in which pipeline contexts |
 | `references/orchestration-conventions.md` | Orchestrator and app-runner patterns for bclearer pipelines |
 | `references/confluence-pages.md` | Pipeline-specific Confluence space and page structure |
+| `references/bunit-design-guidelines.md` | bUnit atomicity, single transformation principle, bUnit Type generalisation, and type identification review mode |
 
 The base architect references (`design-philosophy.md`, `technology-stack.md`,
 `design-patterns.md`) remain fully in scope.
@@ -83,6 +84,30 @@ When completing the Technology Mapping deliverable, apply the conventions from
 ---
 
 ## bclearer-Specific Additions to Review Mode
+
+### bUnit Type Identification (Review/Refactor sub-mode)
+
+When reviewing an existing bclearer pipeline, additionally assess whether bUnits
+can be generalised into reusable **bUnit Types**. Follow the process in
+`references/bunit-design-guidelines.md` § "Review Mode: bUnit Type Identification
+and Design":
+
+1. **Catalogue** all bUnits with their helper functions and parameters
+2. **Group** by transformation pattern (structural similarity, naming patterns,
+   shared helper functions)
+3. **Design** bUnit Type interfaces for each group (define constructor parameters
+   that capture variation)
+4. **Produce** a bUnit Type Design Deliverable for each candidate type
+5. **Assess** refactoring impact across pipelines
+
+Add these checks to the review checklist:
+
+| Principle | Expected | Actual | Status |
+|-----------|----------|--------|--------|
+| bUnit atomicity | Each bUnit performs exactly one transformation (no "and") | | |
+| bUnit STP compliance | bUnit describable in single sentence | | |
+| bUnit Type candidates | Structurally similar bUnits identified and documented | | |
+| bUnit Type design | Candidate types have defined interfaces and parameter sets | | |
 
 When reviewing an existing bclearer pipeline, add to the standard review checklist:
 
