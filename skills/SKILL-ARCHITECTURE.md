@@ -23,6 +23,7 @@ mindmap
       Solution
       Ontology
       Pipeline
+      Agent
       UI
       BIE
     F4 Language
@@ -49,6 +50,7 @@ mindmap
 | Solution | Solution Architecture | Solution Implementation | Solution Ontology |
 | Ontology | Ontology Design | Ontology Implementation | Ontology Analysis (OB) |
 | Pipeline | Pipeline Architecture | Pipeline Implementation | — |
+| Agent | Agent Architecture | Agent Implementation | — |
 | UI | UI Design | UI Implementation | — |
 | BIE | BIE Design | BIE Implementation | BIE Component Ontology |
 
@@ -72,6 +74,8 @@ mindmap
 | `bie-data-engineer` | Implement | Engineer | BIE | Python | BIE Implementation |
 | `ob-engineer` | Implement | Engineer | Ontology | Python | Ontology Implementation |
 | `bclearer-pipeline-engineer` | Implement | Engineer | Pipeline | Python | Pipeline Implementation |
+| `agent-architect` | Design | Architect | Agent | Agnostic | Agent Architecture |
+| `agent-engineer` | Implement | Engineer | Agent | Python | Agent Implementation |
 | `ui-architect` | Design | Architect | UI | Agnostic | UI Design |
 | `ui-engineer` | Implement | Engineer | UI | TypeScript | UI Implementation |
 | `clean-code-reviewer` | Review | Engineer | Solution | Multi | _(cross-cutting)_ |
@@ -234,6 +238,7 @@ C             ontologist‡                                          cc-ref
 O  Ontology   ob-arch†       ob-eng   ·            ·      ·       ·
 P             ob-ontologist‡
 E  Pipeline   bcl-arch†      bcl-eng  ·            ·      ·       ·
+   Agent      agent-arch†    agent-eng ·           ·      ·       ·
    UI         ui-arch†       ·        ui-eng       ·      ·       ·
    BIE        bie-comp-ont‡  bie-eng  ·            ·      ·       ·
 ──────────────────────────────────────────────────────────────────────
@@ -257,6 +262,7 @@ flowchart TD
         SA -->|"extends"| BCL_A
         SA -->|"extends"| OB_A
         SA -->|"extends"| UI_A[ui-architect\nUI]
+        OB_A -->|"extends"| AGT_A[agent-architect\nAgent]
     end
 
     subgraph Ontologist["Role: Ontologist"]
@@ -278,6 +284,7 @@ flowchart TD
         BIE_E[bie-data-engineer\nBIE · Python]
         OB_E[ob-engineer\nOntology · Python]
         BCL_E[bclearer-pipeline-engineer\nPipeline · Python]
+        AGT_E[agent-engineer\nAgent · Python]
 
         DE -->|"extends"| PY
         DE -->|"extends"| JS
@@ -287,6 +294,7 @@ flowchart TD
         JS -->|"extends"| UI_E[ui-engineer\nUI · TypeScript]
         PY -->|"extends"| OB_E
         OB_E -->|"extends"| BCL_E
+        OB_E -->|"extends"| AGT_E
     end
 
     subgraph Quality["Review + Refactor modes · cross-cutting"]
@@ -298,6 +306,7 @@ flowchart TD
     SA -->|"design feeds"| DE
     BCL_A -->|"design feeds"| BCL_E
     OB_A -->|"design feeds"| OB_E
+    AGT_A -->|"design feeds"| AGT_E
     UI_A -->|"design feeds"| UI_E
     BORO_CORE -.->|"loads when needed"| OB_ONT
     OB_ONT -->|"model feeds"| OB_E
@@ -334,6 +343,13 @@ Pipeline   │ bclearer-  │────────────────►
            └────────────┘                  │ (inherits     │
                                            │  ob-engineer) │
                                            └───────────────┘
+
+           ┌────────────┐                  ┌───────────────┐
+Agent      │ agent-     │────────────────►│ agent-        │
+           │ architect  │                  │ engineer      │
+           └────────────┘                  │ (inherits     │
+                                           │  ob-engineer) │
+                                           └───────────────┘
 UI         ┌────────────┐                  ┌───────────────┐
            │ ui-        │────────────────►│ ui-engineer   │
            │ architect  │                  │ (TypeScript)  │
@@ -365,12 +381,14 @@ The inheritance diagram above reflects the **current** state. When Phase 7 compl
 |---|---|---|
 | BIE × non-Python | Implement / Engineer / BIE / TypeScript, C#, Rust | BIE impl locked to Python |
 | Pipeline × non-Python | Implement / Engineer / Pipeline / TypeScript, C#, Rust | Pipeline impl locked to Python |
+| Agent × non-Python | Implement / Engineer / Agent / TypeScript, C#, Rust | Agent impl locked to Python (ol_ai_services is Python) |
 | Ontology × non-Python | Implement / Engineer / Ontology / TypeScript, C#, Rust | `ob-engineer` (Python) exists; other languages still gaps |
 | UI × non-TypeScript | Implement / Engineer / UI / Python, C#, Rust | `ui-engineer` (TypeScript) exists; other UI languages still gaps |
 | UI × Architect (non-Agnostic) | Design / Architect / UI / Python, C# | `ui-architect` is agnostic; no platform-specific UI architect variants |
 | Architect:Refactor | Refactor / Architect / * | No structural refactoring skill |
 | Architect:Review (standalone) | Review / Architect / * | Architecture review is embedded, not composable |
 | Pipeline × Ontologist | Analysis / Ontologist / Pipeline / * | No pipeline ontologist (pipeline domains analysed via ob-ontologist) |
+| Agent × Ontologist | Analysis / Ontologist / Agent / * | No agent ontologist (agent domains analysed via ob-ontologist) |
 
 ### 6. BORO Methodology Is Reusable Below the Facet Grid
 
@@ -402,6 +420,8 @@ Format: `[Role]:[Mode]:[Scope]:[Language]`
 | `engineer:implement:bie:python` | bie-data-engineer |
 | `engineer:implement:ontology:python` | ob-engineer |
 | `engineer:implement:pipeline:python` | bclearer-pipeline-engineer |
+| `architect:design:agent:*` | agent-architect |
+| `engineer:implement:agent:python` | agent-engineer |
 | `architect:design:ui:agnostic` | ui-architect |
 | `engineer:implement:ui:typescript` | ui-engineer |
 | `engineer:review:solution:multi` | clean-code-reviewer |

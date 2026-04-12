@@ -42,6 +42,10 @@ classDiagram
         <<Scope>>
         +domain: Data Identity Ontology
     }
+    class ScopeAgent {
+        <<Scope>>
+        +domain: AI agent systems
+    }
     class ScopeUI {
         <<Scope>>
         +domain: user interface
@@ -101,6 +105,11 @@ classDiagram
         +adds: pipeline topology, interop conventions
         +outputs: pipeline architecture
     }
+    class agent_architect {
+        +canonical: architect·design·agent·*
+        +adds: agent topology, tool gap analysis, context engineering
+        +outputs: agent architecture + tool design specs
+    }
 
     %% Architect inheritance
     RoleArchitect <|-- software_architect
@@ -114,6 +123,9 @@ classDiagram
 
     software_architect <|-- bclearer_pipeline_architect
     ScopePipeline <|-- bclearer_pipeline_architect
+
+    ob_architect <|-- agent_architect
+    StandardOB <|-- agent_architect
 
     %% ═══════════════════════════════════════════════
     %% CONCRETE SKILLS — ONTOLOGISTS
@@ -215,6 +227,11 @@ classDiagram
         +adds: interop patterns, orchestration wiring
         +construction_order: knowledge > BIE > adapters > services > orchestrators > runners
     }
+    class agent_engineer {
+        +canonical: engineer·implement·agent·python
+        +adds: BaseTool impl, interop config, agent config, orchestration graphs
+        +construction_order: knowledge > tools > interop > config > graph > skill > runner
+    }
     class bie_data_engineer {
         +canonical: engineer·implement·bie·python
         +adds: domain enums, identity vectors, bie_id creators
@@ -227,6 +244,10 @@ classDiagram
 
     ob_engineer <|-- bclearer_pipeline_engineer
     ScopePipeline <|-- bclearer_pipeline_engineer
+
+    ob_engineer <|-- agent_engineer
+    ScopeAgent <|-- agent_engineer
+    StandardOB <|-- agent_engineer
 
     python_data_engineer <|-- bie_data_engineer : current
     ScopeBIE <|-- bie_data_engineer
@@ -285,6 +306,7 @@ classDiagram
     bie_component_ontologist ..> bie_data_engineer : model feeds implementation
     software_architect ..> data_engineer : design feeds
     ob_architect ..> ob_engineer : design feeds
+    agent_architect ..> agent_engineer : design feeds
     bclearer_pipeline_architect ..> bclearer_pipeline_engineer : design feeds
 ```
 
@@ -300,6 +322,7 @@ SCOPE        Agnostic              Agnostic               Ag  Py  TS  C#  Rs  Mu
 Solution     ✅ software-architect  ✅ ontologist           ✅   ✅   ✅   ✅   ✅   ✅ cc
 Ontology     ✅ ob-architect        ✅ ob-ontologist        ·   ✅   ·   ·   ·   ·
 Pipeline     ✅ bcl-pipe-arch       ·                      ·   ✅   ·   ·   ·   ·
+Agent        ✅ agent-architect     ·                      ·   ✅   ·   ·   ·   ·
 BIE          ·                     ✅ bie-comp-ont         ·   ✅   ·   ·   ·   ·
 UI           ·                     ·                      ·   ·   ·   ·   ·   ·
 ─────────────────────────────────────────────────────────────────────────────────────
@@ -313,6 +336,7 @@ UI           ·                     ·                      ·   ·   ·   ·   
 | **Solution** | ✅ software-architect | ✅ ontologist | ✅ data-engineer | ✅ python-data-eng | ✅ js-data-eng | ✅ csharp-data-eng | ✅ rust-data-eng | ✅ reviewer, refactor, naming, tests, commit |
 | **Ontology** | ✅ ob-architect | ✅ ob-ontologist | — | ✅ ob-engineer | GAP | GAP | GAP | ✅ via standard=ob |
 | **Pipeline** | ✅ bcl-pipe-arch | GAP | — | ✅ bcl-pipe-eng | GAP | GAP | GAP | ✅ via standard=ob |
+| **Agent** | ✅ agent-architect | GAP | — | ✅ agent-engineer | GAP | GAP | GAP | ✅ via standard=ob |
 | **BIE** | — | ✅ bie-comp-ontologist | — | ✅ bie-data-eng | GAP | GAP | GAP | ✅ via standard=ob |
 | **UI** | GAP | GAP | — | — | GAP | — | — | — |
 
@@ -334,8 +358,10 @@ flowchart LR
         SA[software-architect]
         OB_A[ob-architect]
         BCL_A[bclearer-pipeline-architect]
+        AGT_A[agent-architect]
         SA -->|extends| OB_A
         SA -->|extends| BCL_A
+        OB_A -->|extends| AGT_A
     end
 
     subgraph Engineer["Engineer (Implement)"]
@@ -343,6 +369,7 @@ flowchart LR
         PY[python-data-engineer]
         OB_E[ob-engineer]
         BCL_E[bclearer-pipeline-engineer]
+        AGT_E[agent-engineer]
         BIE_E[bie-data-engineer]
         JS[javascript-data-engineer]
         CS[csharp-data-engineer]
@@ -354,6 +381,7 @@ flowchart LR
         DE -->|extends| RS
         PY -->|extends| OB_E
         OB_E -->|extends| BCL_E
+        OB_E -->|extends| AGT_E
         PY -->|extends| BIE_E
     end
 
@@ -372,6 +400,7 @@ flowchart LR
     BIE_ONT -.->|model feeds| BIE_E
     SA -.->|design feeds| DE
     OB_A -.->|design feeds| OB_E
+    AGT_A -.->|design feeds| AGT_E
     BCL_A -.->|design feeds| BCL_E
 ```
 
@@ -405,10 +434,12 @@ classDiagram
     class OB_Ontology["Ontology (OB)"]
     class Pipeline
     class BIE
+    class Agent_Scope["Agent"]
     class UI
     Scope <|-- Solution
     Scope <|-- OB_Ontology
     Scope <|-- Pipeline
+    Scope <|-- Agent_Scope
     Scope <|-- BIE
     Scope <|-- UI
 
@@ -491,6 +522,26 @@ classDiagram
     Solution <|-- python_data_engineer
     Python <|-- python_data_engineer
     General <|-- python_data_engineer
+
+    note for agent_architect "Architect x Agent x Agnostic x OB\n= agent-architect\n(inherits OB via ob-architect)"
+    note for agent_engineer "Engineer x Agent x Python x OB\n= agent-engineer\n(inherits OB via ob-engineer)"
+
+    class agent_architect {
+        Architect x Agent x Agnostic x OB
+    }
+    class agent_engineer {
+        Engineer x Agent x Python x OB
+    }
+
+    Architect <|-- agent_architect
+    Agent_Scope <|-- agent_architect
+    Agnostic <|-- agent_architect
+    OB_Standard <|-- agent_architect
+
+    Engineer <|-- agent_engineer
+    Agent_Scope <|-- agent_engineer
+    Python <|-- agent_engineer
+    OB_Standard <|-- agent_engineer
 ```
 
 ## Observations
@@ -504,14 +555,17 @@ Just as `software-architect -> ob-architect` and `data-engineer -> python-data-e
 ### 3. BORO Methodology Is Reused Beneath the Main Hierarchy
 `boro-ontologist` sits below the main role/scope hierarchy as a reusable BORO methodology layer. `ob-ontologist` loads it when deeper BORO foundations, patterns, or re-engineering guidance are needed, and the same layer can later support BNOP and other language-specific BORO-native model skills.
 
-### 4. OB/BIE/Pipeline Scopes Remain Python-Only for Engineers
-All three OB-domain scopes (Ontology, Pipeline, BIE) only have Python engineer implementations. Ontologists and Architects are language-agnostic by nature.
+### 4. OB/BIE/Pipeline/Agent Scopes Remain Python-Only for Engineers
+All four OB-domain scopes (Ontology, Pipeline, Agent, BIE) only have Python engineer implementations. Ontologists and Architects are language-agnostic by nature. Agent scope is Python because the underlying `ol_ai_services` platform is Python.
 
-### 5. UI Scope is Empty Across All Roles
+### 5. Agent Scope Extends OB, Not Solution
+`agent-architect` extends `ob-architect` (not `software-architect` directly) because agent building in this context uses OB conventions and the `ol_ai_services` platform. Similarly, `agent-engineer` extends `ob-engineer`, inheriting BORO coding conventions alongside agent-specific patterns. This mirrors how `bclearer-pipeline-engineer` extends `ob-engineer`.
+
+### 6. UI Scope is Empty Across All Roles
 No ontologist, architect, or engineer skills exist for UI.
 
-### 6. Phase 7 Migration Still Pending
+### 7. Phase 7 Migration Still Pending
 `bie-data-engineer` currently extends `python-data-engineer` directly. When migrated to extend `ob-engineer`, it will properly inherit BORO conventions.
 
-### 7. BORO Book as a New Standard Source
+### 8. BORO Book as a New Standard Source
 The `ob-ontologist` introduces the BORO book (Partridge 1996) as a distinct standard source, separate from the BORO Quick Style Guide (which is a coding standard for engineers). The book grounds the ontological method; the style guide grounds the coding conventions.
