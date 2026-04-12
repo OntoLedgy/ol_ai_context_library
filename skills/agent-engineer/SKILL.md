@@ -31,7 +31,7 @@ that apply to agent building work.
 Before implementing, confirm the agent platform:
 
 1. Verify `ol_ai_services` is importable in the target project
-2. Read `references/ol-ai-services-imports.md` (in `agent-architect/references/ol-ai-services-map.md`)
+2. Read `skills/agent-architect/references/ol-ai-services-map.md`
    for the correct import paths and available components
 3. Read `references/ob-library-selection.md` (inherited from ob-engineer) to confirm
    the active OB variant

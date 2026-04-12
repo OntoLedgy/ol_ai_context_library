@@ -3,7 +3,7 @@
 Reference map of the ol_ai_services agent development kit. Use this to identify
 available components before designing custom ones.
 
-**Source**: `/ol_artificial_intelligence_interop_services/ol_ai_services/agent_dev_kit/`
+**Source**: [ol_ai_services/agent_dev_kit](https://github.com/OntoLedgy/ol_artificial_intelligence_interop_services/tree/master/ol_ai_services/agent_dev_kit)
 
 ---
 
