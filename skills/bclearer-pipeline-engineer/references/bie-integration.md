@@ -58,21 +58,45 @@ After `bie-data-engineer` completes:
 
 ## Identity Flow Through Pipeline Stages
 
+Identity flows through the canonical CLEAR stages. **Always use the CLEAR
+stage names** — do not introduce synonyms such as "Ingest", "Identify",
+"Transform", or "Export". "Load" in CLEAR specifically means *computerising
+the collected bytes*; it has caused drift in the past when readers have
+mistaken it for an export step.
+
 ```
-Stage 1 (Ingest)
-  └── produces: raw data (no BIE IDs)
+Stage 1c_collect (Collect)
+  └── produces: file paths / raw bytes staged in Universe registers
+                (no BIE IDs — nothing is BIE-identified yet)
 
-Stage 2 (Identify) ← bie-data-engineer's factories are called here
-  └── produces: domain objects with bie_ids in Universe registries
+Stage 2l_load (Load)
+  └── produces: source-shaped in-memory mirror of the bytes
+                (no BIE IDs — Load does not change the data)
 
-Stage 3 (Transform)
-  └── receives: domain objects looked up from Universe by bie_id
-  └── produces: enriched domain objects (same bie_ids, new relations)
+Stage 3e_evolve (Evolve)  ← bie-data-engineer's factories are called here
+  └── first sub-stage: BIE identity assignment — domain objects materialised
+                       with bie_ids in Universe registries
+  └── later sub-stages: transformation, enrichment, derivations, cross-slice
+                        merges (all operate on BIE-identified objects)
+  └── produces: a BIE-identified ontology fragment
 
-Stage 4 (Export)
-  └── receives: domain objects from Universe
-  └── writes: target format (bie_id may be exported as stable key)
+Stage 4a_assimilate (Assimilate)
+  └── injects the evolved BIE fragment into the master BORO ontology object
+      store, reconciling non-compliance against the master compliance model
+  └── produces: the fragment committed to the master store
+
+Stage 5r_reuse (Reuse)
+  └── receives: domain objects (and optional Assimilate report) from Universe
+  └── writes: target format for downstream consumers (bie_id may be exported
+              as a stable key)
 ```
 
-The `bie_id` is the stable key that flows through the pipeline — it is created once in
-Stage 2 and referenced in all subsequent stages.
+The `bie_id` is the stable key that flows through the pipeline — it is
+created in Evolve's first sub-stage and referenced in all subsequent stages.
+
+**BIE vs BORO reminder**: a `bie_id` identifies a data-structure artefact,
+not a real-world business object. The bridge to BORO identity happens at
+Assimilate, where the fragment is injected into the master BORO ontology
+object store. See
+`skills/bie-component-ontologist/references/four-facet-architecture.md`
+§ "BIE is not BORO".

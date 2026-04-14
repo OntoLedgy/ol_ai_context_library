@@ -1,5 +1,33 @@
 # Four-Facet Architecture
 
+## BIE is not BORO
+
+Before anything else, keep these two ontologies distinct:
+
+- **BORO ontology** — models real-world business objects. It is extensional, 4D,
+  and lives in the **master BORO ontology object store** that the organisation
+  curates as its authoritative semantic reference.
+- **BIE ontology** — identifies **data-structure artefacts**: the files, rows,
+  records, cells, nodes, and in-memory objects that carry information *about*
+  the real world. A `bie_id` identifies the data-structure, not the real-world
+  referent it describes.
+
+The two are **correlated but not identical**. The same data structure usually
+describes the same real-world thing, and BIE identity composition is
+BORO-aligned (extensional, deterministic, parts-before-wholes), but a BIE
+identity is not a BORO identity. The bridge between them is the pipeline's
+**Assimilate** stage (`4a_assimilate`), which injects the evolved BIE fragment
+into the master BORO ontology object store and reconciles any non-compliance
+against the master compliance model.
+
+Whenever this document (or any downstream skill) says "the BIE ontology",
+it means the identity ecosystem for data-structure artefacts — never the
+master BORO ontology.
+
+---
+
+## Four Facets
+
 The BIE framework is organized along two axes, producing four facets:
 
 |                    | Model (Design)                          | Implementation (Code)                     |

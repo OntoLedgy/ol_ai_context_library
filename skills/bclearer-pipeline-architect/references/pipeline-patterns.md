@@ -42,9 +42,11 @@ bclearer pipelines follow a **fixed 5-stage structure**. Not all stages are requ
 for every pipeline — include only the stages that apply.
 
 ```
-1c_collect   →  2l_load   →  3e_evolve   →  4a_assimilate   →  5r_reuse
-   Collect        Load          Evolve         Assimilate          Reuse
-  (gather)     (read/parse)  (transform)     (integrate)         (output)
+1c_collect   →  2l_load         →  3e_evolve    →  4a_assimilate            →  5r_reuse
+   Collect        Load                Evolve          Assimilate                   Reuse
+  (gather)     (computerise —       (transform)    (inject into master BORO     (output)
+                faithful mirror                     ontology object store)
+                of the source)
 ```
 
 ### Stage 1 — `1c_collect` (Collect)
@@ -62,11 +64,11 @@ detailed scenario guidance.
 
 ### Stage 2 — `2l_load` (Load)
 
-- **Responsibility**: Read, parse, and prepare collected data for processing
+- **Responsibility**: Computerise collected bytes — deserialise them into an in-memory mirror of the source. Load does not change the data.
 - **Input**: File paths or raw data from stage 1 in Universe registers
-- **Output**: Cleaned, typed, validated in-memory structures in Universe registers
-- **Pattern**: Service — reads locally-staged files and transforms into typed structures
-- **Must NOT**: Acquire data from external sources or write to external targets
+- **Output**: Source-shaped in-memory structures in Universe registers (round-trip to the source bytes, modulo parser-intrinsic representation)
+- **Pattern**: Inbound adapter — uses `bclearer_interop_services` to deserialise locally-staged files; no domain logic, no transformation beyond what the parser emits
+- **Must NOT**: Acquire data from external sources; rename/retype/normalise columns; validate beyond "can this be parsed at all?"; drop/fill/coerce values; assign BIE identities or attach BIE tracking metadata; apply business logic; write to external targets
 
 ### Stage 3 — `3e_evolve` (Evolve)
 
@@ -78,11 +80,11 @@ detailed scenario guidance.
 
 ### Stage 4 — `4a_assimilate` (Assimilate)
 
-- **Responsibility**: Integrate results across multiple pipelines or sources; reconcile data
-- **Input**: Domain objects from stage 3
-- **Output**: Reconciled, merged, or cross-referenced data in Universe registers
-- **Pattern**: Service — stateless reconciliation logic
-- **Must NOT**: Perform I/O; no external calls
+- **Responsibility**: Inject the evolved BIE-identified fragment into the **master BORO ontology object store**, reconciling non-compliance against the master compliance model
+- **Input**: BIE-identified objects and relations from stage 3 (the evolved ontology fragment)
+- **Output**: Fragment committed into the master BORO ontology object store; optional report of injected/rejected/amended items in Universe registers for downstream Reuse
+- **Pattern**: Outbound adapter (to the master BORO store) + compliance reconciler. Analogous to Reuse in that it crosses a boundary out of the pipeline universe, but targets the master ontology rather than downstream consumers
+- **Must NOT**: Build new BIE identities (Evolve); apply source-specific business rules (Evolve); perform pipeline-local cross-slice merges (Evolve); write the pipeline's own outputs (Reuse)
 
 ### Stage 5 — `5r_reuse` (Reuse)
 

@@ -6,31 +6,43 @@ Grounded in the bclearer PDK source at `ol_bclearer_pdk/libraries/interop_servic
 
 ## Principle
 
-Interop services are **boundary adapters only**. They appear exclusively in:
-- **Stage 1c_collect** — gathering data from an external source into the pipeline's staging area
-- **Stage 2l_load** — reading locally-staged files into in-memory structures (the file
-  is already under the pipeline's control after Collect)
-- **Stage 5r_reuse** — writing results to an external target
+Interop services are **boundary adapters only**. They appear in stages that
+cross a boundary out of (or into) the pipeline universe:
 
-Domain logic stages (3e_evolve, 4a_assimilate) must NOT import or depend on any
-`bclearer_interop_services` module directly.
+- **Stage 1c_collect** — gathering data from an external source into the pipeline's staging area
+- **Stage 2l_load** — deserialising locally-staged bytes into a source-shaped in-memory mirror (the file is already under the pipeline's control after Collect). Load does not change the data — it only computerises it.
+- **Stage 4a_assimilate** — writing the evolved BIE fragment into the **master BORO ontology object store**. This is a boundary — the master store lives outside the pipeline universe — so Assimilate uses a master-store adapter. Apart from this master-store adapter, Assimilate does not import other `bclearer_interop_services` modules.
+- **Stage 5r_reuse** — writing the pipeline's own outputs to downstream consumers
+
+The **pure in-memory domain stage** is **3e_evolve**. Evolve must NOT import
+or depend on any `bclearer_interop_services` module — all transformation,
+BIE identity assignment, business logic, and cross-slice merging happens
+entirely on in-memory Universe state.
 
 ```
 External Source
     ↓
 [1c_collect B-unit] ── bclearer_interop_services ──→ Universe registers
-                                                       (file paths / raw data)
+                                                       (file paths / raw bytes)
     ↓
 [2l_load B-unit] ── bclearer_interop_services ──→ Universe registers
-                                                    (parsed, typed structures)
-                            ...domain stages...
-Universe registers
+                                                    (source-shaped in-memory mirror)
+    ↓
+[3e_evolve B-units]           (pure in-memory — NO interop imports)
+    ↓                          transformation, BIE identity, enrichment,
+Universe registers             cross-slice merges
+    ↓
+[4a_assimilate B-unit] ── master-store adapter ──→ Master BORO ontology object store
+    ↓                                              (plus optional injection report
+Universe registers                                  back into Universe for Reuse)
     ↓
 [5r_reuse B-unit] ── bclearer_interop_services ──→ External Target
 ```
 
-This boundary makes domain stages independently testable — 3e_evolve and 4a_assimilate
-can be tested with mock Universe data without any I/O.
+This boundary makes Evolve independently testable — it can be exercised with
+mock Universe data without any I/O. Assimilate can also be tested with a
+mock master-store adapter, keeping the compliance-reconciliation logic
+independently verifiable.
 
 ---
 

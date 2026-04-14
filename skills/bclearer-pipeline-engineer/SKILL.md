@@ -131,9 +131,12 @@ When reviewing bclearer pipeline code, add to the standard review checklist:
 
 | Principle | Expected | Actual | Status |
 |-----------|----------|--------|--------|
-| Stage separation | Each stage in its own module/class | | |
-| Adapter boundary | Interop services only in adapters | | |
-| BIE boundary | BIE factories only in `bie/` | | |
+| Stage separation | Each CLEAR stage (`1c_collect`, `2l_load`, `3e_evolve`, `4a_assimilate`, `5r_reuse`) in its own module/class, using CLEAR names (no synonyms) | | |
+| Load is computerisation only | `2l_load` B-units deserialise bytes into a source-shaped mirror; no normalisation, validation beyond parseability, schema enforcement, or BIE identity assignment | | |
+| Assimilate targets the master BORO store | `4a_assimilate` B-units use a master-store adapter to inject the evolved BIE fragment into the master BORO ontology object store; cross-slice merges live in `3e_evolve`, not here | | |
+| BIE vs BORO distinction honoured | `bie_id` in code treated as data-structure identity, not real-world identity; BORO identity is established only at the Assimilate boundary | | |
+| Adapter boundary | Interop services only in adapters — `1c_collect`, `2l_load`, `4a_assimilate` (master-store adapter), and `5r_reuse`. Never in `3e_evolve` | | |
+| BIE boundary | BIE factories only in `bie/`; first called from Evolve (not Load) | | |
 | Universe scoping | Universe created at runner level | | |
 | bclearer code style | Backslash continuations, named kwargs, verbose naming | | |
 | Construction order | Pipeline code follows leaf-before-whole | | |

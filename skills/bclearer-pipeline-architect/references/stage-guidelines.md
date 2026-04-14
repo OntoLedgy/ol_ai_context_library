@@ -13,16 +13,27 @@ has a distinct responsibility. Mixing responsibilities across stages undermines 
 framework's transparency, testability, and separation of concerns.
 
 ```
-1c_collect  →  2l_load  →  3e_evolve  →  4a_assimilate  →  5r_reuse
-  Gather        Read        Transform      Integrate         Output
+1c_collect  →  2l_load       →  3e_evolve    →  4a_assimilate           →  5r_reuse
+  Gather       Computerise      Transform       Inject into master BORO    Output
+                                                ontology object store
 ```
 
-The critical distinction:
+The critical distinctions:
 
 - **Collect** gathers raw data sources into the pipeline's control — it does NOT
   read or parse file contents.
-- **Load** reads and parses the collected data into in-memory structures ready for
-  processing.
+- **Load** computerises the collected bytes — it lifts them into in-memory
+  structures that faithfully mirror the source. Load does NOT change the data:
+  no normalisation, no validation beyond "can it be parsed at all?", no schema
+  enforcement, no BIE identity assignment.
+- **Evolve** is where data is changed — typing, normalising, BIE identity
+  assignment, business logic, enrichment.
+- **Assimilate** injects the evolved BIE fragment into the **master BORO
+  ontology object store**. It typically reconciles a not-yet-compliant
+  fragment against the master compliance model. This is semantic integration
+  against a persistent master store — not a pipeline-local merge. See
+  `skills/bie-component-ontologist/references/four-facet-architecture.md`
+  § "BIE is not BORO" for the ontology distinction.
 
 ---
 
@@ -89,57 +100,71 @@ in `source_table_dictionary`). The pipeline stages then begin at 2l_load.
 
 ### Purpose
 
-**Read, parse, and prepare the collected data for processing.** Load turns raw data
-sources into typed, validated, in-memory structures that downstream stages can work
-with.
+**Computerise the collected bytes.** Load lifts the raw data collected in
+stage 1 into in-memory structures that **faithfully mirror the source**. Load
+is about making the data programmatically addressable — it is **not** about
+changing the data. If a value, column name, type, or shape differs between
+the source and the Universe register after Load, Load has over-reached.
 
 ### What Load Does
 
 - Reads file contents from paths collected in stage 1 (e.g. `pd.read_excel()`,
   `json.load()`, `read_csv()`)
-- Parses raw data into typed in-memory structures (DataFrames, dicts, lists)
-- Validates data types, required fields, and structural constraints
-- Normalises column names, data types, and formats
-- Assigns BIE tracking metadata where applicable (as in the exemplar's
-  `BieizeJsonStringBUnits`)
-- Stores prepared data in Universe registers with enum-based keys
+- Deserialises raw bytes into the most direct in-memory representation of the
+  source (DataFrame for tabular, dict/list for tree-shaped, string blob for
+  opaque formats)
+- Stores the source-shaped structures in Universe registers with enum-based
+  keys
 
 ### What Load Does NOT Do
 
-- Does NOT acquire data from external sources (that is Collect's job)
-- Does NOT apply business logic, enrichment, or derivations
-- Does NOT create domain objects or BIE entities
-- Does NOT write to external targets
+- Does NOT acquire data from external sources (Collect's job)
+- Does NOT rename, retype, or normalise columns (Evolve's job)
+- Does NOT validate beyond "can this be parsed at all?" — no required-field
+  checks, no schema enforcement, no range/domain validation (Evolve's job)
+- Does NOT drop, fill, coerce, or otherwise transform values (Evolve's job)
+- Does NOT assign BIE identities or attach BIE tracking metadata (Evolve's
+  job — identity assignment is the *first* act of Evolve, not the last act of
+  Load)
+- Does NOT apply business logic, enrichment, or derivations (Evolve's job)
+- Does NOT create domain objects (Evolve's job)
+- Does NOT write to external targets (Reuse's job)
 
 ### Output
 
-Cleaned, typed, validated in-memory structures (DataFrames, typed dicts) in Universe
-registers, ready for Evolve.
+An in-memory mirror of the source bytes, held in Universe registers and ready
+for Evolve to begin transforming. The shape and content of each register must
+round-trip cleanly back to the source form; if it does not, a transformation
+has leaked into Load.
 
 ### Scenario Guide
 
 | Source Format | Load Action | Load Output |
 |--------------|------------|-------------|
-| **Excel file** (path from Collect) | Read workbook with `excel_services`, parse sheets into DataFrames | DataFrames in Universe registers |
-| **CSV file** (path from Collect) | Read with `delimited_text`, parse into DataFrame | DataFrame in Universe register |
-| **JSON file** (path from Collect) | Read with `json_service`, parse into dict or DataFrame | Typed structure in Universe register |
-| **Parquet file** (path from Collect) | Read with `parquet_service` or `dataframe_service` | DataFrame in Universe register |
-| **Raw database result** (from Collect) | Validate types, normalise column names, enforce schema | Cleaned DataFrame in Universe register |
-| **Raw API response** (from Collect) | Parse JSON/XML response, extract relevant payload, validate | Typed structure in Universe register |
+| **Excel file** (path from Collect) | Read workbook with `excel_services`, deserialise sheets as-is | DataFrames mirroring source sheets in Universe registers |
+| **CSV file** (path from Collect) | Read with `delimited_text`, deserialise rows as-is | DataFrame mirroring source rows in Universe register |
+| **JSON file** (path from Collect) | Read with `json_service`, deserialise into dict/list mirroring the JSON tree | Source-shaped structure in Universe register |
+| **Parquet file** (path from Collect) | Read with `parquet_service` or `dataframe_service` | DataFrame mirroring source in Universe register |
+| **Raw database result** (from Collect) | Hold the result set as-returned by the interop service | Source-shaped DataFrame in Universe register |
+| **Raw API response** (from Collect) | Deserialise JSON/XML payload as-is | Source-shaped structure in Universe register |
+
+Note: any column renaming, type coercion, schema enforcement, or payload
+extraction belongs in **Evolve**, not Load.
 
 ### Pattern
 
-**Service** — pure transformation on in-memory data. May use `bclearer_interop_services`
-to read files collected in stage 1 (this is reading locally-staged files, not reaching
-out to external systems).
+**Adapter (inbound parse)** — uses `bclearer_interop_services` to deserialise
+locally-staged files into in-memory mirrors. Holds no domain logic and
+applies no transformation beyond what the underlying parser emits.
 
 ### Exemplar
 
-In bie_core_graph, the 2l_load stage has two B-units:
-1. `LoadJsonFileAsStringBUnits` — reads JSON files from the collected file paths into
-   a DataFrame of raw strings
-2. `BieizeJsonStringBUnits` — wraps the raw string data with BIE identity tracking
-   metadata
+In bie_core_graph, the 2l_load stage reads JSON files from the collected file
+paths into a DataFrame of raw strings (`LoadJsonFileAsStringBUnits`). That is
+all Load does. The subsequent `BieizeJsonStringBUnits` — which wraps the raw
+string data with BIE identity tracking metadata — is the **first sub-stage
+of Evolve**, not part of Load. Attaching BIE identities is an act of
+transformation; Load does not transform.
 
 ---
 
@@ -190,38 +215,71 @@ In bie_core_graph, the 3e_evolve stage has two sub-stages:
 
 ### Purpose
 
-**Integrate and reconcile results across multiple pipelines, sources, or processing
-passes.** Assimilate merges, cross-references, and reconciles data that has been
-independently evolved.
+**Inject the evolved BIE-identified fragment into the master BORO ontology
+object store.** Assimilate takes the ontology fragment produced in Evolve —
+which is typically not yet compliant with the master ontology's compliance
+model — and integrates it into the authoritative master store, reconciling
+any non-compliance on the way in.
+
+Assimilate is the semantic bridge between the pipeline's local BIE ontology
+(identity for data-structure artefacts) and the **master BORO ontology
+object store** (identity for real-world business objects). See
+`skills/bie-component-ontologist/references/four-facet-architecture.md`
+§ "BIE is not BORO" for the ontology distinction.
 
 ### What Assimilate Does
 
-- Merges data from multiple thin slices or pipelines
-- Reconciles duplicates and conflicts between sources
-- Cross-references domain objects across processing passes
-- Aggregates or consolidates related records
-- Resolves entity matching across different source systems
+- Opens a write boundary onto the master BORO ontology object store
+- Injects the evolved BIE fragment (objects, relations, identities) produced
+  by Evolve into the master store
+- Reconciles the fragment against the master ontology's compliance model —
+  detects and resolves violations of extensionality, identity, typing,
+  whole-part, or any domain-specific compliance rules enforced by the master
+- Reconciles the fragment's BIE-identified artefacts against pre-existing
+  BORO individuals in the master store (same-as resolution, coupling,
+  upgrade of BIE identities to their BORO counterparts where applicable)
+- Commits the assimilated fragment into the master store
 
 ### What Assimilate Does NOT Do
 
-- Does NOT perform I/O — operates only on in-memory objects
-- Does NOT apply source-specific business logic (that belongs in Evolve)
-- Does NOT import `bclearer_interop_services`
+- Does NOT build new BIE identities for the fragment (Evolve's job — the
+  fragment arrives at Assimilate already BIE-identified)
+- Does NOT apply source-specific business rules (Evolve's job)
+- Does NOT perform the pipeline's own cross-slice merges (Evolve's job —
+  merging two thin slices produced by the same pipeline is a transformation,
+  not an injection into the master store)
+- Does NOT write the pipeline's own outputs (Reuse's job — Reuse writes to
+  downstream consumers, Assimilate writes to the master BORO store)
 
 ### Output
 
-Reconciled, merged, or cross-referenced data in Universe registers, ready for Reuse.
+The master BORO ontology object store now contains the assimilated fragment
+(after compliance reconciliation). The Universe registers may also record a
+report of what was injected, rejected, or amended, for downstream Reuse.
 
 ### Pattern
 
-**Service** — stateless reconciliation logic.
+**Outbound adapter (to the master BORO store)** + **compliance reconciler**.
+The adapter owns the connection to the master store; the reconciler owns the
+compliance logic. Analogous in shape to Reuse (both cross a boundary out of
+the pipeline universe), but distinct in target — Reuse writes to downstream
+consumers, Assimilate writes into the master ontology.
 
 ### When to Use
 
-Not all pipelines need an Assimilate stage. Include it when:
-- The pipeline processes data from multiple independent sources
-- Multiple thin slices produce overlapping domain objects that need reconciliation
-- Entity resolution or deduplication is required across sources
+Include an Assimilate stage when the pipeline produces a BIE/BORO fragment
+that must land in the master BORO ontology object store. Typical triggers:
+
+- The pipeline discovers or derives new business individuals that the
+  organisation's master ontology needs to know about
+- The pipeline produces an ontology fragment that must be reconciled against
+  the master compliance model before downstream systems can rely on it
+- The pipeline materialises relations or classifications that extend the
+  master ontology
+
+**Not a trigger for Assimilate**: needing to merge multiple thin slices or
+multiple source feeds inside the pipeline. That is a transformation and
+belongs in Evolve (typically a late Evolve sub-stage).
 
 ---
 
@@ -296,6 +354,34 @@ def b_unit_process_function(self):
     dataframe = pd.read_csv(source_path)
     dataframe['category'] = dataframe['type'].map(BUSINESS_CLASSIFICATION)  # Evolve's job
 ```
+
+### Anti-Pattern: Normalisation / Validation / BIE-ing in Load
+
+**Wrong** — changing the shape or content of the data during Load:
+```python
+# WRONG: la_load_and_normalise_b_units.py (in 2l_load)
+def b_unit_process_function(self):
+    dataframe = pd.read_csv(source_path)
+    dataframe.columns = [c.lower().strip() for c in dataframe.columns]  # Evolve's job
+    dataframe = dataframe.dropna(subset=['customer_id'])                # Evolve's job
+    dataframe['bie_id'] = dataframe.apply(make_bie_id, axis=1)          # Evolve's job
+    self.universe.set_register(RegistryEnums.CUSTOMERS, dataframe)
+```
+
+**Right** — Load mirrors the source, Evolve does the rest:
+```python
+# RIGHT: la_load_csv_b_units.py (in 2l_load)
+def b_unit_process_function(self):
+    dataframe = pd.read_csv(source_path)
+    self.universe.set_register(RegistryEnums.RAW_CUSTOMERS, dataframe)
+
+# RIGHT: ea1_normalise_customers_b_units.py (in 3e_evolve)
+# RIGHT: ea2_bieize_customers_b_units.py  (in 3e_evolve)
+```
+
+Rule of thumb: if the register after Load does not round-trip back to the
+source bytes (modulo parser-intrinsic representation choices), Load has
+over-reached.
 
 ### Anti-Pattern: I/O in Evolve
 

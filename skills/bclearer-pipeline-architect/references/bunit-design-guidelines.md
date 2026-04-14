@@ -133,9 +133,9 @@ falls within the stage's responsibility:
 | Stage | bUnit's transformation must... |
 |-------|-------------------------------|
 | `1c_collect` | Acquire data from outside the pipeline boundary only |
-| `2l_load` | Parse or prepare already-collected data only |
-| `3e_evolve` | Apply business logic, enrichment, or structural transformation only |
-| `4a_assimilate` | Reconcile or integrate across sources/slices only |
+| `2l_load` | Computerise already-collected bytes into a source-shaped in-memory mirror only — no normalisation, no validation, no BIE-ing |
+| `3e_evolve` | Apply business logic, enrichment, BIE identity assignment, or structural transformation only |
+| `4a_assimilate` | Inject the evolved BIE fragment into the master BORO ontology object store (reconciling non-compliance) only |
 | `5r_reuse` | Write results to external targets only |
 
 If a bUnit's transformation spans two stages, it must be split across those
@@ -165,7 +165,7 @@ Follow the naming convention:
 | `1c_collect` | `c` | `ca_fetch_api_response_b_units` |
 | `2l_load` | `l` | `la_read_json_file_b_units`, `lb_bieize_json_string_b_units` |
 | `3e_evolve` | `e` | `ea_split_graph_entities_b_units` |
-| `4a_assimilate` | `a` | `aa_merge_source_records_b_units` |
+| `4a_assimilate` | `a` | `aa_assimilate_fragment_into_master_boro_store_b_units` |
 | `5r_reuse` | `r` | `ra_write_to_neo4j_b_units` |
 
 For sub-stages, extend the prefix: `ea1_`, `ea2_`, `eb1_`, etc.

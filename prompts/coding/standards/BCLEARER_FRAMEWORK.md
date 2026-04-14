@@ -164,19 +164,24 @@ graph LR
    - May involve multiple data formats and systems
 
 2. **Load**
-   - Loading data into the system
-   - Data normalization and initial structuring
-   - Often involves manual processes (to be automated where possible)
+   - Computerising the collected bytes — deserialising them into an in-memory
+     mirror of the source
+   - **Does not change the data**: no normalisation, no validation beyond "can
+     it be parsed at all?", no BIE identity assignment
+   - Any normalisation, typing, or structural restructuring belongs in Evolve
 
 3. **Evolve**
    - Transforming and evolving the data
    - Applying business rules and logic
    - Enhancing data quality and structure
+   - Assigning BIE identities to data-structure artefacts (first act of Evolve)
 
 4. **Assimilate**
-   - Integrating and assimilating data
-   - Merging with existing data structures
-   - Ensuring consistency across systems
+   - Injecting the evolved BIE-identified fragment into the **master BORO
+     ontology object store**
+   - Reconciling non-compliant fragments against the master compliance model
+   - Semantic integration against a persistent master store — **not** a
+     pipeline-local cross-slice merge (cross-slice merges belong in Evolve)
 
 5. **Reuse**
    - Making data available for reuse
@@ -189,7 +194,7 @@ graph LR
 - **Usually gated** for transparency and control
 - **May involve manual work** (marked with manual icon)
 - **Automation priority**: Manual work should be automated where possible
-- **Early stage restriction**: When manual work is unavoidable, typically restricted to early stages (especially Load stage)
+- **Early stage restriction**: When manual work is unavoidable, typically restricted to early stages (Collect or Evolve — not Load, which is strictly automated computerisation of the collected bytes)
 
 ## Design Principles
 
@@ -453,15 +458,33 @@ graph LR
     Retry -->|No| DeadLetter[Dead Letter Queue]
 ```
 
-## BORO Integration
+## BORO and BIE — two distinct ontologies
 
-The bCLEARer framework is built upon **BORO (Business Object Reference Ontology)** principles:
+The bCLEARer framework works with **two related but distinct ontologies**:
+
+- **Master BORO ontology** — models real-world business objects (extensional,
+  4D, curated). It lives in the **master BORO ontology object store** and is
+  the authoritative semantic reference for the organisation.
+- **BIE ontology** — identifies **data-structure artefacts** (the files,
+  records, cells, nodes, and in-memory objects that carry information about
+  the real world). A `bie_id` identifies a data structure, not the real-world
+  referent it describes.
+
+The two are **correlated but not identical**. Pipelines produce BIE-identified
+fragments in Evolve. The **Assimilate** stage (`4a_assimilate`) is the bridge:
+it injects the evolved BIE fragment into the master BORO ontology object
+store and reconciles non-compliance against the master compliance model.
+
+### BORO principles bCLEARer inherits
 
 - **Ontological Foundation**: BORO provides the semantic foundation
 - **Object Identity**: Clear identification of business objects
 - **Temporal Aspects**: Handling of time and change
 - **Extensional Approach**: Focus on instances rather than classes
 - **4D Paradigm**: Objects extended in space and time
+
+BIE identity composition is aligned with these principles, but a BIE identity
+is not a BORO identity — it is a data-structure identity.
 
 ## Conclusion
 
