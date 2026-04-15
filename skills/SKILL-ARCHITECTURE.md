@@ -15,10 +15,12 @@ mindmap
       Analysis
       Review
       Refactor
+      Orchestrate
     F2 Role
       Architect
       Engineer
       Ontologist
+      Orchestrator
     F3 Scope
       Solution
       Ontology
@@ -26,6 +28,7 @@ mindmap
       Agent
       UI
       BIE
+      Spec
     F4 Language
       Agnostic
       Python
@@ -83,6 +86,13 @@ mindmap
 | `clean-code-naming` | Review/Fix/Suggest | Engineer | Solution | Multi | _(cross-cutting)_ |
 | `clean-code-tests` | Generate/Review/Coverage | Engineer | Solution | Multi | _(cross-cutting)_ |
 | `clean-code-commit` | Validate/Generate | Engineer | Solution | Agnostic | _(cross-cutting)_ |
+| `ol-sdd-workflow` | Orchestrate | Orchestrator | Spec | Agnostic | OL Spec-Driven Development Workflow (master) |
+| `product-vision-steering` | Design | Architect | Spec | Agnostic | Phase 0 — Steering |
+| `feature-spec-author` | Design | Architect | Spec | Agnostic | Phase 1 — Feature Spec |
+| `backlog-manager` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 2 — JIRA Backlog |
+| `sprint-planner` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 3 — Sprint Plan |
+| `sprint-executor` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 4 — Tech-Lead Execution |
+| `jira-impl-logger` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 5 — JIRA Impl Log |
 
 > All clean-code skills are cross-cutting — they apply across all scopes. `clean-code-reviewer`, `clean-code-refactor`, `clean-code-naming`, and `clean-code-tests` support `standard: general | ob`. `clean-code-commit` does not use the standard facet.
 >
@@ -429,3 +439,43 @@ Format: `[Role]:[Mode]:[Scope]:[Language]`
 
 Auxiliary dependency skill: `boro-ontologist` (platform-independent BORO methodology;
 loaded by `ob-ontologist` when required)
+
+---
+
+## Spec-Driven Workflow Orchestration (Phase Stack)
+
+A separate orchestration layer that sits *above* the architect/engineer/ontologist grid. It drives a project end-to-end through five phases, with explicit user approval gates between phases and structured implementation logs published to JIRA (not the repo).
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ol-sdd-workflow  (master orchestrator)                         │
+│  workflow:orchestrate:sdd:agnostic                              │
+└─────────────────────────────────────────────────────────────────┘
+       │
+       ├─► Phase 0  product-vision-steering  →  product.md · tech.md · structure.md
+       │      gate: user approves steering
+       ├─► Phase 1  feature-spec-author       →  requirements.md · design.md · tasks.md
+       │      internal gates: requirements → design → tasks
+       │      (wraps software-architect feature-design mode)
+       ├─► Phase 2  backlog-manager           →  JIRA epic · stories · subtasks
+       │      gate: user approves ticket structure
+       ├─► Phase 3  sprint-planner            →  sprint-kickoff.md · JIRA sprint
+       │      gate: user approves sprint scope
+       ├─► Phase 4  sprint-executor           →  code commits · JIRA transitions
+       │      tech-lead loop — delegates per-ticket to engineer skills
+       │      then reviews via clean-code-reviewer
+       └─► Phase 5  jira-impl-logger          →  structured JIRA comment per task
+              (artifact schema adapted from spec-workflow-mcp)
+```
+
+| Skill | Phase | Invokes | Outputs |
+|---|---|---|---|
+| `ol-sdd-workflow` | master | all of the below | controls flow, enforces gates |
+| `product-vision-steering` | 0 | — | `.claude/steering/*.md` + Confluence |
+| `feature-spec-author` | 1 | `software-architect` | `.claude/specs/{feat}/*.md` + Confluence |
+| `backlog-manager` | 2 | Atlassian MCP | JIRA epic/stories/subtasks + ticket-map.md |
+| `sprint-planner` | 3 | JIRA queries | `.claude/sprints/sprint-{N}-kickoff.md` |
+| `sprint-executor` | 4 | engineer skills, `clean-code-reviewer`, `clean-code-commit`, `jira-impl-logger` | commits + JIRA transitions |
+| `jira-impl-logger` | 5 | Atlassian MCP | JIRA issue comment (impl log) |
+
+The phase skills are themselves orchestrators (they invoke architect/engineer skills under the hood) — they do NOT duplicate design or implementation logic. The engineer skills (`python-data-engineer`, `ui-engineer`, `ob-engineer`, etc.) are the actual code producers, invoked by `sprint-executor` via the skill-routing table in `skills/feature-spec-author/references/skill-routing.md`.
