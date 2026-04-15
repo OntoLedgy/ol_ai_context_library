@@ -31,7 +31,7 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 3, or directly wh
 
 | Output | Where |
 |--------|-------|
-| `.claude/sprints/sprint-{N}-kickoff.md` | Committed sprint plan (format below) |
+| `documentation/sprints/sprint-{N}-kickoff.md` | Committed sprint plan (format below) |
 | JIRA sprint | Created or populated; tickets moved in |
 | Confluence page | Sprint overview page under project parent |
 
@@ -113,7 +113,7 @@ Query JIRA for:
 - Their estimates, skill labels, requirement labels
 - Their descriptions for dependency hints
 
-Read the corresponding `.claude/specs/{feature}/` for:
+Read the corresponding `documentation/specs/{feature}/` for:
 - Upstream→downstream task dependencies (from `_Leverage:` references and design.md)
 
 ### Step 3 — Build Dependency Graph
@@ -157,7 +157,7 @@ Show the user:
 On approval:
 1. Create the JIRA sprint (or use an existing future sprint)
 2. Move the selected tickets into the sprint
-3. Write `.claude/sprints/sprint-{N}-kickoff.md` with the full plan
+3. Write `documentation/sprints/sprint-{N}-kickoff.md` with the full plan
 4. Create a Confluence sprint overview page under project parent
 5. Commit the kickoff file
 6. Return to caller with sprint URL and kickoff file path

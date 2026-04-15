@@ -23,7 +23,7 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 0.5, or directly 
 
 ## Inputs
 
-- Approved steering docs: `.claude/steering/product.md`, `tech.md`, `structure.md`
+- Approved steering docs: `documentation/steering/product.md`, `tech.md`, `structure.md`
 - Release target — name (e.g., "MVP", "v1.0", "Q2-2026") and date
 - Capacity — total engineer-days or hours across the release window
 - Constraints — hard deadlines, must-have regulatory features, external dependencies
@@ -33,21 +33,21 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 0.5, or directly 
 
 | Output | Where |
 |--------|-------|
-| Feature list | `.claude/releases/{release-name}/features.md` (prioritised table) |
+| Feature list | `documentation/releases/{release-name}/features.md` (prioritised table) |
 | Release narrative | Same file, top section (the "why" of this release) |
 | Confluence page | "Release Plan — {release-name}" under project parent page |
 | JIRA epics | One empty epic per in-scope feature, labelled `release:{name}` |
-| Epic map | `.claude/releases/{release-name}/epic-map.md` (feature name → JIRA key) |
+| Epic map | `documentation/releases/{release-name}/epic-map.md` (feature name → JIRA key) |
 
 ## Workflow
 
 ### Step 1 — Load Context
 
 Read:
-- `.claude/steering/product.md` — vision, users, objectives, principles
-- `.claude/steering/tech.md` — stack capability constraints
-- `.claude/workflow-config.md` — JIRA project, Confluence space
-- Existing `.claude/releases/` if any prior release exists — check for deferred features
+- `documentation/steering/product.md` — vision, users, objectives, principles
+- `documentation/steering/tech.md` — stack capability constraints
+- `documentation/workflow-config.md` — JIRA project, Confluence space
+- Existing `documentation/releases/` if any prior release exists — check for deferred features
 
 If steering docs are absent, stop and route the user to `product-vision-steering` (Phase 0). Release planning without steering produces disconnected feature lists.
 
@@ -109,7 +109,7 @@ Iterate until approved. This phase is deliberately cheap — it's faster to rewo
 
 On approval:
 
-1. **Write `.claude/releases/{release-name}/features.md`** containing:
+1. **Write `documentation/releases/{release-name}/features.md`** containing:
    - Release narrative
    - Scope tiers
    - Feature table (priority order within tier)
@@ -136,7 +136,7 @@ On approval:
    
    Do NOT create stories or subtasks — those are `backlog-manager`'s responsibility when `feature-spec-author` has approved a full spec for the feature.
 
-4. **Write `.claude/releases/{release-name}/epic-map.md`**:
+4. **Write `documentation/releases/{release-name}/epic-map.md`**:
    ```markdown
    # Epic Map — {release-name}
    
@@ -175,7 +175,7 @@ Never delete JIRA epics — if a feature is cancelled, transition to "Won't Do" 
 - Does not create stories or subtasks — that's `backlog-manager` at Phase 2 (triggered once a feature has an approved spec)
 - Does not plan sprints — that's `sprint-planner` at Phase 3
 - Does not commit to exact effort estimates — T-shirt sizes only. Detailed estimation happens per-task in Phase 1 and is summed in Phase 2.
-- Does not make architectural decisions — those live in `.claude/steering/tech.md` (Phase 0) or are deferred to individual feature designs (Phase 1)
+- Does not make architectural decisions — those live in `documentation/steering/tech.md` (Phase 0) or are deferred to individual feature designs (Phase 1)
 
 ---
 
@@ -187,7 +187,7 @@ When the user is ready to design a feature from this release:
 User: "use feature-spec-author to spec out licence-data-extraction"
 ```
 
-`feature-spec-author` reads `.claude/releases/{release-name}/epic-map.md`, finds the matching JIRA epic (`TI-100`), and links the full spec to that existing epic. It does not create a new epic. When tasks.md is approved, `backlog-manager` creates stories and subtasks as children of the pre-existing epic.
+`feature-spec-author` reads `documentation/releases/{release-name}/epic-map.md`, finds the matching JIRA epic (`TI-100`), and links the full spec to that existing epic. It does not create a new epic. When tasks.md is approved, `backlog-manager` creates stories and subtasks as children of the pre-existing epic.
 
 This handoff is the reason release-planner creates empty epics upfront: every downstream artifact (spec, stories, subtasks, sprint plans, impl logs) is traceable back to a release-scope decision made at Phase 0.5.
 

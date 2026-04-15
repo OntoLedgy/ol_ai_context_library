@@ -29,7 +29,7 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 4, or directly wh
 
 ## Inputs
 
-- Approved `.claude/sprints/sprint-{N}-kickoff.md`
+- Approved `documentation/sprints/sprint-{N}-kickoff.md`
 - Active JIRA sprint with scoped tickets
 - Access to engineer skills (via skill routing) or Codex MCP
 
@@ -55,7 +55,7 @@ Transition JIRA ticket to "In Progress" and note start time.
 
 Read:
 - The JIRA ticket description
-- The linked spec section (Confluence or `.claude/specs/{feature}/`)
+- The linked spec section (Confluence or `documentation/specs/{feature}/`)
 - `_Leverage:` referenced files
 - Relevant steering docs
 
@@ -119,7 +119,7 @@ Commit with conventional-commits format. Feature prefix from the spec (e.g., `li
 ```
 feat(licence): add licence columns to LegalEntities model
 
-Implements TI-101. See .claude/specs/licence-data-extraction/tasks.md task 1.
+Implements TI-101. See documentation/specs/licence-data-extraction/tasks.md task 1.
 ```
 
 Use `clean-code-commit` skill to validate the message format.

@@ -18,7 +18,7 @@ Epic
 
 ## Spec
 - Confluence: {spec page URL}
-- Repo: `.claude/specs/{feature-name}/`
+- Repo: `documentation/specs/{feature-name}/`
 - Design: [design.md]({url-or-path})
 - Requirements: [requirements.md]({url-or-path})
 - Tasks: [tasks.md]({url-or-path})

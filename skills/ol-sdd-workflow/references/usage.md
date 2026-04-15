@@ -28,7 +28,7 @@ You don't have to start at Phase 0. Jump in wherever you are.
 | Steering exists, scoping an MVP or release | "use release-planner to plan the MVP / release {name}" |
 | Release plan exists, need to spec a feature | "use feature-spec-author to spec out feature {name}" (attaches to its release epic) |
 | Steering exists, one-off feature (no release grouping) | "use feature-spec-author to spec feature {name}" (creates standalone epic) |
-| Spec approved, need stories and subtasks | "use backlog-manager to publish `.claude/specs/{feature}/` to JIRA" |
+| Spec approved, need stories and subtasks | "use backlog-manager to publish `documentation/specs/{feature}/` to JIRA" |
 | Backlog exists, planning next sprint | "use sprint-planner to plan sprint {N} with {H} hours of capacity" |
 | Sprint planned, ready to execute | "use sprint-executor to run sprint {N}" |
 | Task committed, need to log it | "use jira-impl-logger to log {TICKET-KEY} implementation" |
@@ -39,7 +39,7 @@ You don't have to start at Phase 0. Jump in wherever you are.
 You: "use ol-sdd-workflow — where are we?"
 ```
 
-The orchestrator reads `.claude/steering/`, `.claude/specs/`, active JIRA sprints, and in-flight tickets, then summarises state and proposes the next action. You can approve or redirect.
+The orchestrator reads `documentation/steering/`, `documentation/specs/`, active JIRA sprints, and in-flight tickets, then summarises state and proposes the next action. You can approve or redirect.
 
 ## Prerequisites
 
@@ -48,7 +48,7 @@ Before you can run the workflow end-to-end you need:
 - **Atlassian MCP configured** — the skill creates/reads JIRA issues and Confluence pages via `mcp__claude_ai_Atlassian__*` tools. Without it, backlog-manager and jira-impl-logger cannot publish.
 - **A JIRA project** with epic → story → subtask hierarchy enabled, and a board with sprints
 - **A Confluence space** with a project parent page (for steering and spec documents)
-- Optional: a `.claude/workflow-config.md` at repo root with:
+- Optional: a `documentation/workflow-config.md` at repo root with:
   ```markdown
   confluence_space: TBMLI
   confluence_parent_page: 6500000000
@@ -63,7 +63,7 @@ Before you can run the workflow end-to-end you need:
 
 ```
 your-repo/
-├── .claude/
+├── documentation/
 │   ├── workflow-config.md              (JIRA/Confluence config; Phase 0)
 │   ├── steering/
 │   │   ├── product.md                  (Phase 0)
@@ -133,7 +133,7 @@ This re-invokes `sprint-planner` in replan mode. It reads current sprint state (
 
 If a new task surfaces during execution:
 
-1. Add it to `.claude/specs/{feature}/tasks.md` with full metadata (`_Requirements:`, `_Leverage:`, `_Skill:`, `_Estimate:`)
+1. Add it to `documentation/specs/{feature}/tasks.md` with full metadata (`_Requirements:`, `_Leverage:`, `_Skill:`, `_Estimate:`)
 2. Re-invoke `backlog-manager` with "add new task to existing epic {KEY}"
 3. It creates a new subtask and appends to `ticket-map.md` — existing tickets are unchanged
 4. Decide whether the new task goes in this sprint (re-invoke `sprint-planner` replan) or the backlog
@@ -159,10 +159,22 @@ The master `ol-sdd-workflow` skill is only needed when you want gated end-to-end
 - Exploratory spikes / R&D — specs constrain; spikes need freedom. Do the spike first, then write a feature spec if you keep any of it.
 - Already-agreed work without external stakeholders — if the team knows the scope and trusts each other, you may not need Confluence/JIRA overhead. Use just the engineer skills.
 
+## Migrating from legacy spec locations
+
+If your project has specs under `.spec-workflow/` (upstream spec-workflow-mcp layout) or `.claude/` (earlier ol-sdd-workflow versions), migrate them to the canonical `documentation/` folder:
+
+```
+You: "use ol-sdd-workflow to migrate .claude/ to documentation/"
+You: "migrate .spec-workflow/ to the new folder layout"
+```
+
+The migration uses `git mv` to preserve file history, single-commits the move for reviewability, translates legacy config files, archives approval/template history, and updates internal path references in moved files. Full procedure and collision-handling policy: [migration.md](migration.md).
+
 ## Further reading
 
 - [SKILL.md](../SKILL.md) — the orchestrator behaviour spec
 - [phase-flow.md](phase-flow.md) — I/O contracts for each phase
 - [workflow-state.md](workflow-state.md) — how state is detected for resumption
+- [migration.md](migration.md) — migrating legacy `.spec-workflow/` or `.claude/` layouts
 - [skills/feature-spec-author/references/skill-routing.md](../../feature-spec-author/references/skill-routing.md) — engineer-skill routing table
 - Upstream inspiration: https://github.com/Pimzino/spec-workflow-mcp

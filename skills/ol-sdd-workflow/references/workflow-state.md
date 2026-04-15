@@ -5,18 +5,18 @@ When invoked without explicit phase direction, infer the current phase by probin
 ## State probes
 
 ```
-probe 0: .claude/steering/product.md + tech.md + structure.md
+probe 0: documentation/steering/product.md + tech.md + structure.md
   present & non-empty  → steering complete
   missing/empty        → Phase 0 required
 
-probe 0.5: .claude/releases/{release}/epic-map.md
+probe 0.5: documentation/releases/{release}/epic-map.md
   present                    → release plan in place; read epic-map to identify
                                candidate features and their spec status
   absent and user is scoping → Phase 0.5 required (MVP, v1, roadmap language)
   absent and single-feature  → Phase 0.5 skippable; proceed to Phase 1 directly
     work                     
 
-probe 1: .claude/specs/{feature}/ directory
+probe 1: documentation/specs/{feature}/ directory
   with requirements.md only              → Phase 1 mid, gate 1
   with requirements.md + design.md       → Phase 1 mid, gate 2
   with all three (incl. tasks.md)        → Phase 1 complete, ready for Phase 2
@@ -40,7 +40,7 @@ probe 4: tickets in sprint with status transitions
 
 ## Multi-feature state
 
-A project can have several features in flight simultaneously. When multiple `.claude/specs/*/` exist:
+A project can have several features in flight simultaneously. When multiple `documentation/specs/*/` exist:
 
 1. List all feature folders
 2. For each, report phase (use probe sequence above)
@@ -48,7 +48,7 @@ A project can have several features in flight simultaneously. When multiple `.cl
 
 ## Configuration file
 
-If `.claude/workflow-config.md` exists, read it for project-level config:
+If `documentation/workflow-config.md` exists, read it for project-level config:
 
 ```markdown
 # Workflow Config
@@ -65,7 +65,7 @@ These values flow into the downstream skill invocations so the user isn't asked 
 
 ## Unknown state
 
-If probes return inconsistent results (e.g., JIRA epic exists but no `.claude/specs/`), flag to the user:
+If probes return inconsistent results (e.g., JIRA epic exists but no `documentation/specs/`), flag to the user:
 
 > "I see a JIRA epic {KEY} for {feature} but no spec folder in the repo. Did the spec live elsewhere, or should we reverse-engineer one from the epic description?"
 

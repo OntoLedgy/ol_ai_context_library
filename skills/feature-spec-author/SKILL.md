@@ -7,7 +7,7 @@ description: >
   with three in-phase approval gates. Use when: designing a new feature, breaking a
   feature from the development plan into implementable tasks, or re-specifying an
   existing feature. Phase 1 of the ol-sdd-workflow orchestrator. Outputs land in
-  .claude/specs/{feature-name}/ and on Confluence.
+  documentation/specs/{feature-name}/ and on Confluence.
 ---
 
 # Feature Spec Author
@@ -22,9 +22,9 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 1, or directly by
 
 | File | Template | Produced by | Gate |
 |------|----------|-------------|------|
-| `.claude/specs/{feature}/requirements.md` | `requirements-template.md` | This skill | 1a — requirements approval |
-| `.claude/specs/{feature}/design.md` | `design-template.md` | `software-architect` (feature mode) | 1b — design approval |
-| `.claude/specs/{feature}/tasks.md` | `tasks-template.md` | This skill | 1c — tasks approval |
+| `documentation/specs/{feature}/requirements.md` | `requirements-template.md` | This skill | 1a — requirements approval |
+| `documentation/specs/{feature}/design.md` | `design-template.md` | `software-architect` (feature mode) | 1b — design approval |
+| `documentation/specs/{feature}/tasks.md` | `tasks-template.md` | This skill | 1c — tasks approval |
 
 All three are published as a single Confluence page (with sub-sections) or three child pages, under the project's parent page.
 
@@ -32,9 +32,9 @@ All three are published as a single Confluence page (with sub-sections) or three
 
 ### Step 1 — Load Steering and Release Context
 
-Read `.claude/steering/product.md`, `tech.md`, `structure.md`. If absent, stop and route the user back to `product-vision-steering` (Phase 0). A feature spec cannot be authored without steering context.
+Read `documentation/steering/product.md`, `tech.md`, `structure.md`. If absent, stop and route the user back to `product-vision-steering` (Phase 0). A feature spec cannot be authored without steering context.
 
-Also read `.claude/releases/*/epic-map.md` if any release is active. If the target feature appears in a release's epic-map, note the linked JIRA epic key — the spec will attach to that existing epic rather than create a new one downstream.
+Also read `documentation/releases/*/epic-map.md` if any release is active. If the target feature appears in a release's epic-map, note the linked JIRA epic key — the spec will attach to that existing epic rather than create a new one downstream.
 
 ### Step 2 — Confirm Feature Scope
 
@@ -45,7 +45,7 @@ Confirm with the user:
 - Upstream feature dependencies
 - Known constraints (deadline, scope exclusions, must-not-change areas)
 
-Create the directory `.claude/specs/{feature}/` and initialise empty files.
+Create the directory `documentation/specs/{feature}/` and initialise empty files.
 
 ### Step 3 — Gate 1a: Requirements
 
@@ -100,7 +100,7 @@ Present to user. **Gate 1c: user approves tasks before the spec is published and
 ### Step 6 — Publish
 
 On all three gates passing:
-1. Commit the three files to `.claude/specs/{feature}/`
+1. Commit the three files to `documentation/specs/{feature}/`
 2. Publish a Confluence page (use Atlassian MCP). Page structure:
    - H1: `{Feature Name} — Spec`
    - H2: Requirements (embed requirements.md)
@@ -108,7 +108,7 @@ On all three gates passing:
    - H2: Tasks (embed tasks.md)
 3. If a release epic exists for this feature:
    - Update the JIRA epic description to include a link to the Confluence spec page
-   - Update `.claude/releases/{release}/epic-map.md` — change the Spec Status column for this feature from "not specced" to "specced" (or "specced, ready for backlog")
+   - Update `documentation/releases/{release}/epic-map.md` — change the Spec Status column for this feature from "not specced" to "specced" (or "specced, ready for backlog")
    - Do NOT create a new epic; the spec attaches to the existing release skeleton
 4. If no release plan exists: a standalone epic will be created later by `backlog-manager` (Phase 2)
 5. Record the Confluence page URL in the workflow config

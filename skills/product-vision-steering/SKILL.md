@@ -7,7 +7,7 @@ description: >
   project from scratch, onboarding an existing codebase into the ol-sdd-workflow,
   refreshing steering docs when the project's direction or stack changes, or when a
   feature spec author needs upstream context that is missing. Produces filled-in
-  templates committed to .claude/steering/ and published to Confluence. Phase 0 of
+  templates committed to documentation/steering/ and published to Confluence. Phase 0 of
   the ol-sdd-workflow orchestrator.
 ---
 
@@ -23,9 +23,9 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 0, or directly by
 
 | File | Template | Purpose |
 |------|----------|---------|
-| `.claude/steering/product.md` | `prompts/coding/templates/product-template.md` | Product vision: purpose, users, key features, objectives, metrics, principles |
-| `.claude/steering/tech.md` | `prompts/coding/templates/tech-template.md` | Technology stack: languages, frameworks, libraries, tooling, deployment |
-| `.claude/steering/structure.md` | `prompts/coding/templates/structure-template.md` | Project structure: directory organisation, naming conventions, module boundaries |
+| `documentation/steering/product.md` | `prompts/coding/templates/product-template.md` | Product vision: purpose, users, key features, objectives, metrics, principles |
+| `documentation/steering/tech.md` | `prompts/coding/templates/tech-template.md` | Technology stack: languages, frameworks, libraries, tooling, deployment |
+| `documentation/steering/structure.md` | `prompts/coding/templates/structure-template.md` | Project structure: directory organisation, naming conventions, module boundaries |
 
 Each file is also published as a Confluence page under the project's parent page.
 
@@ -34,7 +34,7 @@ Each file is also published as a Confluence page under the project's parent page
 ### Step 1 — Detect Existing State
 
 Check for:
-- `.claude/steering/` directory and each of the three files
+- `documentation/steering/` directory and each of the three files
 - If any exist, read them and treat them as the baseline to refine (not replace)
 - Identify codebase type from manifest files: `package.json`, `pyproject.toml`, `requirements.txt`, `go.mod`, `Cargo.toml`, `Pipfile`, etc.
 
@@ -75,9 +75,9 @@ Present all three filled documents to the user. Ask for approval per document �
 ### Step 6 — Commit and Publish
 
 On approval:
-1. Write the three files to `.claude/steering/`
+1. Write the three files to `documentation/steering/`
 2. Publish each as a Confluence page under the project's parent page (use Atlassian MCP tools; ask for space key and parent page ID if not configured)
-3. Update `.claude/workflow-config.md` with confluence/jira config if provided
+3. Update `documentation/workflow-config.md` with confluence/jira config if provided
 4. Return to the caller (orchestrator or user) with links to committed files and Confluence pages
 
 ---

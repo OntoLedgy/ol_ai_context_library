@@ -474,11 +474,11 @@ A separate orchestration layer that sits *above* the architect/engineer/ontologi
 | Skill | Phase | Invokes | Outputs |
 |---|---|---|---|
 | `ol-sdd-workflow` | master | all of the below | controls flow, enforces gates |
-| `product-vision-steering` | 0 | — | `.claude/steering/*.md` + Confluence |
-| `release-planner` | 0.5 | Atlassian MCP | `.claude/releases/{release}/features.md`, `epic-map.md` + Confluence roadmap + skeleton JIRA epics |
-| `feature-spec-author` | 1 | `software-architect` | `.claude/specs/{feat}/*.md` + Confluence; attaches to release epic if present |
+| `product-vision-steering` | 0 | — | `documentation/steering/*.md` + Confluence |
+| `release-planner` | 0.5 | Atlassian MCP | `documentation/releases/{release}/features.md`, `epic-map.md` + Confluence roadmap + skeleton JIRA epics |
+| `feature-spec-author` | 1 | `software-architect` | `documentation/specs/{feat}/*.md` + Confluence; attaches to release epic if present |
 | `backlog-manager` | 2 | Atlassian MCP | JIRA stories/subtasks under existing (release) or new epic + ticket-map.md |
-| `sprint-planner` | 3 | JIRA queries | `.claude/sprints/sprint-{N}-kickoff.md` |
+| `sprint-planner` | 3 | JIRA queries | `documentation/sprints/sprint-{N}-kickoff.md` |
 | `sprint-executor` | 4 | engineer skills, `clean-code-reviewer`, `clean-code-commit`, `jira-impl-logger` | commits + JIRA transitions |
 | `jira-impl-logger` | 5 | Atlassian MCP | JIRA issue comment (impl log) |
 

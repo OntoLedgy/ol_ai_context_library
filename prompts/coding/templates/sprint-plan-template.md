@@ -25,8 +25,8 @@ Fetch these before starting — they contain data models, API contracts, schemas
 
 | Feature | Confluence | Epic | Repo |
 |---------|-----------|------|------|
-| {feature-1} | {url} | {epic-key} | `.claude/specs/{feature-1}/` |
-| {feature-2} | {url} | {epic-key} | `.claude/specs/{feature-2}/` |
+| {feature-1} | {url} | {epic-key} | `documentation/specs/{feature-1}/` |
+| {feature-2} | {url} | {epic-key} | `documentation/specs/{feature-2}/` |
 
 ## JIRA Board
 {board URL}
@@ -76,11 +76,11 @@ Fetch these before starting — they contain data models, API contracts, schemas
 
 | Area | Path |
 |------|------|
-(drawn from `.claude/steering/structure.md`)
+(drawn from `documentation/steering/structure.md`)
 
 ## Working Conventions
 
-(drawn from `.claude/steering/tech.md` — stack versions, commit format, PR conventions, test policy, style guides)
+(drawn from `documentation/steering/tech.md` — stack versions, commit format, PR conventions, test policy, style guides)
 
 ## Cuts & Deferrals (if any)
 

@@ -129,7 +129,7 @@ List every class name, exported function name, API route, table column group, mi
 ### Back-Links
 
 - Spec: {Confluence URL}
-- tasks.md: `.claude/specs/{feature-name}/tasks.md#{anchor}`
+- tasks.md: `documentation/specs/{feature-name}/tasks.md#{anchor}`
 - Commit: {git commit URL or `git show {sha}` locally}
 - Related tickets: {list of JIRA keys touched by dependent work}
 ```
@@ -167,7 +167,7 @@ A complete rendered comment might look like:
 
 ### Back-Links
 - Spec: https://ontoledgy.atlassian.net/wiki/spaces/TBMLI/pages/6521323524
-- tasks.md: `.claude/specs/licence-data-extraction/tasks.md` task 1
+- tasks.md: `documentation/specs/licence-data-extraction/tasks.md` task 1
 - Commit: git show a3f1b29
 ```
 

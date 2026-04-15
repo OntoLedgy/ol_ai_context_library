@@ -20,20 +20,20 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 2, or directly wh
 
 ## Inputs
 
-- `.claude/specs/{feature}/tasks.md` — approved (Phase 1 gate 1c passed)
-- `.claude/specs/{feature}/requirements.md` — for story grouping
-- `.claude/specs/{feature}/design.md` — for epic description
+- `documentation/specs/{feature}/tasks.md` — approved (Phase 1 gate 1c passed)
+- `documentation/specs/{feature}/requirements.md` — for story grouping
+- `documentation/specs/{feature}/design.md` — for epic description
 - Confluence URL for the spec page — for back-links
 - JIRA project key (e.g., `TI`, `TBMLI`)
 - Default assignee (optional)
-- Optional: existing release epic from `.claude/releases/{release}/epic-map.md` — if present, stories and subtasks attach under it rather than creating a new epic
+- Optional: existing release epic from `documentation/releases/{release}/epic-map.md` — if present, stories and subtasks attach under it rather than creating a new epic
 
 ## Epic handling: release skeleton vs standalone
 
 Before creating anything, determine the epic strategy:
 
 1. **Release-skeleton epic exists** (from Phase 0.5 `release-planner`):
-   - Read the epic from `.claude/releases/{release}/epic-map.md`
+   - Read the epic from `documentation/releases/{release}/epic-map.md`
    - Fetch the existing JIRA epic (use `getJiraIssue`)
    - Update its description with: full design overview, spec Confluence URL, repo spec folder link — fleshing out the skeleton
    - Create stories and subtasks as children of this existing epic
@@ -43,7 +43,7 @@ Before creating anything, determine the epic strategy:
    - Create a new standalone epic (per the original Phase 2 behaviour)
    - Stories and subtasks become children of this new epic
 
-The decision is made from `.claude/releases/*/epic-map.md` lookups. Ask the user to confirm which epic (if multiple releases are active).
+The decision is made from `documentation/releases/*/epic-map.md` lookups. Ask the user to confirm which epic (if multiple releases are active).
 
 ## Outputs
 
@@ -52,7 +52,7 @@ The decision is made from `.claude/releases/*/epic-map.md` lookups. Ask the user
 | JIRA Epic (one) | `{project-key}-NNN` |
 | JIRA Stories (several) | `{project-key}-NNN`, children of epic |
 | JIRA Subtasks (many) | `{project-key}-NNN`, children of stories |
-| Ticket map | `.claude/specs/{feature}/ticket-map.md` |
+| Ticket map | `documentation/specs/{feature}/ticket-map.md` |
 
 ## Ticket Structure
 
@@ -92,7 +92,7 @@ The decision is made from `.claude/releases/*/epic-map.md` lookups. Ask the user
 
 - Confirm tasks.md exists and is marked approved
 - Confirm the three spec files all exist
-- Confirm JIRA project key and Confluence URL are available (from `.claude/workflow-config.md` or user input)
+- Confirm JIRA project key and Confluence URL are available (from `documentation/workflow-config.md` or user input)
 - Confirm the feature does not already have an epic in JIRA (avoid duplicate publication). If one exists, ask: update existing or abort?
 
 ### Step 2 — Parse tasks.md
@@ -131,11 +131,11 @@ Use Atlassian MCP tools in this order:
 
 Create in small batches and surface any API errors immediately — don't continue on failure.
 
-If operating on a release-skeleton epic, also update `.claude/releases/{release}/epic-map.md`: change the Spec Status column for this feature from "specced" to "in backlog" so the release roadmap reflects progress.
+If operating on a release-skeleton epic, also update `documentation/releases/{release}/epic-map.md`: change the Spec Status column for this feature from "specced" to "in backlog" so the release roadmap reflects progress.
 
 ### Step 5 — Write Ticket Map
 
-Create `.claude/specs/{feature}/ticket-map.md`:
+Create `documentation/specs/{feature}/ticket-map.md`:
 
 ```markdown
 # Ticket Map — {feature-name}

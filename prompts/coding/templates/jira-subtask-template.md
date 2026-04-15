@@ -38,7 +38,7 @@ The story covering the referenced requirement.
 
 ## Spec Reference
 - Feature spec: [Confluence link]
-- tasks.md: `.claude/specs/{feature-name}/tasks.md` — task #{N}
+- tasks.md: `documentation/specs/{feature-name}/tasks.md` — task #{N}
 - design.md section: [Confluence anchor link]
 
 ## Acceptance

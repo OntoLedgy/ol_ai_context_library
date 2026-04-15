@@ -27,7 +27,7 @@ The workflow is adapted from the upstream spec-workflow-mcp model (Requirements 
 1. **Phased progression** — never skip phases. Each phase has a single primary deliverable.
 2. **Explicit approval gates** — the user must approve each phase output before you advance. No silent progression.
 3. **Delegation over duplication** — every phase has a dedicated skill. Invoke it; do not re-implement its work here.
-4. **Repo for specs, JIRA for backlog and logs** — design documents live in Confluence (and optionally `.claude/specs/`); tickets and implementation logs live in JIRA.
+4. **Repo for specs, JIRA for backlog and logs** — design documents live in Confluence (and optionally `documentation/specs/`); tickets and implementation logs live in JIRA.
 5. **Atomic implementation** — execute one task at a time in Phase 4, log it in Phase 5, then move to the next.
 6. **Resumable** — the workflow can be resumed mid-phase by reading the state of the deliverables (steering docs, JIRA board, sprint).
 
@@ -41,7 +41,7 @@ The workflow is adapted from the upstream spec-workflow-mcp model (Requirements 
           │   ├── tech.md        (stack, patterns, conventions)
           │   └── structure.md   (directory layout, naming)
           │ Skill: product-vision-steering
-          │ Output surface: Confluence + .claude/steering/
+          │ Output surface: Confluence + documentation/steering/
           │ Approval gate: user confirms steering before any release planning
           ▼
  Phase 0.5 │ Release Plan
@@ -49,7 +49,7 @@ The workflow is adapted from the upstream spec-workflow-mcp model (Requirements 
           │   ├── Confluence page    (roadmap narrative + feature table)
           │   └── JIRA epics         (one empty epic per in-scope feature)
           │ Skill: release-planner
-          │ Output surface: Confluence + .claude/releases/ + JIRA
+          │ Output surface: Confluence + documentation/releases/ + JIRA
           │ Approval gate: user approves the feature list and scope tier
           ▼
  Phase 1  │ Feature Spec (per feature; triggered from a release epic)
@@ -57,7 +57,7 @@ The workflow is adapted from the upstream spec-workflow-mcp model (Requirements 
           │   ├── design.md        (architecture, components, data models)
           │   └── tasks.md         (atomic implementation tasks)
           │ Skill: feature-spec-author (wraps software-architect in feature mode)
-          │ Output surface: Confluence + .claude/specs/{feature}/
+          │ Output surface: Confluence + documentation/specs/{feature}/
           │ Approval gate: user approves requirements, then design, then tasks
           ▼
  Phase 2  │ Backlog
@@ -97,9 +97,9 @@ At the start of every invocation, determine the current phase by reading the art
 
 | Phase | Check | If present → |
 |-------|-------|--------------|
-| 0 | `.claude/steering/product.md` exists and non-empty | Steering is set; skip to 0.5 |
-| 0.5 | `.claude/releases/{release}/epic-map.md` exists with JIRA epics | Release is planned; skip to 1 |
-| 1 | `.claude/specs/{feature}/tasks.md` exists for the target feature | Feature is specced; skip to 2 |
+| 0 | `documentation/steering/product.md` exists and non-empty | Steering is set; skip to 0.5 |
+| 0.5 | `documentation/releases/{release}/epic-map.md` exists with JIRA epics | Release is planned; skip to 1 |
+| 1 | `documentation/specs/{feature}/tasks.md` exists for the target feature | Feature is specced; skip to 2 |
 | 2 | JIRA epic has child stories/subtasks (not just a release skeleton) | Backlog exists; skip to 3 |
 | 3 | Active JIRA sprint contains the epic's tasks | Sprint is planned; skip to 4 |
 | 4 | In-flight sprint | Continue execution |
@@ -122,6 +122,7 @@ The skill accepts several entry modes. Route accordingly:
 | "kick off sprint N" / "run the sprint" | 4 | Invoke `sprint-executor` |
 | "log the implementation for {ticket}" | 5 | Invoke `jira-impl-logger` |
 | "start from scratch" / "end to end" | 0 | Walk through all phases sequentially |
+| "migrate legacy specs" / "move .claude or .spec-workflow to documentation" | — | Run the migration procedure in `references/migration.md` |
 
 If the user's request is ambiguous (e.g. "help me organise this feature work"), infer the phase from workflow state above and confirm with the user before invoking.
 
@@ -132,7 +133,7 @@ If the user's request is ambiguous (e.g. "help me organise this feature work"), 
 **Delegate to:** `product-vision-steering`
 
 **Your responsibility:**
-1. Check `.claude/steering/` for existing steering docs.
+1. Check `documentation/steering/` for existing steering docs.
 2. If missing or stale, invoke `product-vision-steering` with: "Produce the three steering documents (product, tech, structure) for this project and publish to Confluence."
 3. Wait for the skill to return filled templates.
 4. Present to user. **Gate: user must approve before Phase 0.5.**
@@ -149,7 +150,7 @@ If the user's request is ambiguous (e.g. "help me organise this feature work"), 
 2. Invoke `release-planner` with: "Plan the feature set for release {name}. Capacity {H} hours over {D} days. Reference steering docs."
 3. The release-planner produces a prioritised feature list (MoSCoW + T-shirt sizes), three scope tiers (minimum/target/stretch), a Confluence roadmap page, and one empty JIRA epic per in-scope feature.
 4. Present the plan to the user. **Gate: user approves the feature list and target scope tier.**
-5. On approval, the epics are published and `.claude/releases/{release}/epic-map.md` is committed. Features can now be specced individually in Phase 1.
+5. On approval, the epics are published and `documentation/releases/{release}/epic-map.md` is committed. Features can now be specced individually in Phase 1.
 
 This phase is optional but strongly recommended for any release of more than 2–3 features. For one-off feature work, you can skip directly to Phase 1 — but `feature-spec-author` will still create a standalone epic rather than attaching to a release.
 
@@ -160,8 +161,8 @@ This phase is optional but strongly recommended for any release of more than 2�
 **Delegate to:** `feature-spec-author` (which internally uses `software-architect` in feature-design mode)
 
 **Your responsibility:**
-1. Confirm the feature name and scope with the user. If a release plan exists (`.claude/releases/{release}/epic-map.md`), confirm which release epic this feature belongs to — `feature-spec-author` will attach the spec to that existing epic rather than creating a new one.
-2. Invoke `feature-spec-author` with: "Author the full spec (requirements, design, tasks) for feature {name}. Reference steering docs. Link to release epic {KEY} if present. Produce all three files in `.claude/specs/{feature-name}/` and a Confluence page."
+1. Confirm the feature name and scope with the user. If a release plan exists (`documentation/releases/{release}/epic-map.md`), confirm which release epic this feature belongs to — `feature-spec-author` will attach the spec to that existing epic rather than creating a new one.
+2. Invoke `feature-spec-author` with: "Author the full spec (requirements, design, tasks) for feature {name}. Reference steering docs. Link to release epic {KEY} if present. Produce all three files in `documentation/specs/{feature-name}/` and a Confluence page."
 3. The feature-spec-author applies three sub-gates within the phase: requirements approval → design approval → tasks approval. Mirror each gate to the user.
 4. **Gate: user must approve the full spec before Phase 2.** Do not create stories or subtasks until tasks.md is approved.
 
@@ -172,7 +173,7 @@ This phase is optional but strongly recommended for any release of more than 2�
 **Delegate to:** `backlog-manager`
 
 **Your responsibility:**
-1. Invoke `backlog-manager` with: "Publish the approved spec at `.claude/specs/{feature}/tasks.md` to JIRA project {project-key}. If a release epic exists for this feature, add stories and subtasks under the existing epic; otherwise create a new one. Create story groupings per requirement and subtasks per atomic task."
+1. Invoke `backlog-manager` with: "Publish the approved spec at `documentation/specs/{feature}/tasks.md` to JIRA project {project-key}. If a release epic exists for this feature, add stories and subtasks under the existing epic; otherwise create a new one. Create story groupings per requirement and subtasks per atomic task."
 2. The backlog-manager returns a ticket map (`{task_id → JIRA key}`) and posts a comment on each JIRA subtask linking back to the spec (Confluence URL or file path). It also updates the release's `epic-map.md` to mark this feature's spec status as "specced and in backlog."
 3. **Gate: user reviews the JIRA board and approves structure + estimates before Phase 3.**
 
@@ -243,7 +244,7 @@ If the user has not configured these, ask them to provide:
 - JIRA project key and board ID
 - Default assignee (if applicable)
 
-Record these in `.claude/steering/` or `.claude/workflow-config.md` so downstream skills can pick them up automatically.
+Record these in `documentation/steering/` or `documentation/workflow-config.md` so downstream skills can pick them up automatically.
 
 ---
 
@@ -263,8 +264,8 @@ This skill is the control plane. Every concrete action is delegated.
 
 When the user returns mid-workflow ("continue where we left off"):
 
-1. Read `.claude/steering/` — if absent, resume at Phase 0.
-2. Read `.claude/specs/` — list in-flight specs, ask which to resume.
+1. Read `documentation/steering/` — if absent, resume at Phase 0.
+2. Read `documentation/specs/` — list in-flight specs, ask which to resume.
 3. Query JIRA — find matching epic, check sprint state, find in-progress tickets.
 4. Summarise state to the user: "Feature X: spec approved, JIRA epic TI-42 with 18 subtasks, Sprint 3 in flight, 7/18 tickets done. Next action: continue execution or plan next wave?"
 5. Route to the appropriate phase skill.
@@ -283,4 +284,4 @@ When the user returns mid-workflow ("continue where we left off"):
 | 4 | `sprint-executor` | "Run sprint {N} using plan at {path}." |
 | 5 | `jira-impl-logger` | "Log implementation for ticket {KEY} with {artifacts}." |
 
-See `references/phase-flow.md` for detailed phase I/O contracts, `references/workflow-state.md` for state detection heuristics, and `references/usage.md` for the user-facing usage guide (how to invoke, prerequisites, partial-workflow recipes, and when not to use this workflow).
+See `references/phase-flow.md` for detailed phase I/O contracts, `references/workflow-state.md` for state detection heuristics, `references/usage.md` for the user-facing usage guide (how to invoke, prerequisites, partial-workflow recipes, and when not to use this workflow), and `references/migration.md` for migrating legacy `.spec-workflow/` or `.claude/` layouts to the canonical `documentation/` folder.
