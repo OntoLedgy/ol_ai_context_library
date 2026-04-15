@@ -9,15 +9,23 @@ probe 0: .claude/steering/product.md + tech.md + structure.md
   present & non-empty  → steering complete
   missing/empty        → Phase 0 required
 
+probe 0.5: .claude/releases/{release}/epic-map.md
+  present                    → release plan in place; read epic-map to identify
+                               candidate features and their spec status
+  absent and user is scoping → Phase 0.5 required (MVP, v1, roadmap language)
+  absent and single-feature  → Phase 0.5 skippable; proceed to Phase 1 directly
+    work                     
+
 probe 1: .claude/specs/{feature}/ directory
   with requirements.md only              → Phase 1 mid, gate 1
   with requirements.md + design.md       → Phase 1 mid, gate 2
   with all three (incl. tasks.md)        → Phase 1 complete, ready for Phase 2
   absent                                  → Phase 1 not started
 
-probe 2: JIRA epic whose summary contains feature name
-  absent                 → Phase 2 required
-  present w/ subtasks    → Phase 2 complete
+probe 2: JIRA epic state for target feature
+  release-skeleton epic (no children)       → Phase 0.5 done, Phase 2 not yet
+  epic with stories and subtasks            → Phase 2 complete
+  no epic at all                             → neither Phase 0.5 nor Phase 2 done
 
 probe 3: JIRA sprint containing epic's subtasks
   absent                 → Phase 3 required

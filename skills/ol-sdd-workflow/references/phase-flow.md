@@ -16,18 +16,38 @@ Each phase has a defined input contract (what must exist before it starts) and o
 
 **Approval gate output:** Three documents committed to repo and published to Confluence.
 
+## Phase 0.5 — Release Plan
+
+**Input:**
+- Approved steering docs (Phase 0 output)
+- Release target (name + date)
+- Capacity (engineer-days or hours across the release window)
+- Optional: stakeholder feature requests, carry-over from prior releases
+
+**Output:**
+- `.claude/releases/{release-name}/features.md` (from `release-plan-template.md`): prioritised feature list with MoSCoW, T-shirt sizes, dependencies, three scope tiers
+- `.claude/releases/{release-name}/epic-map.md`: feature → JIRA epic key mapping, with a Spec Status column that downstream skills update
+- Confluence page: "Release Plan — {release-name}" under the project parent
+- JIRA epic per in-scope feature (skeleton: summary, description, `release:{name}` label, priority label — no stories or subtasks yet)
+
+**Approval gate output:** feature list approved; skeleton epics created. Features with empty epics are ready for Phase 1 specification.
+
+This phase is optional. If skipped, Phase 1 creates standalone epics per feature (no release grouping). Recommended for any release larger than 2–3 features.
+
 ## Phase 1 — Feature Spec
 
 **Input:**
 - Approved steering docs (Phase 0 output)
-- Feature name and brief scope from user (or development plan)
+- Feature name and brief scope from user
+- Optional but preferred: release epic from Phase 0.5 — if `.claude/releases/{release}/epic-map.md` has an epic for this feature, the spec attaches to that existing epic rather than creating a new one
 - Upstream feature dependencies (optional)
 
 **Output:**
 - `.claude/specs/{feature-name}/requirements.md` (from `requirements-template.md`)
 - `.claude/specs/{feature-name}/design.md` (from `design-template.md`)
 - `.claude/specs/{feature-name}/tasks.md` (from `tasks-template.md`)
-- Confluence page: feature spec under project parent
+- Confluence page: feature spec under project parent (linked from the release page if applicable)
+- If a release epic exists: its description is updated with a link to the spec, and `epic-map.md` Spec Status column is updated to "specced"
 
 **Sub-gates within Phase 1:**
 1. Requirements approval (before design starts)
@@ -40,16 +60,18 @@ Each phase has a defined input contract (what must exist before it starts) and o
 - Approved `.claude/specs/{feature}/tasks.md`
 - JIRA project key
 - Confluence URL for the spec (for back-link)
+- Optional: existing release epic from Phase 0.5 (`.claude/releases/{release}/epic-map.md`)
 
 **Output:**
-- One JIRA epic (feature-level)
-- N JIRA stories (one per top-level requirement or task group)
-- M JIRA subtasks (one per atomic task in tasks.md)
+- One JIRA epic — either the existing release-skeleton epic (fleshed out with full description + story/subtask children) or a new standalone epic if no release plan exists
+- N JIRA stories (one per top-level requirement or task group), children of the epic
+- M JIRA subtasks (one per atomic task in tasks.md), children of stories
 - Ticket map file: `.claude/specs/{feature}/ticket-map.md` (task_id → JIRA key)
+- If a release is active: `.claude/releases/{release}/epic-map.md` Spec Status column updated to "in backlog"
 - Each ticket has:
   - Description with spec back-link
   - Estimate (from tasks.md or user input)
-  - Labels (feature name, skill routing tag)
+  - Labels (feature name, skill routing tag, release name if applicable)
 
 ## Phase 3 — Sprint Plan
 

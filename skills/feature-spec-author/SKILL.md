@@ -30,16 +30,18 @@ All three are published as a single Confluence page (with sub-sections) or three
 
 ## Workflow
 
-### Step 1 — Load Steering Context
+### Step 1 — Load Steering and Release Context
 
 Read `.claude/steering/product.md`, `tech.md`, `structure.md`. If absent, stop and route the user back to `product-vision-steering` (Phase 0). A feature spec cannot be authored without steering context.
+
+Also read `.claude/releases/*/epic-map.md` if any release is active. If the target feature appears in a release's epic-map, note the linked JIRA epic key — the spec will attach to that existing epic rather than create a new one downstream.
 
 ### Step 2 — Confirm Feature Scope
 
 Confirm with the user:
 - Feature name (kebab-case, e.g., `licence-data-extraction`)
-- One-line description
-- Which part of the development plan this fulfils (if applicable)
+- One-line description (or read from the release's features.md if present)
+- Release epic to attach to (if a release plan exists): confirm the JIRA epic key from `epic-map.md`
 - Upstream feature dependencies
 - Known constraints (deadline, scope exclusions, must-not-change areas)
 
@@ -104,8 +106,13 @@ On all three gates passing:
    - H2: Requirements (embed requirements.md)
    - H2: Design (embed design.md)
    - H2: Tasks (embed tasks.md)
-3. Record the Confluence page URL in the workflow config
-4. Return to caller with links
+3. If a release epic exists for this feature:
+   - Update the JIRA epic description to include a link to the Confluence spec page
+   - Update `.claude/releases/{release}/epic-map.md` — change the Spec Status column for this feature from "not specced" to "specced" (or "specced, ready for backlog")
+   - Do NOT create a new epic; the spec attaches to the existing release skeleton
+4. If no release plan exists: a standalone epic will be created later by `backlog-manager` (Phase 2)
+5. Record the Confluence page URL in the workflow config
+6. Return to caller with links (including the release epic key if applicable)
 
 ---
 

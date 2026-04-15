@@ -88,6 +88,7 @@ mindmap
 | `clean-code-commit` | Validate/Generate | Engineer | Solution | Agnostic | _(cross-cutting)_ |
 | `ol-sdd-workflow` | Orchestrate | Orchestrator | Spec | Agnostic | OL Spec-Driven Development Workflow (master) |
 | `product-vision-steering` | Design | Architect | Spec | Agnostic | Phase 0 — Steering |
+| `release-planner` | Design | Architect | Spec | Agnostic | Phase 0.5 — Release Plan |
 | `feature-spec-author` | Design | Architect | Spec | Agnostic | Phase 1 — Feature Spec |
 | `backlog-manager` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 2 — JIRA Backlog |
 | `sprint-planner` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 3 — Sprint Plan |
@@ -454,6 +455,8 @@ A separate orchestration layer that sits *above* the architect/engineer/ontologi
        │
        ├─► Phase 0  product-vision-steering  →  product.md · tech.md · structure.md
        │      gate: user approves steering
+       ├─► Phase 0.5 release-planner          →  features.md · Confluence roadmap · JIRA epic skeletons
+       │      gate: user approves feature list and scope tier (optional phase)
        ├─► Phase 1  feature-spec-author       →  requirements.md · design.md · tasks.md
        │      internal gates: requirements → design → tasks
        │      (wraps software-architect feature-design mode)
@@ -472,8 +475,9 @@ A separate orchestration layer that sits *above* the architect/engineer/ontologi
 |---|---|---|---|
 | `ol-sdd-workflow` | master | all of the below | controls flow, enforces gates |
 | `product-vision-steering` | 0 | — | `.claude/steering/*.md` + Confluence |
-| `feature-spec-author` | 1 | `software-architect` | `.claude/specs/{feat}/*.md` + Confluence |
-| `backlog-manager` | 2 | Atlassian MCP | JIRA epic/stories/subtasks + ticket-map.md |
+| `release-planner` | 0.5 | Atlassian MCP | `.claude/releases/{release}/features.md`, `epic-map.md` + Confluence roadmap + skeleton JIRA epics |
+| `feature-spec-author` | 1 | `software-architect` | `.claude/specs/{feat}/*.md` + Confluence; attaches to release epic if present |
+| `backlog-manager` | 2 | Atlassian MCP | JIRA stories/subtasks under existing (release) or new epic + ticket-map.md |
 | `sprint-planner` | 3 | JIRA queries | `.claude/sprints/sprint-{N}-kickoff.md` |
 | `sprint-executor` | 4 | engineer skills, `clean-code-reviewer`, `clean-code-commit`, `jira-impl-logger` | commits + JIRA transitions |
 | `jira-impl-logger` | 5 | Atlassian MCP | JIRA issue comment (impl log) |

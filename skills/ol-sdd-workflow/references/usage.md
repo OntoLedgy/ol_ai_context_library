@@ -10,10 +10,11 @@ You: "use ol-sdd-workflow to take this project end to end — we want to ship Fe
 
 The orchestrator will walk through:
 1. Phase 0 — steering docs (product, tech, structure)
-2. Phase 1 — feature spec (requirements → design → tasks)
-3. Phase 2 — JIRA backlog (epic + stories + subtasks)
-4. Phase 3 — sprint plan
-5. Phase 4 — sprint execution (with Phase 5 impl logs per task)
+2. Phase 0.5 — release plan (feature list, Confluence roadmap, empty JIRA epics)
+3. Phase 1 — feature spec for each in-scope feature (requirements → design → tasks)
+4. Phase 2 — JIRA backlog (stories + subtasks added under the release epic)
+5. Phase 3 — sprint plan
+6. Phase 4 — sprint execution (with Phase 5 impl logs per task)
 
 At each phase gate it will pause and ask for approval.
 
@@ -24,8 +25,10 @@ You don't have to start at Phase 0. Jump in wherever you are.
 | Situation | Say |
 |-----------|-----|
 | New project, no steering yet | "use product-vision-steering to set up steering docs for this project" |
-| Steering exists, need to spec a new feature | "use feature-spec-author to spec out feature {name}" |
-| Spec approved, need JIRA tickets | "use backlog-manager to publish `.claude/specs/{feature}/` to JIRA project {KEY}" |
+| Steering exists, scoping an MVP or release | "use release-planner to plan the MVP / release {name}" |
+| Release plan exists, need to spec a feature | "use feature-spec-author to spec out feature {name}" (attaches to its release epic) |
+| Steering exists, one-off feature (no release grouping) | "use feature-spec-author to spec feature {name}" (creates standalone epic) |
+| Spec approved, need stories and subtasks | "use backlog-manager to publish `.claude/specs/{feature}/` to JIRA" |
 | Backlog exists, planning next sprint | "use sprint-planner to plan sprint {N} with {H} hours of capacity" |
 | Sprint planned, ready to execute | "use sprint-executor to run sprint {N}" |
 | Task committed, need to log it | "use jira-impl-logger to log {TICKET-KEY} implementation" |
@@ -66,6 +69,10 @@ your-repo/
 │   │   ├── product.md                  (Phase 0)
 │   │   ├── tech.md                     (Phase 0)
 │   │   └── structure.md                (Phase 0)
+│   ├── releases/
+│   │   └── {release-name}/
+│   │       ├── features.md             (Phase 0.5; prioritised feature list)
+│   │       └── epic-map.md             (Phase 0.5; feature → JIRA epic mapping)
 │   ├── specs/
 │   │   └── {feature-name}/
 │   │       ├── requirements.md         (Phase 1, gate 1a)
@@ -138,6 +145,7 @@ Never delete JIRA tickets — use "Won't Do" status with a reason.
 Every phase skill is independently callable. Common partial uses:
 
 - **Steering-only**: `product-vision-steering` alone to document an existing codebase
+- **Release-planning-only**: `release-planner` alone to enumerate and prioritise features for stakeholder review (produces Confluence roadmap + skeleton epics without forcing spec work)
 - **Spec-only**: `feature-spec-author` to produce spec docs without JIRA publishing (useful for exploratory specs)
 - **JIRA-only**: `backlog-manager` to publish an externally-authored tasks.md to JIRA
 - **Exec-only**: `sprint-executor` against an existing JIRA sprint, without going through planning (useful when someone else planned the sprint)

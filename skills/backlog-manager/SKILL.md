@@ -26,6 +26,24 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 2, or directly wh
 - Confluence URL for the spec page — for back-links
 - JIRA project key (e.g., `TI`, `TBMLI`)
 - Default assignee (optional)
+- Optional: existing release epic from `.claude/releases/{release}/epic-map.md` — if present, stories and subtasks attach under it rather than creating a new epic
+
+## Epic handling: release skeleton vs standalone
+
+Before creating anything, determine the epic strategy:
+
+1. **Release-skeleton epic exists** (from Phase 0.5 `release-planner`):
+   - Read the epic from `.claude/releases/{release}/epic-map.md`
+   - Fetch the existing JIRA epic (use `getJiraIssue`)
+   - Update its description with: full design overview, spec Confluence URL, repo spec folder link — fleshing out the skeleton
+   - Create stories and subtasks as children of this existing epic
+   - Do NOT create a new epic
+
+2. **No release plan, or feature not in release epic-map**:
+   - Create a new standalone epic (per the original Phase 2 behaviour)
+   - Stories and subtasks become children of this new epic
+
+The decision is made from `.claude/releases/*/epic-map.md` lookups. Ask the user to confirm which epic (if multiple releases are active).
 
 ## Outputs
 
@@ -104,12 +122,16 @@ Ask the user to approve before any tickets are created.
 ### Step 4 — Create Tickets
 
 Use Atlassian MCP tools in this order:
-1. `createJiraIssue` for the epic
+1. Epic:
+   - If release-skeleton epic exists: `editJiraIssue` to flesh out its description, add labels, link Confluence
+   - Otherwise: `createJiraIssue` for a new standalone epic
 2. `createJiraIssue` for each story, linking `parent: {epic-key}`
 3. `createJiraIssue` for each subtask, linking `parent: {story-key}` (subtask issue type)
 4. `addCommentToJiraIssue` on each subtask with the spec-section back-link (Confluence URL + anchor + local file path)
 
 Create in small batches and surface any API errors immediately — don't continue on failure.
+
+If operating on a release-skeleton epic, also update `.claude/releases/{release}/epic-map.md`: change the Spec Status column for this feature from "specced" to "in backlog" so the release roadmap reflects progress.
 
 ### Step 5 — Write Ticket Map
 
