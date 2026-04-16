@@ -1,61 +1,70 @@
 #!/usr/bin/env python3
-"""Install SKILL.md-bearing folders from a repo into ~/.claude/skills/.
+"""Package every SKILL.md-bearing folder in a repo as an uploadable .zip.
 
-Discovers every top-level folder under the given repo that contains a
-SKILL.md with valid YAML frontmatter (name + description), and installs
-each one into the Claude skills directory as either a symlink (default,
-so `git pull` in the repo updates installed skills in place) or a copy.
+For each discovered skill, produces <out>/<skill-name>.zip whose archive
+root is the skill folder itself (the layout Claude Desktop's
+Customize > Skills uploader expects).
 
-Idempotent: existing targets are skipped unless --force is passed.
+Stdlib only: no PyYAML, no third-party deps. Frontmatter is parsed just
+enough to extract `name` and `description` for validation.
 """
 
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, Literal
+from typing import Iterator
 
-import yaml  # pip install pyyaml
 
-InstallMode = Literal["symlink", "copy"]
-Action = Literal["linked", "copied", "replaced", "skipped"]
-
+# --- Types ------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class SkillSource:
-    """A folder on disk that contains a valid SKILL.md."""
-
     path: Path
     name: str
     description: str
 
 
 @dataclass(frozen=True)
-class InstallResult:
+class PackageResult:
     skill: SkillSource
-    target: Path
-    action: Action
+    archive: Path
 
 
-def _parse_frontmatter(skill_md: Path) -> dict:
+# --- Frontmatter ------------------------------------------------------------
+
+_KV = re.compile(r"^\s*([A-Za-z_][\w-]*)\s*:\s*(.+?)\s*$")
+
+
+def _strip_quotes(value: str) -> str:
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+        return value[1:-1]
+    return value
+
+
+def _read_frontmatter(skill_md: Path) -> dict[str, str]:
     text = skill_md.read_text(encoding="utf-8")
     if not text.startswith("---"):
-        raise ValueError("missing YAML frontmatter")
-    try:
-        _, frontmatter, _ = text.split("---", 2)
-    except ValueError as exc:
-        raise ValueError("unterminated frontmatter block") from exc
-    data = yaml.safe_load(frontmatter) or {}
-    if not isinstance(data, dict):
-        raise ValueError("frontmatter is not a mapping")
-    return data
+        raise ValueError("missing frontmatter")
+    rest = text[3:]
+    end = rest.find("\n---")
+    if end < 0:
+        raise ValueError("unterminated frontmatter block")
+    fields: dict[str, str] = {}
+    for line in rest[:end].splitlines():
+        match = _KV.match(line)
+        if match:
+            fields[match.group(1)] = _strip_quotes(match.group(2))
+    return fields
 
 
-def _is_nested_skill(skill_md: Path, root: Path) -> bool:
-    """True if skill_md lives inside another SKILL.md's folder tree."""
+# --- Discovery --------------------------------------------------------------
+
+def _is_nested(skill_md: Path, root: Path) -> bool:
     ancestor = skill_md.parent.parent
     while ancestor != root and ancestor != ancestor.parent:
         if (ancestor / "SKILL.md").exists():
@@ -66,12 +75,12 @@ def _is_nested_skill(skill_md: Path, root: Path) -> bool:
 
 def discover_skills(root: Path) -> Iterator[SkillSource]:
     for skill_md in sorted(root.rglob("SKILL.md")):
-        if _is_nested_skill(skill_md, root):
+        if _is_nested(skill_md, root):
             continue
         try:
-            fm = _parse_frontmatter(skill_md)
-            name = str(fm["name"]).strip()
-            description = str(fm["description"]).strip()
+            fm = _read_frontmatter(skill_md)
+            name = fm["name"].strip()
+            description = fm["description"].strip()
         except (KeyError, ValueError) as exc:
             print(f"skip  {skill_md.relative_to(root)}: {exc}", file=sys.stderr)
             continue
@@ -84,57 +93,42 @@ def discover_skills(root: Path) -> Iterator[SkillSource]:
         yield SkillSource(path=skill_md.parent, name=name, description=description)
 
 
-def install(
-    skill: SkillSource,
-    dest_root: Path,
-    *,
-    mode: InstallMode,
-    force: bool,
-) -> InstallResult:
-    target = dest_root / skill.name
-    existed = target.exists() or target.is_symlink()
-    if existed and not force:
-        return InstallResult(skill, target, "skipped")
-    if existed:
-        if target.is_symlink() or target.is_file():
-            target.unlink()
-        else:
-            shutil.rmtree(target)
-    if mode == "symlink":
-        target.symlink_to(skill.path.resolve(), target_is_directory=True)
-    else:
-        shutil.copytree(skill.path, target)
-    return InstallResult(skill, target, "replaced" if existed else mode_to_action(mode))
+# --- Packaging --------------------------------------------------------------
+
+def package(skill: SkillSource, out_dir: Path, *, force: bool) -> PackageResult | None:
+    archive = out_dir / f"{skill.name}.zip"
+    if archive.exists() and not force:
+        print(f"skip     {skill.name:<32}  (already packaged)")
+        return None
+    if archive.exists():
+        archive.unlink()
+
+    # shutil.make_archive places `base_dir` at the archive root, which is
+    # exactly what the Claude Desktop uploader expects.
+    produced = shutil.make_archive(
+        base_name=str(out_dir / skill.name),
+        format="zip",
+        root_dir=str(skill.path.parent),
+        base_dir=skill.path.name,
+    )
+    return PackageResult(skill=skill, archive=Path(produced))
 
 
-def mode_to_action(mode: InstallMode) -> Action:
-    return "linked" if mode == "symlink" else "copied"
-
+# --- Main -------------------------------------------------------------------
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("repo", type=Path, help="Path to a cloned skills repo")
     parser.add_argument(
-        "--dest",
+        "--out",
         type=Path,
-        default=Path.home() / ".claude" / "skills",
-        help="Claude skills directory (default: ~/.claude/skills)",
-    )
-    parser.add_argument(
-        "--mode",
-        choices=("symlink", "copy"),
-        default="symlink",
-        help="symlink (default) tracks the repo on git pull; copy is portable",
+        default=Path.cwd() / "skill-zips",
+        help="Output directory for .zip files (default: ./skill-zips)",
     )
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Replace existing skills with the same name",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="List what would happen without touching the filesystem",
+        help="Rebuild archives that already exist",
     )
     args = parser.parse_args(argv)
 
@@ -143,31 +137,23 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {repo} is not a directory", file=sys.stderr)
         return 2
 
-    dest: Path = args.dest
-    if not args.dry_run:
-        dest.mkdir(parents=True, exist_ok=True)
+    out: Path = args.out.resolve()
+    out.mkdir(parents=True, exist_ok=True)
 
     skills = list(discover_skills(repo))
     if not skills:
         print(f"no skills found under {repo}")
         return 0
 
-    results: list[InstallResult] = []
+    packaged: list[PackageResult] = []
     for skill in skills:
-        if args.dry_run:
-            print(f"would  {skill.name:<30}  <-  {skill.path.relative_to(repo)}")
+        result = package(skill, out, force=args.force)
+        if result is None:
             continue
-        result = install(skill, dest, mode=args.mode, force=args.force)
-        results.append(result)
-        print(f"{result.action:<8} {skill.name:<30}  {skill.path.relative_to(repo)}")
+        packaged.append(result)
+        print(f"packaged {skill.name:<32}  -> {result.archive.name}")
 
-    if not args.dry_run:
-        summary = {
-            action: sum(1 for r in results if r.action == action)
-            for action in ("linked", "copied", "replaced", "skipped")
-        }
-        kept = ", ".join(f"{k}={v}" for k, v in summary.items() if v)
-        print(f"\ndone -> {dest}  ({kept})")
+    print(f"\n{len(packaged)} archive(s) in {out}")
     return 0
 
 
