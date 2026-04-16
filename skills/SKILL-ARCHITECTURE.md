@@ -94,6 +94,7 @@ mindmap
 | `sprint-planner` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 3 — Sprint Plan |
 | `sprint-executor` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 4 — Tech-Lead Execution |
 | `jira-impl-logger` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 5 — JIRA Impl Log |
+| `confluence-space-manager` | Orchestrate | Orchestrator | Spec | Agnostic | Confluence space create / audit / align (cross-cutting infrastructure) |
 
 > All clean-code skills are cross-cutting — they apply across all scopes. `clean-code-reviewer`, `clean-code-refactor`, `clean-code-naming`, and `clean-code-tests` support `standard: general | ob`. `clean-code-commit` does not use the standard facet.
 >
@@ -437,6 +438,7 @@ Format: `[Role]:[Mode]:[Scope]:[Language]`
 | `engineer:implement:ui:typescript` | ui-engineer |
 | `engineer:review:solution:multi` | clean-code-reviewer |
 | `engineer:refactor:solution:multi` | clean-code-refactor |
+| `orchestrator:orchestrate:confluence:agnostic` | confluence-space-manager |
 
 Auxiliary dependency skill: `boro-ontologist` (platform-independent BORO methodology;
 loaded by `ob-ontologist` when required)
@@ -481,5 +483,6 @@ A separate orchestration layer that sits *above* the architect/engineer/ontologi
 | `sprint-planner` | 3 | JIRA queries | `documentation/sprints/sprint-{N}-kickoff.md` |
 | `sprint-executor` | 4 | engineer skills, `clean-code-reviewer`, `clean-code-commit`, `jira-impl-logger` | commits + JIRA transitions |
 | `jira-impl-logger` | 5 | Atlassian MCP | JIRA issue comment (impl log) |
+| `confluence-space-manager` | infrastructure (cross-cutting) | Atlassian MCP | Confluence space scaffold / audit report / aligned page tree — provides the *containers* the phase skills publish into |
 
 The phase skills are themselves orchestrators (they invoke architect/engineer skills under the hood) — they do NOT duplicate design or implementation logic. The engineer skills (`python-data-engineer`, `ui-engineer`, `ob-engineer`, etc.) are the actual code producers, invoked by `sprint-executor` via the skill-routing table in `skills/feature-spec-author/references/skill-routing.md`.
