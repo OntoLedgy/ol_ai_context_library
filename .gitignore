@@ -20,3 +20,14 @@ env/
 .DS_Store
 
 
+.omx/metrics.json
+.omx/logs/tmux-hook-2026-04-16.jsonl
+.omx/logs/turns-2026-04-16.jsonl
+.omx/state/hud-state.json
+.omx/state/notify-hook-state.json
+.omx/state/team-leader-nudge.json
+.omx/state/tmux-hook-state.json
+.playwright-mcp/console-2026-04-02T15-44-15-929Z.log
+.playwright-mcp/console-2026-04-02T15-44-57-499Z.log
+.playwright-mcp/page-2026-04-02T15-44-15-805Z.yml
+.playwright-mcp/page-2026-04-02T15-44-57-614Z.yml
