@@ -155,3 +155,12 @@ In addition to the `software-architect` deliverables, every OB architecture outp
 ### Review Mode additions (in gap analysis):
 - OB principles column in the review checklist
 - Severity includes OB-specific critical violations listed above
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

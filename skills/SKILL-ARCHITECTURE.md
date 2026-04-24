@@ -439,6 +439,7 @@ Format: `[Role]:[Mode]:[Scope]:[Language]`
 | `engineer:review:solution:multi` | clean-code-reviewer |
 | `engineer:refactor:solution:multi` | clean-code-refactor |
 | `orchestrator:orchestrate:confluence:agnostic` | confluence-space-manager |
+| `orchestrator:feedback:skill:agnostic` | skill-feedback |
 
 Auxiliary dependency skill: `boro-ontologist` (platform-independent BORO methodology;
 loaded by `ob-ontologist` when required)
@@ -484,5 +485,6 @@ A separate orchestration layer that sits *above* the architect/engineer/ontologi
 | `sprint-executor` | 4 | engineer skills, `clean-code-reviewer`, `clean-code-commit`, `jira-impl-logger` | commits + JIRA transitions |
 | `jira-impl-logger` | 5 | Atlassian MCP | JIRA issue comment (impl log) |
 | `confluence-space-manager` | infrastructure (cross-cutting) | Atlassian MCP | Confluence space scaffold / audit report / aligned page tree — provides the *containers* the phase skills publish into |
+| `skill-feedback` | infrastructure (cross-cutting) | `gh` CLI | GitHub issue capturing skill defect — structured feedback loop for skill improvement |
 
 The phase skills are themselves orchestrators (they invoke architect/engineer skills under the hood) — they do NOT duplicate design or implementation logic. The engineer skills (`python-data-engineer`, `ui-engineer`, `ob-engineer`, etc.) are the actual code producers, invoked by `sprint-executor` via the skill-routing table in `skills/feature-spec-author/references/skill-routing.md`.

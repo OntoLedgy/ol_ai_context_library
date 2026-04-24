@@ -199,3 +199,12 @@ This handoff is the reason release-planner creates empty epics upfront: every do
 - `prompts/coding/templates/jira-epic-template.md` — epic fields (release-planner populates a skeleton version)
 - Atlassian MCP: `createJiraIssue`, `createConfluencePage`, `updateConfluencePage`
 - Upstream: `software-architect` high-level-design mode produces a similar "phased development plan" but as design documentation; `release-planner` extends this with JIRA publishing and release-centric prioritisation
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

@@ -168,3 +168,12 @@ When reviewing UI code, apply these checks in addition to the `data-engineer` re
 | **ol_ui_library usage** | Using library components where they exist? Not re-implementing atoms? |
 | **Test quality** | Tests cover states (loading, error, empty, populated)? Testing behaviour not implementation? |
 | **Type safety** | No `any`? Event handlers typed? Prop interfaces explicit? |
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

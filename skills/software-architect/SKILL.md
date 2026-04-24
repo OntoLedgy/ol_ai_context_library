@@ -218,3 +218,12 @@ Include severity: **CRITICAL** (blocks correctness), **MAJOR** (increases fragil
 ### Step 6: Publish to Confluence
 
 Create or update a Confluence page with the review findings. Note: review pages should link to the original design page if one exists.
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

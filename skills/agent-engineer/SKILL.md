@@ -287,3 +287,12 @@ Severity classification:
 - **CRITICAL**: Tools not registered (unreusable); no BaseTool contract (unresolvable); circular dependencies
 - **MAJOR**: Missing tests; ad-hoc interop; no constants layer; missing type annotations
 - **MINOR**: Naming inconsistencies; suboptimal construction order; loose memory config
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

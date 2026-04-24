@@ -72,3 +72,12 @@ dotnet test                        # all tests pass
 dotnet test --collect:"XPlat Code Coverage"   # coverage
 dotnet format --verify-no-changes  # formatting check
 ```
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

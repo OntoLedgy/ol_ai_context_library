@@ -126,3 +126,12 @@ pytest                   # all tests pass
 Note: `ruff`'s default line length is 88 characters. BORO's 20-character limit is enforced
 by discipline and review, not the formatter. Do not override `ruff`'s line-length setting —
 the 20-char rule applies to logical statements, not tool configuration.
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

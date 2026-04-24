@@ -122,3 +122,12 @@ For each GAP, follow the table with a short evidence block containing:
 - `Relation site`: file and line, or `not applicable`
 - `Object registration sites`: file and line for each endpoint, or `missing`
 - `Why this is a gap`: one sentence tied to the checklist item
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

@@ -106,3 +106,12 @@ Minor drift (a new library added, a refactor) does not warrant a steering refres
 - `prompts/coding/templates/structure-template.md` — project structure template
 - `skills/software-architect/references/technology-stack.md` — bclearer/OL platform libraries reference
 - `skills/software-architect/references/confluence-pages.md` — Confluence page conventions
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

@@ -82,3 +82,12 @@ Do not attempt to load `examples/` files unless they are added in a later revisi
 When modelling: use space-time maps (text diagrams) to show 4D extents. Always
 distinguish clearly between individuals, types, and tuples. Challenge any model that
 conflates a role with a type or treats change as attribute mutation rather than temporal parts.
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

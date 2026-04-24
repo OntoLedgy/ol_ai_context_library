@@ -139,3 +139,12 @@ When reviewing bclearer pipeline code, add to the standard review checklist:
 | Construction order | Pipeline code follows leaf-before-whole | | |
 | Configuration management | Env vars at entry point only; absolute paths in Universe; B-units read-only | | |
 | Test coverage | Each stage has independent unit tests | | |
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

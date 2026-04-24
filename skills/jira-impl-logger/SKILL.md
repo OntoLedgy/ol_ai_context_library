@@ -198,3 +198,12 @@ If invoked on a closed ticket that never got a log:
 - `prompts/coding/templates/jira-impl-log-template.md`
 - Atlassian MCP: `addCommentToJiraIssue`, `editJiraIssue`, `getJiraIssue`
 - Origin schema: https://github.com/Pimzino/spec-workflow-mcp `log-implementation` tool
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

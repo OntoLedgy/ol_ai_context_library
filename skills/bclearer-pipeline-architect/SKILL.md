@@ -120,3 +120,12 @@ When reviewing an existing bclearer pipeline, add to the standard review checkli
 | Runner wiring follows convention | `b_app_runner_service` or equivalent used for entry point | | |
 | Construction order respected | BIE leaf entities before composites within pipeline | | |
 | Configuration boundary | Env vars read at entry point only; paths absolute in Universe; no `os.getenv()` in orchestrators or B-units | | |
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.

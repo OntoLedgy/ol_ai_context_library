@@ -178,3 +178,12 @@ The ontologist produces these artifacts:
 | How things relate to each other | Database schemas |
 | How things change over time | API designs |
 | Naming at the domain level | Naming at the code level |
+
+
+---
+
+## Feedback
+
+If the user corrects this skill's output due to a misinterpretation or missing rule **in the skill itself** (not a one-off preference), invoke `skill-feedback` to capture structured feedback and optionally post a GitHub issue.
+
+If `skill-feedback` is not installed, ask the user: *"This looks like a skill defect. Would you like to install the `skill-feedback` skill to report it?"* If the user declines, continue without feedback capture.
