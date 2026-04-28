@@ -36,11 +36,13 @@ Default to **TypeScript** and **React** unless the project specifies otherwise.
 | Reference | Content |
 |-----------|---------|
 | `skills/ui-architect/references/project-structure.md` | Canonical folder naming (`frontend/`), product application layout (Feature-Sliced), ol_ui_library layout (Atomic), file naming conventions |
-| `references/component-standards.md` | SOLID principles, compound components, React 19 patterns, implementation micro-rules (focus, forms, animation, typography, URL state), forbidden patterns |
+| `references/component-standards.md` | SOLID principles, compound components, React 19 patterns, implementation micro-rules (focus, forms, animation, typography, URL state), forbidden patterns, interaction timing budget, interaction anti-patterns |
 | `references/performance.md` | Core Web Vitals (LCP/INP/CLS targets), eliminating waterfalls, bundle optimisation, list virtualisation, re-render memoisation |
 | `references/ux-journey-implementation.md` | Wizard, file upload, monitoring dashboard, results dashboard implementation patterns |
 | `references/data-visualisation.md` | Recharts/ECharts usage, real-time data hooks, chart component patterns |
 | `references/ol-ui-library.md` | ol_ui_library component catalogue, usage patterns, Storybook contribution workflow |
+| `references/mobile-and-touch.md` | Touch target sizes, safe areas, gesture conflicts, press feedback, haptics, dynamic type, mobile forms, React Native specifics |
+| `references/pre-delivery.md` | Manual ship-readiness checklist run after Quality Gates pass: visual quality, library compliance, a11y, contrast, interaction, forms, responsive, performance, charts, mobile, tests |
 | `references/tooling.md` | Storybook, React Testing Library, Playwright, Vitest, accessibility linting |
 
 ---
@@ -135,6 +137,11 @@ All gates must pass before declaring implementation complete.
 Report failures — do not suppress them with `eslint-disable` or `@ts-ignore` without
 a documented justification.
 
+After Quality Gates pass, walk through `references/pre-delivery.md` against a
+running preview before handing back. Quality Gates verify *correctness*; the
+pre-delivery checklist verifies *ship-readiness* — visual quality, accessibility
+in practice, interaction feel, and design-system fit.
+
 ---
 
 ## Implement Mode: UI Construction Order
@@ -151,6 +158,7 @@ Follow this order within a UI feature to minimise rework:
 8. **Page / feature entry point** — wire together the template with data
 9. **Tests** — React Testing Library unit tests + Playwright journey tests
 10. **Storybook stories** — if contributing to or using ol_ui_library
+11. **Pre-delivery review** — walk `references/pre-delivery.md` against a running preview; for mobile targets, also walk `references/mobile-and-touch.md`
 
 ---
 
@@ -164,10 +172,14 @@ When reviewing UI code, apply these checks in addition to the `data-engineer` re
 | **SOLID compliance** | One responsibility? Domain logic absent from render? Props interface not over-specified? |
 | **State co-location** | Server state in React Query? No unnecessary lifts to global store? |
 | **Accessibility** | jsx-a11y rules passing? WCAG 2.2 AA met (POUR)? `:focus-visible` used? No `outline: none`? `prefers-reduced-motion` respected? ARIA labels present? |
+| **Interaction timing** | Press feedback within 80–150 ms? Skeleton at 300 ms+? Toast 3–5 s? Animations interruptible? See `references/component-standards.md` § Interaction Timing Budget |
+| **Interaction patterns** | Focus order matches visual order? No `<div onClick>`? No layout-shifting press states? Drag has alternative? See `references/component-standards.md` § Interaction Anti-patterns |
+| **Mobile / touch** (if applicable) | Targets ≥ 44 pt iOS / 48 dp Android / 24 px web? Safe areas respected? Edge gestures clear of system regions? See `references/mobile-and-touch.md` |
 | **Naming** | `handle*` for internal handlers, `on*` for callback props, `use*` for hooks? |
 | **ol_ui_library usage** | Using library components where they exist? Not re-implementing atoms? |
 | **Test quality** | Tests cover states (loading, error, empty, populated)? Testing behaviour not implementation? |
 | **Type safety** | No `any`? Event handlers typed? Prop interfaces explicit? |
+| **Pre-delivery checklist** | Walked through against a running preview? See `references/pre-delivery.md` |
 
 
 ---

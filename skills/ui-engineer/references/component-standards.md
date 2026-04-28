@@ -265,6 +265,70 @@ Rules:
 
 ---
 
+## Interaction Timing Budget
+
+Concrete numbers for every animated or asynchronous response. These are
+ceilings — feel free to be faster, but never exceed.
+
+| Event | Target | Why |
+|-------|--------|-----|
+| Pressed-state feedback (button, list row, tab) | 80–150 ms | Below 80 ms feels twitchy; above 150 ms feels broken |
+| Micro-interaction (hover, focus, toggle) | 150–300 ms | Long enough to perceive; short enough not to delay |
+| Complex transition (panel slide, route change) | ≤ 400 ms | Beyond this, the user thinks the app has stalled |
+| Loading indicator first appearance | ≤ 100 ms after action | Users register "nothing happened" at ~100 ms |
+| Skeleton / spinner first appearance | ≤ 300 ms after action | Below 300 ms, instant feels better than spinner |
+| Optimistic UI rollback on failure | ≤ 1 s | Long enough to detect failure, short enough to feel responsive |
+| Toast auto-dismiss | 3–5 s | Long enough to read; short enough to not nag |
+| Tooltip show delay | 400–600 ms | Prevents accidental tooltip storms when the cursor passes over |
+| Tooltip hide delay | 100–200 ms | Forgiving when the cursor briefly leaves and returns |
+| Frame budget | ≤ 16 ms per frame (60 fps) | Anything above causes visible jank |
+| INP (Interaction to Next Paint) | ≤ 200 ms | Core Web Vital; must hold across primary interactions |
+| Exit animation duration | 60–70% of entrance | Asymmetric timing feels natural; equal feels laboured |
+| List-item stagger | 30–50 ms per item | Below 30 ms is invisible; above 50 ms feels slow |
+| Modal scrim fade-in | 150–250 ms | Establishes context without being a "production" |
+
+### Rules That Apply Across All Timings
+
+- Use `ease-out` (decelerate) for entering elements
+- Use `ease-in` (accelerate) for exiting elements
+- Animate `transform` and `opacity` only — never layout properties
+- Make animations interruptible (cancellable mid-flight when the user acts)
+- Never block input during an animation
+- Modals animate **from the trigger element**, not from a global anchor
+- Forward and backward navigation use the same direction, mirrored
+- A modal scrim sits at 40–60% black so foreground content remains legible
+
+---
+
+## Interaction Anti-patterns
+
+These are the behavioural counterpart to the visual anti-patterns in
+`ui-architect/references/aesthetic-quality.md`. Reject them in review.
+
+| Anti-pattern | Why it fails | Alternative |
+|--------------|-------------|-------------|
+| **Focus order ≠ visual order** | Keyboard and screen-reader users get a different journey than sighted users | Author DOM in reading order; use `order` only for purely visual columns; never use positive `tabindex` |
+| **Modal as primary navigation** | Modals are for self-contained tasks; using them as nav breaks back/forward, deep links, and screen readers | Real route + page transition |
+| **Mixing tab bar + sidebar + bottom nav at the same hierarchy** | Users cannot tell which is "primary"; selection state contradicts itself | Pick one primary surface per hierarchy level |
+| **Layout-shifting press state** (`padding`, `margin`, `width` change on `:active`) | Causes CLS; nearby elements jump under the finger | Animate `transform` and `opacity` only |
+| **Gesture conflict in same region** (horizontal swipe inside vertical scroll, custom edge swipe over system back) | One gesture wins by accident; users learn neither works reliably | Pick one direction per region; reserve edge regions for system gestures |
+| **`<div onClick>`** | Not focusable, not announced, not keyboard-activatable | `<button>` for actions, `<a>` for navigation |
+| **Hover-only affordance** | Touch users cannot discover the action; keyboard users cannot trigger it | Make the action visible at rest, or expose via long-press / explicit menu |
+| **Toast as the only error channel** | Toast disappears; user cannot recover the message | Toast for transient confirmation only; persistent error inline near the trigger |
+| **Auto-advancing carousels** | Steals attention; fights screen readers; rarely read | User-driven advance, or auto-advance with prominent pause control + `prefers-reduced-motion` honoured |
+| **Form validation on every keystroke** | Errors appear before the user finishes typing — punishing, not helpful | Validate on `blur`; allow inline character counters and async availability checks |
+| **Disabled submit until form is "valid"** | User cannot tell *why* it is disabled; gives no error path | Allow submit; surface field-level errors on attempt; auto-focus the first invalid field |
+| **Submit buttons that double-fire** | Network race conditions; duplicate records | Disable + show loading on submit; idempotency key on the request |
+| **Page jump on route change without focus management** | Screen-reader users stay on the old element | Move focus to main content or page heading after navigation |
+| **Touch target < 24×24 CSS px on web** (or < 44×44 pt iOS / 48×48 dp Android) | Mistaps; fails WCAG 2.2 SC 2.5.8 | Expand hit area via padding or pseudo-element without changing visual size |
+| **Drag-only interactions with no alternative** | Fails WCAG 2.2 SC 2.5.7; impossible for users with motor limitations | Provide a non-drag alternative (buttons, menu) for every drag action |
+| **Scroll-hijacking** (custom wheel handlers, locked scroll regions) | Breaks momentum scrolling, screen-reader scrolling, browser find-in-page | Trust the platform scroll; only intercept for proven UX wins (parallax narrative, lightbox) |
+| **Sticky elements covering the focused control** | Fails WCAG 2.2 SC 2.4.11 | Use `scroll-margin-top` / `scroll-padding-top` so focused elements stay visible |
+| **Ambiguous loading state** (button looks identical loading vs idle) | User clicks again → duplicate submission | Spinner inside the button + disabled + label change ("Saving…") |
+| **`outline: none` without replacement** | Destroys keyboard accessibility | Replace with `:focus-visible` ring using the design-token shadow |
+
+---
+
 ## Implementation Micro-rules
 
 Specific rules derived from Vercel web-interface-guidelines and addyosmani/web-quality-skills.
