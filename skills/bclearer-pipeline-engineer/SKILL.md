@@ -27,12 +27,34 @@ Note: `references/bclearer-code-style.md` overrides the general Python formattin
 conventions — use bclearer conventions (backslash continuations, named kwargs)
 throughout.
 
+## Required Companion Skill: `bclearer-pipeline-architect`
+
+This skill **requires** `bclearer-pipeline-architect` to be installed alongside it.
+The architect skill owns the authoritative stage-boundary definitions in
+`skills/bclearer-pipeline-architect/references/stage-guidelines.md`, which this
+skill loads to decide where each B-unit belongs.
+
+**Before starting any pipeline work, verify the architect skill is installed:**
+
+1. Check that `skills/bclearer-pipeline-architect/references/stage-guidelines.md`
+   exists. If it does, proceed.
+2. If it does **not** exist, stop and tell the user:
+
+   > The `bclearer-pipeline-engineer` skill depends on `bclearer-pipeline-architect`
+   > for stage-boundary guidance, but `bclearer-pipeline-architect` is not installed.
+   > Without it I cannot reliably decide which stage a piece of logic belongs to,
+   > and risk inventing non-canonical stage names or putting Load work in Collect.
+   > Please install `bclearer-pipeline-architect` and re-run.
+
+   Do not proceed with implementation until the architect skill is installed.
+
 ## Additional Knowledge
 
 Beyond the base `data-engineer` references, you draw on:
 
 | Reference | Content |
 |-----------|---------|
+| `skills/bclearer-pipeline-architect/references/stage-guidelines.md` | Stage responsibilities, boundaries, anti-patterns, scenario guides — authoritative source for what work belongs in which stage |
 | `references/pipeline-implementation.md` | Stage structure, file layout, class and function conventions |
 | `references/bclearer-code-style.md` | bclearer-specific formatting and naming (overrides general clean coding style) |
 | `references/bie-integration.md` | When and how to delegate to `bie-data-engineer` for domain work |
@@ -42,6 +64,11 @@ Beyond the base `data-engineer` references, you draw on:
 The base data-engineer references (`clean-coding-index.md`, `testing-index.md`) remain
 fully in scope, but `references/bclearer-code-style.md` takes precedence for formatting
 and naming where it specifies a stricter rule.
+
+**Blocking requirement:** Load `stage-guidelines.md` before placing any B-unit in a
+stage folder or deciding which stage a piece of logic belongs to. The canonical stage
+folder names are `1c_collect`, `2l_load`, `3e_evolve`, `4a_assimilate`, `5r_reuse` —
+no other stage names are valid.
 
 ## Sub-skill Delegation
 
@@ -93,6 +120,10 @@ See `references/pipeline-implementation.md` for file-level conventions within ea
 
 Beyond pytest/mypy/ruff, verify:
 
+- [ ] All stage folders use only the canonical names: `1c_collect`, `2l_load`, `3e_evolve`, `4a_assimilate`, `5r_reuse` (no invented stage names)
+- [ ] No `pd.read_*()`, `json.load()`, `open()` or equivalent parsing calls in `1c_collect` B-units (that is Load's job)
+- [ ] No business logic, classifications, or derivations in `2l_load` B-units (that is Evolve's job)
+- [ ] No `bclearer_interop_services` imports in `3e_evolve` or `4a_assimilate` B-units
 - [ ] Each stage is independently testable (no direct cross-stage imports)
 - [ ] Interop services appear only in `adapters/` — not in `services/` or `orchestrators/`
 - [ ] BIE factories only in `bie/` — not in `services/` or `adapters/`
@@ -131,6 +162,10 @@ When reviewing bclearer pipeline code, add to the standard review checklist:
 
 | Principle | Expected | Actual | Status |
 |-----------|----------|--------|--------|
+| Canonical stage names | Only `1c_collect`, `2l_load`, `3e_evolve`, `4a_assimilate`, `5r_reuse` | | |
+| Collect boundary | No file parsing (`pd.read_*`, `json.load`, `open().read()`) in `1c_collect` | | |
+| Load boundary | No business logic / classifications / derivations in `2l_load` | | |
+| Evolve / Assimilate boundary | No `bclearer_interop_services` imports in `3e_evolve` or `4a_assimilate` | | |
 | Stage separation | Each stage in its own module/class | | |
 | Adapter boundary | Interop services only in adapters | | |
 | BIE boundary | BIE factories only in `bie/` | | |
