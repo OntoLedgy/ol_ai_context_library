@@ -298,7 +298,7 @@ must be on the path:
 export PYTHONPATH="${PYTHONPATH}:$(pwd)/tests"
 
 # Or inline
-PYTHONPATH=tests pytest tests/unit_tests
+PYTHONPATH=tests pytest tests/unit
 ```
 
 ---

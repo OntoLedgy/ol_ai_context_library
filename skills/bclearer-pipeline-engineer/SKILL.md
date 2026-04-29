@@ -125,11 +125,20 @@ Beyond pytest/mypy/ruff, verify:
 - [ ] No business logic, classifications, or derivations in `2l_load` B-units (that is Evolve's job)
 - [ ] No `bclearer_interop_services` imports in `3e_evolve` or `4a_assimilate` B-units
 - [ ] Each stage is independently testable (no direct cross-stage imports)
+- [ ] Each stage has independent unit tests
+- [ ] One e2e test per top-level pipeline runner (`tests/e2e/test_<pipeline>_b_application_runner.py`)
+- [ ] One e2e test per thin-slice runner (sub-pipeline runnable on its own — `tests/e2e/<thin_slice>/test_<thin_slice>_b_application_runner.py`)
+- [ ] E2E tests invoke runners via `run_b_application(app_startup_method=<runner>)`; per-slice `conftest.py` wires `BConfigurations`, output paths, and external service config
 - [ ] Interop services appear only in `adapters/` — not in `services/` or `orchestrators/`
 - [ ] BIE factories only in `bie/` — not in `services/` or `adapters/`
 - [ ] Universe is created in the runner, not in a stage
 - [ ] No module-level or global mutable state
 - [ ] Configuration follows `references/configuration-management.md` — no `os.getenv()` in B-units or orchestrators, all paths absolute in the Universe
+
+See `skills/clean-code-tests/SKILL.md` § "E2E Tests — Pipeline Runner + Thin-Slice
+Convention" for the full e2e folder layout, `conftest.py` conventions, and
+review checklist. The bclearer-specific addition is the runner invocation idiom
+(`run_b_application(app_startup_method=...)`).
 
 ---
 
@@ -173,7 +182,8 @@ When reviewing bclearer pipeline code, add to the standard review checklist:
 | bclearer code style | Backslash continuations, named kwargs, verbose naming | | |
 | Construction order | Pipeline code follows leaf-before-whole | | |
 | Configuration management | Env vars at entry point only; absolute paths in Universe; B-units read-only | | |
-| Test coverage | Each stage has independent unit tests | | |
+| Unit test coverage | Each stage has independent unit tests | | |
+| E2E test coverage | One e2e test per top-level runner; one per thin-slice runner; per-slice `conftest.py` wires `BConfigurations` + paths | | |
 
 
 ---

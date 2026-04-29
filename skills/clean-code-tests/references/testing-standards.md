@@ -29,21 +29,43 @@ Each module MUST cover:
 
 ```
 tests/
-├── unit_tests/           # Fast, no external deps — always run in CI
+├── unit/                              # Fast, no external deps — always run in CI
 │   └── <module>/
-├── integration_tests/    # Require external services — marked heavy/slow
-├── e2e_tests/
-├── fixtures/             # Shared test fixtures (imported by conftest)
+│       ├── conftest.[ext]             # module-scoped fixtures
+│       └── test_<component>.[ext]
+├── integration/                       # Require external services — marked heavy/slow
+├── e2e/                               # Pipeline-runner smoke tests
+│   ├── conftest.[ext]                 # top-level setup/teardown for all e2e tests
+│   ├── test_<full_pipeline>_runner.[ext]      # one e2e test per top-level runner
+│   ├── <thin_slice_a>/                # one folder per thin-slice runner
+│   │   ├── conftest.[ext]             # slice-specific fixture overrides
+│   │   └── test_<thin_slice_a>_runner.[ext]
+│   └── <thin_slice_b>/
+│       ├── conftest.[ext]
+│       └── test_<thin_slice_b>_runner.[ext]
+├── fixtures/                          # Shared test fixtures (imported by conftest)
 │   └── <service>/
 ├── data/
-│   ├── input/            # Static input files — small and representative
-│   └── output/           # Expected outputs for comparison
-└── conftest.[ext]        # Root fixture configuration
+│   ├── input/                         # Static input files — small and representative
+│   └── output/                        # Expected outputs for comparison
+├── outputs/                           # Artefacts written by tests at runtime
+└── conftest.[ext]                     # Root fixture configuration
 ```
 
 File naming mirrors source:
 - Source: `src/module/component.[ext]`
-- Test:   `tests/unit_tests/module/test_component.[ext]`
+- Test:   `tests/unit/module/test_component.[ext]`
+
+E2E coverage rule: there is exactly one e2e test per pipeline runner — one for the
+top-level pipeline, plus one per thin-slice runner (a sub-pipeline that can be
+invoked independently). Each thin slice gets its own folder under `tests/e2e/`
+with its own `conftest.[ext]` for slice-specific fixture overrides.
+
+E2E tests are smoke tests first: assert the runner completes without error
+(`assert True` is acceptable when the pipeline is first wired). Add real assertions
+on outputs and registers incrementally as the pipeline stabilises. When an
+`assert True` stub is left in place, mark it with a `# TODO` referencing the
+assertion to be added.
 
 ---
 

@@ -103,6 +103,23 @@ pytest                   # all tests pass
 pytest --cov=src         # coverage (target > 80% for new code)
 ```
 
+## Tests for Python Pipelines
+
+For Python pipeline projects (collect → transform → emit), follow the e2e + unit
+test convention from `data-engineer` Step 4:
+
+- **Unit tests** — one per non-trivial component, under `tests/unit/<module>/`
+- **E2E tests** — one per top-level pipeline runner, plus one per thin-slice
+  runner, under `tests/e2e/` (and `tests/e2e/<thin_slice>/` per slice)
+- Use `pytest` fixtures via `conftest.py` at the appropriate scope (top-level
+  for shared e2e setup, per-slice for overrides)
+- E2E tests are smoke tests first; `assert True` is acceptable when the runner
+  is freshly wired — mark with `# TODO` and add real assertions incrementally
+
+Full layout, `conftest.py` conventions, and review checklist:
+`skills/clean-code-tests/SKILL.md` § "E2E Tests — Pipeline Runner +
+Thin-Slice Convention".
+
 
 ---
 

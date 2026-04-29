@@ -78,7 +78,20 @@ For every non-trivial function or class, write unit tests covering:
 - Error conditions (invalid inputs, missing data)
 - Edge cases (empty collections, boundary values)
 
-See `references/testing-index.md` for testing standards.
+For pipeline-shaped codebases (collect → transform → emit), unit tests alone are
+not enough. Also write **end-to-end (e2e) tests** following the runner +
+thin-slice convention:
+
+- One e2e test per top-level pipeline runner
+- One e2e test per thin-slice runner (sub-pipeline runnable on its own)
+- Per-slice `conftest.[ext]` for slice-specific fixture overrides
+- Smoke-test first (`assert True` is acceptable on a freshly wired runner);
+  add real assertions on outputs and registers incrementally
+
+See `skills/clean-code-tests/SKILL.md` § "E2E Tests — Pipeline Runner +
+Thin-Slice Convention" for folder layout, `conftest.[ext]` conventions, and
+generation/review checklists. See `references/testing-index.md` for the
+underlying testing standards.
 
 ### Step 5: Verify
 

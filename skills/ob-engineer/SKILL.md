@@ -83,6 +83,14 @@ Implementation order follows `python-data-engineer` (read spec → read existing
 implement in construction order → write tests → verify). Apply the BORO checklist at
 each step.
 
+When the OB code under implementation is a pipeline (collect → transform → emit),
+follow the e2e + unit test convention from `python-data-engineer` § "Tests for
+Python Pipelines": one e2e test per top-level runner, one per thin-slice runner,
+plus unit tests per component. BORO test conventions (action-verb naming, 20-char
+lines, `*` named parameters, `__double_underscore` private helpers) apply to the
+test code itself — see `skills/clean-code-tests/SKILL.md` § "OB Overrides for
+Tests (Python)" for the full table.
+
 ---
 
 ## Review Mode Additions

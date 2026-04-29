@@ -27,7 +27,7 @@ code issues as recommendations for `[language]-data-engineer` Implement Mode.
 | `mode` | Yes | `generate` \| `review` \| `coverage-check` |
 | `target_path` | Yes | File, class, or function to generate/review/check tests for |
 | `language` | Yes | `python` \| `javascript` \| `csharp` \| `rust` |
-| `test_category` | No | `unit` (default) \| `integration` — scope of tests to generate or review |
+| `test_category` | No | `unit` (default) \| `integration` \| `e2e` — scope of tests to generate or review |
 | `test_path` | No (review, coverage-check) | Path to existing test file(s); inferred if omitted |
 | `standard` | No | `general` (default) \| `ob` — convention set to enforce in generated/reviewed tests |
 
@@ -96,6 +96,93 @@ itself (see the language-appropriate OB Overrides for Tests table above).
 
 ---
 
+## E2E Tests — Pipeline Runner + Thin-Slice Convention
+
+When `test_category=e2e`, generate or review tests according to the runner + thin-slice
+convention. This applies to any pipeline-shaped codebase (collect → transform → emit).
+
+### What an E2E Test Is
+
+An e2e test invokes a **pipeline runner** end-to-end via its public entry point. It is
+a smoke test first: assert the runner completes without error. Real assertions on
+outputs, side effects, and registers are added incrementally as the pipeline matures.
+A stub of the form `assert True` is acceptable when the runner is first wired —
+existence of the test is more valuable than its strength at that stage.
+
+### Coverage Rule — One E2E Per Runner
+
+For every runner the codebase exposes, there is exactly one e2e test:
+
+| Runner Kind | E2E Test Location |
+|-------------|-------------------|
+| Top-level pipeline runner (full collect→reuse) | `tests/e2e/test_<pipeline>_runner.py` |
+| Thin-slice runner (a sub-pipeline runnable on its own) | `tests/e2e/<thin_slice>/test_<thin_slice>_runner.py` |
+
+A "thin slice" is a sub-pipeline that can be invoked independently — typically used
+to exercise one stage or one source against the full downstream chain. Each thin
+slice has its own folder under `tests/e2e/` with its own `conftest.py` for
+slice-specific fixture overrides.
+
+### Folder Layout
+
+```
+tests/
+├── e2e/
+│   ├── conftest.py                                # top-level setup/teardown fixtures
+│   ├── test_<full_pipeline>_runner.py             # smoke test for the full pipeline
+│   ├── <thin_slice_a>/
+│   │   ├── conftest.py                            # slice-specific fixture overrides
+│   │   └── test_<thin_slice_a>_runner.py
+│   └── <thin_slice_b>/
+│       ├── conftest.py
+│       └── test_<thin_slice_b>_runner.py
+├── unit/
+│   └── <module>/
+│       ├── conftest.py
+│       └── test_<component>.py
+└── outputs/                                       # artefacts written by tests
+```
+
+### `conftest.py` Conventions
+
+- **Top-level `tests/e2e/conftest.py`** — global setup/teardown shared by all e2e
+  tests: configuration object construction, output path provisioning, external
+  service config (URLs, credentials), session-scoped fixtures.
+- **Per-slice `tests/e2e/<slice>/conftest.py`** — overrides for that slice only:
+  scoped output paths, slice-specific input fixtures, narrower configuration.
+- Each e2e test depends on its slice's `conftest.py`. Do not share fixtures
+  laterally between slices — if two slices need the same fixture, lift it to
+  the top-level `conftest.py`.
+
+### Generating an E2E Test (Step 4 addendum)
+
+When `test_category=e2e`:
+
+1. Identify the runner's public entry point (the function the application calls).
+2. Place the test under `tests/e2e/` (top-level) or `tests/e2e/<thin_slice>/` per
+   the table above.
+3. Write a smoke test: invoke the runner via the project's invocation idiom; assert
+   the call returns successfully. `assert True` is acceptable initially.
+4. Provide a `conftest.py` at the test's level wiring the configuration the runner
+   needs (paths, service config). Reuse top-level fixtures where applicable.
+5. Add real assertions incrementally — output files exist, register counts match,
+   downstream contracts hold — as the pipeline stabilises.
+
+### Reviewing E2E Tests (Mode: `review` addendum)
+
+When `test_category=e2e`, additionally verify:
+
+- [ ] One e2e test exists for the top-level pipeline runner
+- [ ] One e2e test exists for each thin-slice runner
+- [ ] Each test invokes the runner via the project's public invocation idiom (not
+      by reaching into stage internals)
+- [ ] Per-slice `conftest.py` overrides only what the slice needs; shared setup
+      is in the top-level `conftest.py`
+- [ ] `assert True` stubs, where present, have a `# TODO` referencing the
+      assertion to be added
+
+---
+
 ## Mode: `generate`
 
 Generate tests for the class or function at `target_path`. Produces a complete test file.
@@ -140,7 +227,7 @@ the references define.
 
 **Language:** [language]
 **Standard:** [general | ob]
-**Category:** [unit | integration]
+**Category:** [unit | integration | e2e]
 **Tests generated:** [N]
 **Coverage of public interface:** [functions covered / total functions]
 
@@ -204,7 +291,7 @@ Work through the checklist in `references/testing-standards.md`. For each violat
 
 **Language:** [language]
 **Standard:** [general | ob]
-**Category:** [unit | integration]
+**Category:** [unit | integration | e2e]
 **Tests reviewed:** [N]
 **Violations:** [N] (HIGH: N, MEDIUM: N, LOW: N)
 
@@ -264,7 +351,7 @@ Mark each production path as covered or uncovered. Flag paths with:
 
 **Language:** [language]
 **Standard:** [general | ob]
-**Category:** [unit | integration]
+**Category:** [unit | integration | e2e]
 **Functions analysed:** [N]
 **Paths covered:** [N] / [Total paths]
 **Coverage estimate:** [N]%
