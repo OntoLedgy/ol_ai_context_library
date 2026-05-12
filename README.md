@@ -12,7 +12,7 @@ Installable agent skills for ontological analysis, architecture, implementation,
 |-------------|----------|---------|
 | Ontologists | `ontologist`, `boro-ontologist`, `ob-ontologist`, `bie-component-ontologist` | Analyse a domain, build ontology models, and validate ontological coherence before design or implementation |
 | Architects | `software-architect`, `ob-architect`, `bclearer-pipeline-architect` | Design solution architecture, ontology-aware systems, and bclearer pipelines |
-| Engineers | `data-engineer`, `python-data-engineer`, `javascript-data-engineer`, `csharp-data-engineer`, `rust-data-engineer`, `ob-engineer`, `bclearer-pipeline-engineer`, `bie-data-engineer` | Implement approved designs in the target language or platform |
+| Engineers | `data-engineer`, `python-data-engineer`, `javascript-data-engineer`, `csharp-data-engineer`, `rust-data-engineer`, `go-data-engineer`, `ob-engineer`, `bclearer-pipeline-engineer`, `bie-data-engineer` | Implement approved designs in the target language or platform |
 | Clean Code | `clean-code-reviewer`, `clean-code-refactor`, `clean-code-naming`, `clean-code-tests`, `clean-code-commit` | Review, refactor, test, and commit changes using shared quality standards |
 
 ### Prompts
@@ -196,6 +196,7 @@ ol_ai_context_library/
 │   ├── data-engineer/
 │   ├── python-data-engineer/
 │   ├── rust-data-engineer/
+│   ├── go-data-engineer/
 │   ├── clean-code-reviewer/
 │   ├── clean-code-refactor/
 │   ├── bie-component-ontologist/

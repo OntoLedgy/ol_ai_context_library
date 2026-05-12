@@ -90,6 +90,13 @@ skills/
 │       ├── tooling.md                     (cargo, clippy, rustfmt, tarpaulin)
 │       └── patterns.md                    (Result/Option, builder, newtype, iterators, async)
 │
+├── go-data-engineer/                      ← TIER 2: Inherits data-engineer
+│   ├── SKILL.md
+│   └── references/
+│       ├── language-standards.md          (MixedCaps, packages, errors, interfaces, embedding, generics, context)
+│       ├── tooling.md                     (go mod, gofmt, go vet, golangci-lint, go test, coverage, -race)
+│       └── patterns.md                    (channel pipelines, fan-out/fan-in, worker pools, errgroup, functional options, table-driven tests)
+│
 ├── bclearer-pipeline-engineer/            ← TIER 3: Inherits ob-engineer (bclearer is an OB framework)
 │   ├── SKILL.md
 │   └── references/
@@ -369,20 +376,21 @@ software-architect (Review Mode) → [language]-data-engineer (Implement Mode) �
 6. `javascript-data-engineer` — **DONE** (SKILL.md + 3 references)
 7. `csharp-data-engineer` — **DONE** (SKILL.md + 3 references)
 8. `rust-data-engineer` — **DONE** (SKILL.md + 3 references)
+9. `go-data-engineer` — **DONE** (SKILL.md + 3 references)
 
 ### Phase 2 — Core clean coding pair (complete)
 
-9. `clean-code-reviewer` — **DONE** (SKILL.md + report template + 4 language refs)
-10. `clean-code-refactor` — **DONE** (SKILL.md + change summary template + 4 language refs)
+10. `clean-code-reviewer` — **DONE** (SKILL.md + report template + 4 language refs)
+11. `clean-code-refactor` — **DONE** (SKILL.md + change summary template + 4 language refs)
 
 ### Phase 3 — High-frequency standalone (complete)
 
-11. `clean-code-naming` — **DONE** (SKILL.md — modes: review, fix, suggest; supports general + ob standards)
-12. `clean-code-tests` — **DONE** (SKILL.md — modes: generate, review, coverage-check)
+12. `clean-code-naming` — **DONE** (SKILL.md — modes: review, fix, suggest; supports general + ob standards)
+13. `clean-code-tests` — **DONE** (SKILL.md — modes: generate, review, coverage-check)
 
 ### Phase 4 — Workflow integration (complete)
 
-13. `clean-code-commit` — **DONE** (SKILL.md — modes: validate, generate)
+14. `clean-code-commit` — **DONE** (SKILL.md — modes: validate, generate)
 
 ### Phase 5 — Fill bclearer skeletons (complete)
 
@@ -397,8 +405,8 @@ Populated from `ol_bclearer_pdk/libraries/core/bclearer_core/pipeline_builder/` 
 
 Fills the **Ontology scope gap** identified in `SKILL-ARCHITECTURE.md`. See `docs/coding/boro-skills-plan.md` for full design.
 
-14. `ob-architect` — **DONE** (SKILL.md + `boro-coding-principles.md` + `ob-library-selection.md`)
-15. `ob-engineer` — **DONE** (SKILL.md + `boro-quick-style-guide.md` + `ob-library-selection.md`)
+15. `ob-architect` — **DONE** (SKILL.md + `boro-coding-principles.md` + `ob-library-selection.md`)
+16. `ob-engineer` — **DONE** (SKILL.md + `boro-quick-style-guide.md` + `ob-library-selection.md`)
 
 Both skills carry their own copy of `ob-library-selection.md` (variant → platform library mapping).
 
