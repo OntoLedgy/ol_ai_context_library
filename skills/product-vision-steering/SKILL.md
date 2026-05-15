@@ -21,13 +21,18 @@ You are invoked by the `ol-sdd-workflow` orchestrator at Phase 0, or directly by
 
 ## Deliverables
 
-| File | Template | Purpose |
-|------|----------|---------|
-| `documentation/steering/product.md` | `prompts/coding/templates/product-template.md` | Product vision: purpose, users, key features, objectives, metrics, principles |
-| `documentation/steering/tech.md` | `prompts/coding/templates/tech-template.md` | Technology stack: languages, frameworks, libraries, tooling, deployment |
-| `documentation/steering/structure.md` | `prompts/coding/templates/structure-template.md` | Project structure: directory organisation, naming conventions, module boundaries |
+| File | Template (bundled) | Purpose |
+|------|--------------------|---------|
+| `documentation/steering/product.md` | `references/templates/product-template.md` | Product vision: purpose, users, key features, objectives, metrics, principles, constraints, scope |
+| `documentation/steering/tech.md` | `references/templates/tech-template.md` | Technology stack: languages, frameworks, libraries, tooling, deployment, allowlist |
+| `documentation/steering/structure.md` | `references/templates/structure-template.md` | Project structure: directory layout, naming conventions, test placement, skill routing |
 
-Each file is also published as a Confluence page under the project's parent page.
+The templates are bundled inside this skill at `references/templates/` so they ship with the skill
+zip. Mirror copies exist at `prompts/coding/templates/{product,tech,structure}-template.md` for
+non-skill consumers (e.g. `software-architect`, `ol-sdd-workflow/references/phase-flow.md`) — keep
+the two in sync when editing.
+
+Each filled file is also published as a Confluence page under the project's parent page.
 
 ## Workflow
 
@@ -101,9 +106,10 @@ Minor drift (a new library added, a refactor) does not warrant a steering refres
 
 ## References
 
-- `prompts/coding/templates/product-template.md` — product vision template
-- `prompts/coding/templates/tech-template.md` — technology stack template
-- `prompts/coding/templates/structure-template.md` — project structure template
+- `references/templates/product-template.md` — product vision template (bundled)
+- `references/templates/tech-template.md` — technology stack template (bundled)
+- `references/templates/structure-template.md` — project structure template (bundled)
+- `prompts/coding/templates/{product,tech,structure}-template.md` — mirror copies in the global prompts tree (kept in sync)
 - `skills/software-architect/references/technology-stack.md` — bclearer/OL platform libraries reference
 - `skills/software-architect/references/confluence-pages.md` — Confluence page conventions
 

@@ -135,7 +135,7 @@ If the user's request is ambiguous (e.g. "help me organise this feature work"), 
 **Your responsibility:**
 1. Check `documentation/steering/` for existing steering docs.
 2. If missing or stale, invoke `product-vision-steering` with: "Produce the three steering documents (product, tech, structure) for this project and publish to Confluence."
-3. Wait for the skill to return filled templates.
+3. Wait for the skill to return filled templates. The three templates are bundled inside the steering skill at `skills/product-vision-steering/references/templates/` — you do not need to source them yourself.
 4. Present to user. **Gate: user must approve before Phase 0.5.**
 5. Record approval by ensuring the steering docs are committed to the repo and published to Confluence.
 
