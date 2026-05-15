@@ -93,7 +93,8 @@ mindmap
 | `backlog-manager` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 2 — JIRA Backlog |
 | `sprint-planner` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 3 — Sprint Plan |
 | `sprint-executor` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 4 — Tech-Lead Execution |
-| `jira-task-executor` | Orchestrate | Orchestrator | Spec | Agnostic | Single-ticket execution via Codex (sub-skill of `sprint-executor`) |
+| `jira-task-executor` | Orchestrate | Orchestrator | Spec | Agnostic | Single-ticket execution via Codex (sub-skill of `sprint-executor` / `jira-epic-executor`) |
+| `jira-epic-executor` | Orchestrate | Orchestrator | Spec | Agnostic | Epic-wide execution — discovers children, builds dep graph, runs waves, delegates each ticket to `jira-task-executor` |
 | `jira-impl-logger` | Orchestrate | Orchestrator | Spec | Agnostic | Phase 5 — JIRA Impl Log |
 | `confluence-space-manager` | Orchestrate | Orchestrator | Spec | Agnostic | Confluence space create / audit / align (cross-cutting infrastructure) |
 
