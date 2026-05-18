@@ -66,7 +66,8 @@ Thing
     Boundary Event (instantaneous transition between States)
   Type (classifies Elements by criteria)
     Natural Type (criteria intrinsic to the Element)
-    Role Type (criteria depend on context/relationship)
+    State Type (members are temporal parts of an underlying Element
+                participating in a 4D process whole — see Participation pattern)
   Tuple (ordered relationship between things)
     Binary Tuple (2 places)
     N-ary Tuple (3+ places)
@@ -147,6 +148,17 @@ An Element's identity is not determined by its current properties but by its **s
 
 **Implication for analysis**: Identity criteria must be stable across the Element's existence. Ask: "if this property changed, would it still be the same thing?"
 
+#### Principle 8: Participation
+
+Things-that-play-a-part-in-a-process are not modelled as "Role Types" over the whole Element. The BORO-canonical pattern is Participation:
+
+- The underlying Element (e.g. `LegalEntity`) has many temporal parts (slices).
+- A 4D **process whole** (e.g. `BusinessEvent`, `EmploymentEpisode`, `Tenancy`) has participants.
+- A temporal part of the underlying Element participates in the process whole by being a *part-of* it: the slice is at once a temporal part of the underlying Element AND a participant-part of the process whole.
+- **State Types** classify the participating temporal slices, not the underlying Elements.
+
+See `skills/boro-ontologist/patterns/event-participation.md` for the full pattern (including the space-time diagram). The participation tuple structure is `<participant-state, process-whole, participation-role-class>`.
+
 ---
 
 ## BORO Re-Engineering Method
@@ -169,7 +181,7 @@ For each entity in the existing model, determine its BORO category:
 | [name] | Element / Type / Tuple / Set / State / Sign | [why] | [any ontological issues] |
 
 Common re-engineering discoveries:
-- **Conflated types**: A single entity in the legacy model represents multiple BORO categories (e.g., "Customer" conflates a Type with a Role Type)
+- **Conflated types**: A single entity in the legacy model conflates the underlying Element with the participating temporal slice (e.g., a "Customer" table conflates the `LegalEntity` with the `CustomerState` that participates in each sale `BusinessEvent` — the participating slice is a different 4D individual from the whole LegalEntity)
 - **Missing states**: The legacy model treats change as property updates rather than temporal parts
 - **Implicit tuples**: Relationships are modelled as foreign keys rather than first-class Tuples
 - **Confused signs**: Identifiers are treated as properties of the entity rather than as distinct Signs
@@ -224,7 +236,7 @@ Classify all domain candidates against the BORO top-level categories:
 | Candidate | BORO Category | Sub-Category | Reasoning |
 |-----------|---------------|--------------|-----------|
 | [name] | Element | Physical Object / Event / State | [why] |
-| [name] | Type | Natural Type / Role Type | [why] |
+| [name] | Type | Natural Type / State Type (Participation) | [why] |
 | [name] | Tuple | Binary / N-ary | [why] |
 | [name] | Set | | [why] |
 | [name] | Sign | | [why] |
@@ -259,7 +271,7 @@ For each identifier, name, code, or label in the domain:
 
 Organise types into a BORO-grounded hierarchy:
 - Apply extensional definition at each level
-- Mark each classification as Natural Type or Role Type
+- Mark each classification as Natural Type or State Type (under Participation); for State Types, name the process whole the participating slices participate in
 - Document exhaustiveness and disjointness
 
 ### Step 8: Construction Order
@@ -310,7 +322,7 @@ Severity guide:
 The ob-ontologist produces these artifacts (extending base ontologist deliverables):
 
 1. **BORO Entity Catalogue** — all entities classified against BORO top-level categories with sub-category
-2. **BORO Taxonomy** — type hierarchy with extensional definitions, Natural/Role Type classification, exhaustiveness, disjointness
+2. **BORO Taxonomy** — type hierarchy with extensional definitions, Natural Type vs State Type (Participation) classification, exhaustiveness, disjointness
 3. **Tuple Map** — all relationships as Tuples with typed places, temporal extent, and Tuple Type classification
 4. **State Model** — temporal parts and boundary events for each Element type
 5. **Sign Registry** — all identifiers, names, and codes as Signs with their denotation targets
@@ -362,7 +374,7 @@ Key chapters and their application:
 | Ch. 2 | Foundation Ontology | BORO top-level categories (Element, Type, Tuple, Set) |
 | Ch. 3 | Physical Objects & Substance | Modelling physical individuals and amounts |
 | Ch. 4 | Events | Modelling events, states, and temporal parts |
-| Ch. 5 | Types & Classification | Extensional type definition, Natural vs. Role Types |
+| Ch. 5 | Types & Classification | Extensional type definition, Natural Types vs State Types (under Participation) |
 | Ch. 6 | Tuples & Relations | Relationships as first-class objects |
 | Ch. 7 | Signs & Naming | Identifiers, codes, labels as distinct entities |
 | Ch. 8 | Parts & Wholes | Spatial, temporal, component, and member parthood |
